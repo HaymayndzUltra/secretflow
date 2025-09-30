@@ -1,0 +1,321 @@
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Deployment environment'
+        required: true
+        default: 'staging'
+        type: choice
+        options:
+          - staging
+          - production
+      skip_tests:
+        description: 'Skip tests (emergency only)'
+        required: false
+        default: false
+        type: boolean
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+  DEFAULT_APP_NAME: portfolio-dashboard
+
+jobs:
+  resolve-environment:
+    runs-on: ubuntu-latest
+    outputs:
+      environment: ${{ steps.resolve.outputs.environment }}
+      skip_tests: ${{ steps.resolve.outputs.skip_tests }}
+    steps:
+      - name: Resolve deployment inputs
+        id: resolve
+        run: |
+          if [[ "${GITHUB_EVENT_NAME}" == "workflow_dispatch" ]]; then
+            echo "environment=${{ github.event.inputs.environment }}" >> "$GITHUB_OUTPUT"
+            echo "skip_tests=${{ github.event.inputs.skip_tests }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "environment=staging" >> "$GITHUB_OUTPUT"
+            echo "skip_tests=false" >> "$GITHUB_OUTPUT"
+          fi
+
+  check-files:
+    runs-on: ubuntu-latest
+    outputs:
+      has_frontend: ${{ steps.detect.outputs.has_frontend }}
+      has_python: ${{ steps.detect.outputs.has_python }}
+      has_go: ${{ steps.detect.outputs.has_go }}
+      has_node_backend: ${{ steps.detect.outputs.has_node_backend }}
+      has_hipaa_tests: ${{ steps.detect.outputs.has_hipaa_tests }}
+      has_finance_tests: ${{ steps.detect.outputs.has_finance_tests }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Detect project layout
+        id: detect
+        shell: bash
+        run: |
+          has_frontend=$([ -f frontend/package.json ] && echo 'true' || echo 'false')
+          if [[ -f backend/requirements.txt || -f backend/pyproject.toml ]]; then
+            has_python=true
+          else
+            has_python=false
+          fi
+          if [[ -f backend/tests/compliance/test_encryption.py || -f backend/tests/compliance/test_audit_logging.py ]]; then
+            has_hipaa_tests=true
+          else
+            has_hipaa_tests=false
+          fi
+          if [[ -f backend/tests/compliance/test_transactions.py || -f backend/tests/compliance/test_audit_trail.py ]]; then
+            has_finance_tests=true
+          else
+            has_finance_tests=false
+          fi
+          echo "has_frontend=$has_frontend" >> "$GITHUB_OUTPUT"
+          echo "has_python=$has_python" >> "$GITHUB_OUTPUT"
+          echo "has_go=$([ -f backend/go.mod ] && echo 'true' || echo 'false')" >> "$GITHUB_OUTPUT"
+          echo "has_node_backend=$([ -f backend/package.json ] && echo 'true' || echo 'false')" >> "$GITHUB_OUTPUT"
+          echo "has_hipaa_tests=$has_hipaa_tests" >> "$GITHUB_OUTPUT"
+          echo "has_finance_tests=$has_finance_tests" >> "$GITHUB_OUTPUT"
+
+  run-tests:
+    needs: [resolve-environment, check-files]
+    if: needs.resolve-environment.outputs.skip_tests != 'true'
+    uses: ./.github/workflows/ci-test.yml
+    secrets: inherit
+    with:
+      has_frontend: ${{ needs.check-files.outputs.has_frontend }}
+      has_python: ${{ needs.check-files.outputs.has_python }}
+      has_go: ${{ needs.check-files.outputs.has_go }}
+      has_node_backend: ${{ needs.check-files.outputs.has_node_backend }}
+      has_hipaa_tests: ${{ needs.check-files.outputs.has_hipaa_tests }}
+      has_finance_tests: ${{ needs.check-files.outputs.has_finance_tests }}
+      node_version: '18'
+      python_version: '3.11'
+      go_version: '1.21'
+      postgres_version: '15'
+      redis_version: '7'
+
+  run-security-scan:
+    needs: resolve-environment
+    if: needs.resolve-environment.outputs.skip_tests != 'true'
+    uses: ./.github/workflows/ci-security.yml
+    secrets: inherit
+
+  build-backend-image:
+    needs: [resolve-environment, run-tests, run-security-scan]
+    if: |
+      always() &&
+      (needs.run-tests.result == 'success' || needs.run-tests.result == 'skipped') &&
+      (needs.run-security-scan.result == 'success' || needs.run-security-scan.result == 'skipped')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-backend
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=semver,pattern={{version}}
+            type=sha
+
+      - name: Build and push backend image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./backend
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          build-args: |
+            BUILD_DATE=${{ github.event.head_commit.timestamp }}
+            VCS_REF=${{ github.sha }}
+
+  deploy-backend:
+    needs: [resolve-environment, build-backend-image]
+    if: vars.DEPLOY_TARGET == 'aws'
+    runs-on: ubuntu-latest
+    environment: ${{ needs.resolve-environment.outputs.environment }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ vars.AWS_REGION }}
+
+      - name: Deploy backend service
+        env:
+          AWS_REGION: ${{ vars.AWS_REGION }}
+          AWS_PROFILE: ${{ vars.AWS_PROFILE }}
+          APP_NAME: ${{ vars.APP_NAME || env.DEFAULT_APP_NAME }}
+          ECS_CLUSTER_NAME: ${{ vars.ECS_CLUSTER_NAME }}
+          ECS_SERVICE_NAME: ${{ vars.ECS_SERVICE_NAME }}
+          ECS_DESIRED_COUNT: ${{ vars.ECS_DESIRED_COUNT }}
+          TASK_EXECUTION_ROLE_ARN: ${{ secrets.AWS_ECS_EXECUTION_ROLE_ARN }}
+          TASK_ROLE_ARN: ${{ secrets.AWS_ECS_TASK_ROLE_ARN }}
+          BACKEND_IMAGE: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-backend:sha-${{ github.sha }}
+        run: |
+          chmod +x scripts/deploy_backend.sh
+          ./scripts/deploy_backend.sh ${{ needs.resolve-environment.outputs.environment }}
+
+  deploy-frontend:
+    needs: [resolve-environment, run-tests, run-security-scan]
+    if: |
+      (needs.run-tests.result == 'success' || needs.run-tests.result == 'skipped') &&
+      (needs.run-security-scan.result == 'success' || needs.run-security-scan.result == 'skipped')
+    runs-on: ubuntu-latest
+    environment: ${{ needs.resolve-environment.outputs.environment }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        working-directory: frontend
+        run: npm ci
+
+      - name: Build frontend
+        working-directory: frontend
+        run: npm run build
+
+      - name: Deploy to Vercel
+        working-directory: frontend
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+        run: |
+          if [ -z "$VERCEL_TOKEN" ] || [ -z "$VERCEL_ORG_ID" ] || [ -z "$VERCEL_PROJECT_ID" ]; then
+            echo "Vercel secrets are required for frontend deployment" >&2
+            exit 1
+          fi
+          ENV_FILE="../.env.${{ needs.resolve-environment.outputs.environment }}"
+          if [ -f "$ENV_FILE" ]; then
+            ENV_FLAG="--env-file $ENV_FILE"
+          else
+            ENV_FLAG=""
+          fi
+          DEPLOY_ARGS="--yes --token $VERCEL_TOKEN"
+          if [ "${{ needs.resolve-environment.outputs.environment }}" = "production" ]; then
+            DEPLOY_ARGS="$DEPLOY_ARGS --prod"
+          fi
+          npx vercel deploy $DEPLOY_ARGS --scope "$VERCEL_ORG_ID" $ENV_FLAG
+
+  smoke-tests:
+    needs: [resolve-environment, deploy-backend, deploy-frontend]
+    if: |
+      always() &&
+      (needs.deploy-backend.result == 'success' || needs.deploy-backend.result == 'skipped') &&
+      (needs.deploy-frontend.result == 'success' || needs.deploy-frontend.result == 'skipped')
+    runs-on: ubuntu-latest
+    environment: ${{ needs.resolve-environment.outputs.environment }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run deployment health verification
+        env:
+          FRONTEND_URL: ${{ secrets.FRONTEND_URL }}
+          API_URL: ${{ secrets.API_HEALTH_URL }}
+          DB_URL: ${{ secrets.DB_HEALTH_URL }}
+        run: |
+          if [ -z "$FRONTEND_URL" ] || [ -z "$API_URL" ]; then
+            echo "FRONTEND_URL and API_HEALTH_URL secrets are required for smoke tests" >&2
+            exit 1
+          fi
+          args=(
+            --environment "${{ needs.resolve-environment.outputs.environment }}"
+            --frontend-url "$FRONTEND_URL"
+            --api-url "$API_URL"
+            --output-file health-report.json
+          )
+          if [ -n "$DB_URL" ]; then
+            args+=(--db-url "$DB_URL")
+          fi
+          python3 scripts/health/check_deployment.py "${args[@]}"
+
+      - name: Upload health verification report
+        uses: actions/upload-artifact@v4
+        with:
+          name: health-report-${{ github.run_number }}
+          path: health-report.json
+          if-no-files-found: error
+
+      - name: Run smoke tests
+        run: |
+          npm install -g newman
+          newman run tests/postman/smoke-tests.json \
+            --environment tests/postman/${{ needs.resolve-environment.outputs.environment }}-env.json
+
+  rollback:
+    needs: [resolve-environment, smoke-tests]
+    if: failure()
+    runs-on: ubuntu-latest
+    environment: ${{ needs.resolve-environment.outputs.environment }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        if: vars.DEPLOY_TARGET == 'aws'
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ vars.AWS_REGION }}
+
+      - name: Roll back backend service
+        if: vars.DEPLOY_TARGET == 'aws'
+        env:
+          AWS_REGION: ${{ vars.AWS_REGION }}
+          APP_NAME: ${{ vars.APP_NAME || env.DEFAULT_APP_NAME }}
+          ECS_CLUSTER_NAME: ${{ vars.ECS_CLUSTER_NAME }}
+          ECS_SERVICE_NAME: ${{ vars.ECS_SERVICE_NAME }}
+        run: |
+          chmod +x scripts/rollback_backend.sh
+          ./scripts/rollback_backend.sh ${{ needs.resolve-environment.outputs.environment }} previous
+
+      - name: Roll back frontend deployment
+        if: ${{ secrets.VERCEL_TOKEN != '' }}
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_ROLLBACK_TARGET: ${{ secrets.VERCEL_ROLLBACK_TARGET }}
+        run: |
+          chmod +x scripts/rollback_frontend.sh
+          ./scripts/rollback_frontend.sh ${{ needs.resolve-environment.outputs.environment }}
+
+      - name: Notify team
+        if: ${{ secrets.SLACK_WEBHOOK != '' }}
+        uses: 8398a7/action-slack@v3
+        with:
+          status: ${{ job.status }}
+          text: 'Deployment rollback initiated for ${{ needs.resolve-environment.outputs.environment }}'
+          webhook_url: ${{ secrets.SLACK_WEBHOOK }}

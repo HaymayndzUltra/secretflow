@@ -1,0 +1,78 @@
+# General
+*.log
+logs/
+*.tmp
+*.swp
+*.swo
+.cache/
+
+# OS files
+.DS_Store
+Thumbs.db
+.Spotlight-V100
+.Trashes
+
+# Editors/IDE
+.vscode/
+.idea/
+*.iml
+
+# Environment / secrets
+.env
+.env.*
+*.key
+*.pem
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.pytest_cache/
+.mypy_cache/
+.pytype/
+.pyre/
+*.egg-info/
+.eggs/
+dist/
+build/
+.venv/
+venv/
+ENV/
+htmlcov/
+.coverage
+coverage.xml
+
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Jupyter
+.ipynb_checkpoints/
+
+# C/C++/Rust/Go build outputs
+*.o
+*.obj
+*.so
+*.dll
+*.dylib
+*.a
+*.lib
+target/
+bin/
+*.out
+*.test
+
+# Java/Gradle
+*.class
+.gradle/
+build/
+
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.*
+
+

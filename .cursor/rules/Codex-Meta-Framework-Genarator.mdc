@@ -1,0 +1,175 @@
+---
+alwaysApply: true
+description: Meta-Framework Generator — Produces project-specific rulebooks (personas, validators, protocols, validation) from any brief or repo
+---
+
+# Meta-Framework Generator (Rulebook-of-Rulebooks)
+
+## [STRICT] Purpose
+Generate a complete, project-specific execution rulebook (personas, validators, protocols, validation flows, evidence map) from any input (brief, repo, constraints). This meta-framework does NOT execute work; it creates the system that will.
+
+## [STRICT] Core Outcomes
+- Phase personas + validator personas with system instructions and I/O contracts
+- Phase protocols with [STRICT]/[GUIDELINE] directives, success criteria, ✅/❌ examples
+- Evidence scaffolding and validation session scripts
+- JSON schemas for phase transitions and evidence manifests
+
+## [STRICT] Inputs
+- Required:
+  - `brief.md` or `AGENTS.md` directives, or repository scan (if present)
+- Optional:
+  - Compliance targets: SOC2/GDPR/PCI/Accessibility
+  - Tech constraints: languages, frameworks, IaC, deploy targets
+  - Delivery constraints: deadlines, SLAs, environments, budgets
+
+## [STRICT] Outputs (Generated)
+- `/.cursor/rules/_generated/<project-id>/personas.mdc`
+- `/.cursor/rules/_generated/<project-id>/protocols.mdc`
+- `/docs/plans/<project-id>/phase-map.md`
+- `/var/schemas/<project-id>/phase-contracts/*.schema.json`
+- `/var/validation/<project-id>/README.md` (sessions: builder/auditor/challenger)
+
+## [STRICT] 4 Pillars Enforcement
+- Structure/Discoverability: single entrypoint `master-rule.mdc` linking all artifacts
+- Persona/Intent: each phase starts with Persona + System Instruction + Core Principle
+- Precision with Prefixes: every directive uses [STRICT]/[GUIDELINE]
+- Examples: each phase includes ✅/❌ with why-pass/why-fail
+
+---
+
+## [STRICT] Meta-Generator Protocol (This file governs generation)
+
+### [STRICT] Step 1 — Project Fingerprint
+- [STRICT] Detect domain, scale, risk, and tech direction from `brief.md`/repo
+- [STRICT] Build `phase-sequence` tailored to domain (web, data, ML, platform)
+- [GUIDELINE] Extend phases for regulated domains (health/finance/gov)
+
+### [STRICT] Step 2 — Persona Synthesis
+- [STRICT] Create per-phase personas:
+  - BuilderPersona: executes the phase
+  - AuditorPersona: validates independently (fresh session)
+  - ChallengerPersona: proposes ≥3 improvement deltas
+- [STRICT] Emit persona system instructions (2–4 lines) with core principles
+- [GUIDELINE] Add domain specialists (e.g., Threat Modeler, Data Steward) if needed
+
+### [STRICT] Step 3 — Protocol Construction
+For each phase:
+- [STRICT] Define Inputs with path and schema hints
+- [STRICT] Define Process with [STRICT]/[GUIDELINE] directives (ordered)
+- [STRICT] Define Outputs with exact paths and acceptance checks
+- [STRICT] Define Success Criteria with measurable gates
+- [STRICT] Provide ✅/❌ examples with pass/fail rationale
+- [GUIDELINE] Link to automation hooks (scripts/actions) if available
+
+### [STRICT] Step 4 — Validation Orchestration
+- [STRICT] 3-session loop per phase:
+  - Builder → Auditor → Challenger → Convergence (“PASS” required)
+- [STRICT] Persist transcripts:
+  - `/var/validation/<project-id>/phase-<n>/{builder,auditor,challenger}.md`
+- [STRICT] Record deltas and diffs before progressing
+- [GUIDELINE] Gate progression via JSON schema checks
+
+### [STRICT] Step 5 — Contracts and Schemas
+- [STRICT] Emit phase I/O schemas:
+  - `/var/schemas/<project-id>/phase-contracts/phase-<n>-inputs.schema.json`
+  - `/var/schemas/<project-id>/phase-contracts/phase-<n>-outputs.schema.json`
+- [STRICT] Validate: outputs(N) must satisfy inputs(N+1)
+- [GUIDELINE] Include evidence manifest schema per phase
+
+### [STRICT] Step 6 — Evidence Map
+- [STRICT] Create `/docs/plans/<project-id>/phase-map.md` with:
+  - Phase order, persona map, inputs/outputs, gates, schemas
+- [GUIDELINE] Include links to compliance matrices and quality rails
+
+---
+
+## [STRICT] Canonical Phase Set (auto-pruned per project)
+1) Phase 0 — Bootstrap
+- Persona: AI Project Initializer
+- Core Principle: Context mastery before motion
+- Inputs: brief/repo
+- Outputs:
+  - `evidence/phase0/{context-kit.md, stakeholder-map.md, tech-inventory.md, validation.md}`
+- Success:
+  - Tech, scripts, configs, compliance gates enumerated and verified
+- Examples:
+  - ✅ Complete tech inventory with versions and gates_config references
+  - ❌ Missing CI/CD/security gates or unverified assumptions
+
+2) Phase 1 — PRD
+- Persona: AI Product Discovery Lead
+- Core Principle: Business truth first
+- Outputs:
+  - `evidence/phase1/{prd.md, business-logic.md, user-journeys.md, acceptance-criteria.md, validation.md}`
+- Success:
+  - Measurable acceptance criteria; edge cases mapped; feasibility aligned
+
+3) Phase 2 — Design & Planning
+- Persona: AI Architecture Designer
+- Outputs:
+  - `evidence/phase2/{architecture.md, api-contracts.yaml, coding-standards.md, implementation-roadmap.md, adr-catalog.md, validation.md}`
+- Success:
+  - Contracts validated; ADRs linked; roadmap feasible with dependencies
+
+4) Phase 3 — Quality Rails
+- Persona: AI QA Specialist
+- Outputs:
+  - `evidence/phase3/{security-checklist.md, performance-budgets.json, a11y-plan.md, test-plan.md, code-review-checklist.md, validation.md}`
+- Success:
+  - Security/perf/a11y/test gates defined and runnable
+
+5) Phase 4 — Integration
+- Persona: AI Integration Engineer
+- Outputs:
+  - `evidence/phase4/{observability-spec.md, slo-sli.md, staging-smoke-playbook.md, deployment-pipeline.md, validation.md}`
+- Success:
+  - Observability configured; staging smoke passing; rollback rehearsed
+
+6) Phase 5 — Launch
+- Persona: AI Deployment Specialist
+- Outputs:
+  - `evidence/phase5/{deployment-runbook.md, rollback-plan.md, production-observability.md, backup-policy.md, release-notes.md, validation.md}`
+- Success:
+  - Rollback validated; production telemetry green; approvals recorded
+
+7) Phase 6 — Operations
+- Persona: AI Operations Manager
+- Outputs:
+  - `evidence/phase6/{slo-monitoring.md, incident-response.md, postmortem-template.md, dependency-update-log.md, retrospective-template.md, validation.md}`
+- Success:
+  - SLOs monitored; incident drills executed; updates tracked
+
+Each phase includes Auditor/Challenger roles and session artifacts under `/var/validation/<project-id>/phase-<n>/`.
+
+---
+
+## [STRICT] Quality Gates (Global)
+- Static: lint, format, types, license headers, spellcheck, secret scan
+- Dynamic: unit/integration/e2e, perf smoke, a11y axe, bundle size budgets
+- Policy: OPA/Rego rulepacks (security/PII/compliance)
+- ADR: `docs/adr/ADR-XXXX.md` for key decisions; link ADRs in diffs
+
+---
+
+## [STRICT] Invocation Contract (How this generator runs)
+- [STRICT] Trigger: “Generate Rulebook for <project-id>”
+- [STRICT] Inputs discovery priority:
+  1) `brief.md` if present
+  2) `AGENTS.md` directives
+  3) Repo scan (template-packs, gates_config, workflows)
+- [STRICT] Generation steps: Fingerprint → Personas → Protocols → Schemas → Evidence Map → Emit files
+- [STRICT] Idempotency: Re-runs update `_generated/<project-id>` and append change log
+
+---
+
+## [STRICT] Success Criteria (for this generator)
+- All required outputs emitted with valid frontmatter and cross-links
+- Phase contracts compile; outputs(N) satisfy inputs(N+1)
+- Validation session scaffolds exist for all phases
+- Examples present with clear pass/fail rationale
+- Evidence map complete and discoverable from one entrypoint
+
+## [GUIDELINE] Adaptation
+- Prune or extend phases per domain (data/ML/platform)
+- Add domain personas (e.g., Data Privacy Officer, MLOps Lead)
+- Tune gates per risk profile; raise/lower thresholds explicitly
