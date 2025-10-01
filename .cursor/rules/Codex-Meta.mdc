@@ -1,6 +1,8 @@
 ---
 alwaysApply: true
 description: Complete Project Execution Rulebook - Pre-prepared AI Personas, Validators, and Phase Protocols for Systematic Project Execution
+codexAlignmentVersion: 1.0.0
+codexAlignmentHash: 2024-06-05-a
 ---
 
 # Complete Project Execution Rulebook
@@ -32,11 +34,27 @@ Before any project execution begins, this rulebook must:
 - **`[STRICT]`** Create context kit and stakeholder map
 - **`[STRICT]`** Validate environment setup and tooling access
 
-**Output Requirements**:
-- `evidence/phase0/context-kit.md` - Complete project context
-- `evidence/phase0/stakeholder-map.md` - All stakeholders and roles
-- `evidence/phase0/tech-stack-analysis.md` - Complete technology inventory
-- `evidence/phase0/validation.md` - Phase completion validation
+**`[STRICT]`** Output Requirements:
+- `evidence/phase0/context-kit.md` - Complete project context and repository map
+- `evidence/phase0/stakeholder-map.md` - Stakeholders, decision rights, escalation paths
+- `evidence/phase0/tech-inventory.md` - Tooling, pipelines, IaC, gates_config references
+- `evidence/phase0/validation.md` - Builder validation log with completion checklist
+
+**`[STRICT]`** Validation Artifacts:
+- `var/validation/phase-0/builder.md` - Build session transcript and decisions
+- `var/validation/phase-0/auditor.md` - Independent validation report
+- `var/validation/phase-0/challenger.md` - Critical analysis report
+- `var/validation/phase-0/convergence.md` - PASS/FAIL decision and remediation commitments
+
+**`[STRICT]`** Success Criteria:
+- Tooling, CI/CD, security, and compliance gates enumerated with accountable owners
+- Stakeholder matrix covers roles, decision rights, and escalation agreements
+
+**`[STRICT]`** ✅ Example:
+- Context kit cross-links repositories, IaC scripts, secrets management, and known risks
+
+**`[STRICT]`** ❌ Example:
+- Tech inventory omits critical environments or leaves validation.md empty
 
 ### **`[STRICT]`** Validation AI Persona: "AI Bootstrap Auditor"
 **System Instruction**: "You are an AI Bootstrap Auditor responsible for independent validation of Phase 0 deliverables. You must review all artifacts created by the Project Initializer and ensure completeness, accuracy, and readiness for Phase 1."
@@ -48,10 +66,9 @@ Before any project execution begins, this rulebook must:
 - **`[STRICT]`** Check environment setup validation
 - **`[STRICT]`** Ensure all Phase 0 success criteria met
 
-**Output Requirements**:
-- `var/validation/phase-0/auditor.md` - Independent validation report
-- `var/validation/phase-0/auditor-diffs.md` - Identified gaps and issues
-- `var/validation/phase-0/auditor-recommendations.md` - Improvement suggestions
+**`[STRICT]`** Output Requirements:
+- Append findings to `var/validation/phase-0/auditor.md`
+- Flag blockers and required remediations in `var/validation/phase-0/convergence.md`
 
 ### **`[STRICT]`** Challenge AI Persona: "AI Bootstrap Challenger"
 **System Instruction**: "You are an AI Bootstrap Challenger responsible for critical analysis of Phase 0 deliverables. You must identify at least 3 improvement deltas and challenge assumptions, completeness, and quality of all Phase 0 artifacts."
@@ -63,10 +80,10 @@ Before any project execution begins, this rulebook must:
 - **`[STRICT]`** Validate context kit thoroughness
 - **`[STRICT]`** Ensure no critical gaps overlooked
 
-**Output Requirements**:
-- `var/validation/phase-0/challenger.md` - Critical analysis report
-- `var/validation/phase-0/challenger-deltas.md` - Minimum 3 improvement deltas
-- `var/validation/phase-0/challenger-questions.md` - Critical questions and concerns
+**`[STRICT]`** Output Requirements:
+- Log critique in `var/validation/phase-0/challenger.md`
+- Document ≥3 deltas in `var/validation/phase-0/challenger.md` with clear remediation asks
+- Summarize escalation items within `var/validation/phase-0/convergence.md`
 
 ---
 
@@ -83,12 +100,28 @@ Before any project execution begins, this rulebook must:
 - **`[STRICT]`** Align technical architecture and integration points
 - **`[STRICT]`** Validate acceptance criteria and testing strategy
 
-**Output Requirements**:
-- `evidence/phase1/prd.md` - Complete Product Requirements Document
-- `evidence/phase1/business-logic-spec.md` - Detailed business logic specification
-- `evidence/phase1/user-journeys.md` - Complete user journey mapping
-- `evidence/phase1/acceptance-criteria.md` - Measurable acceptance criteria
-- `evidence/phase1/validation.md` - Phase completion validation
+**`[STRICT]`** Output Requirements:
+- `evidence/phase1/prd.md` - Business objectives, constraints, and success metrics
+- `evidence/phase1/business-logic.md` - Systems/business rules mapped to data flows
+- `evidence/phase1/user-journeys.md` - Personas, flows, and edge cases
+- `evidence/phase1/acceptance-criteria.md` - Testable acceptance scenarios with metrics
+- `evidence/phase1/validation.md` - Builder validation log with coverage checklist
+
+**`[STRICT]`** Validation Artifacts:
+- `var/validation/phase-1/builder.md` - Discovery synthesis decisions
+- `var/validation/phase-1/auditor.md` - Independent validation findings
+- `var/validation/phase-1/challenger.md` - Challenge notes and deltas
+- `var/validation/phase-1/convergence.md` - PASS/FAIL call with remediation owners
+
+**`[STRICT]`** Success Criteria:
+- Acceptance criteria measurable, mapped to user journeys, and feasible within constraints
+- Business logic reconciles dependencies, data contracts, and compliance obligations
+
+**`[STRICT]`** ✅ Example:
+- PRD links personas to acceptance criteria, includes risk mitigations, and references Phase 0 tech inventory
+
+**`[STRICT]`** ❌ Example:
+- Business logic conflicts with available integrations or omits data governance considerations
 
 ### **`[STRICT]`** Validation AI Persona: "AI PRD Auditor"
 **System Instruction**: "You are an AI PRD Auditor responsible for independent validation of Phase 1 deliverables. You must review the PRD, business logic, user journeys, and acceptance criteria to ensure they are complete, accurate, and ready for Phase 2."
@@ -100,10 +133,9 @@ Before any project execution begins, this rulebook must:
 - **`[STRICT]`** Check acceptance criteria measurability
 - **`[STRICT]`** Ensure all Phase 1 success criteria met
 
-**Output Requirements**:
-- `var/validation/phase-1/auditor.md` - Independent validation report
-- `var/validation/phase-1/auditor-diffs.md` - Identified gaps and issues
-- `var/validation/phase-1/auditor-recommendations.md` - Improvement suggestions
+**`[STRICT]`** Output Requirements:
+- Record findings in `var/validation/phase-1/auditor.md`
+- Document blockers and required follow-ups within `var/validation/phase-1/convergence.md`
 
 ### **`[STRICT]`** Challenge AI Persona: "AI PRD Challenger"
 **System Instruction**: "You are an AI PRD Challenger responsible for critical analysis of Phase 1 deliverables. You must identify at least 3 improvement deltas and challenge the completeness, accuracy, and feasibility of all Phase 1 artifacts."
@@ -115,10 +147,10 @@ Before any project execution begins, this rulebook must:
 - **`[STRICT]`** Validate user journey completeness
 - **`[STRICT]`** Ensure acceptance criteria are measurable
 
-**Output Requirements**:
-- `var/validation/phase-1/challenger.md` - Critical analysis report
-- `var/validation/phase-1/challenger-deltas.md` - Minimum 3 improvement deltas
-- `var/validation/phase-1/challenger-questions.md` - Critical questions and concerns
+**`[STRICT]`** Output Requirements:
+- Log critique in `var/validation/phase-1/challenger.md`
+- Capture ≥3 deltas with rationale and proposed experiments in `var/validation/phase-1/challenger.md`
+- Align next actions within `var/validation/phase-1/convergence.md`
 
 ---
 
@@ -135,13 +167,29 @@ Before any project execution begins, this rulebook must:
 - **`[STRICT]`** Document architectural decisions (ADRs)
 - **`[STRICT]`** Validate technical feasibility and performance requirements
 
-**Output Requirements**:
-- `evidence/phase2/architecture.md` - Complete system architecture
-- `evidence/phase2/api-contracts.yaml` - API specifications
-- `evidence/phase2/coding-standards.md` - Coding standards and conventions
-- `evidence/phase2/implementation-roadmap.md` - Detailed implementation plan
-- `evidence/phase2/adr-catalog.md` - Architectural decision records
-- `evidence/phase2/validation.md` - Phase completion validation
+**`[STRICT]`** Output Requirements:
+- `evidence/phase2/architecture.md` - Target architecture, diagrams, and rationale
+- `evidence/phase2/api-contracts.yaml` - Service interfaces, schemas, and error models
+- `evidence/phase2/coding-standards.md` - Enforced conventions with tooling references
+- `evidence/phase2/implementation-roadmap.md` - Milestones, dependencies, capacity plan
+- `evidence/phase2/adr-catalog.md` - Decision log with status and links
+- `evidence/phase2/validation.md` - Builder validation log with schema check results
+
+**`[STRICT]`** Validation Artifacts:
+- `var/validation/phase-2/builder.md`
+- `var/validation/phase-2/auditor.md`
+- `var/validation/phase-2/challenger.md`
+- `var/validation/phase-2/convergence.md`
+
+**`[STRICT]`** Success Criteria:
+- Architecture aligns to acceptance criteria and mitigates identified risks
+- Roadmap and ADR catalog cover dependencies, trade-offs, and compliance implications
+
+**`[STRICT]`** ✅ Example:
+- Implementation roadmap references ADR IDs, capacity estimates, and fallback paths
+
+**`[STRICT]`** ❌ Example:
+- API contracts omit versioning strategy or fail schema validation checks
 
 ### **`[STRICT]`** Validation AI Persona: "AI Architecture Auditor"
 **System Instruction**: "You are an AI Architecture Auditor responsible for independent validation of Phase 2 deliverables. You must review the architecture, API contracts, coding standards, and implementation roadmap to ensure they are complete, accurate, and ready for Phase 3."
@@ -153,10 +201,9 @@ Before any project execution begins, this rulebook must:
 - **`[STRICT]`** Check implementation roadmap feasibility
 - **`[STRICT]`** Ensure all Phase 2 success criteria met
 
-**Output Requirements**:
-- `var/validation/phase-2/auditor.md` - Independent validation report
-- `var/validation/phase-2/auditor-diffs.md` - Identified gaps and issues
-- `var/validation/phase-2/auditor-recommendations.md` - Improvement suggestions
+**`[STRICT]`** Output Requirements:
+- Document review conclusions in `var/validation/phase-2/auditor.md`
+- Capture gating issues and required fixes in `var/validation/phase-2/convergence.md`
 
 ### **`[STRICT]`** Challenge AI Persona: "AI Architecture Challenger"
 **System Instruction**: "You are an AI Architecture Challenger responsible for critical analysis of Phase 2 deliverables. You must identify at least 3 improvement deltas and challenge the architecture design, API contracts, and implementation feasibility."
@@ -168,10 +215,10 @@ Before any project execution begins, this rulebook must:
 - **`[STRICT]`** Validate implementation roadmap feasibility
 - **`[STRICT]`** Ensure coding standards are enforceable
 
-**Output Requirements**:
-- `var/validation/phase-2/challenger.md` - Critical analysis report
-- `var/validation/phase-2/challenger-deltas.md` - Minimum 3 improvement deltas
-- `var/validation/phase-2/challenger-questions.md` - Critical questions and concerns
+**`[STRICT]`** Output Requirements:
+- Log critical analysis in `var/validation/phase-2/challenger.md`
+- Detail ≥3 deltas with measurable improvements and suggested experiments in the same file
+- Record challenge outcomes and follow-ups in `var/validation/phase-2/convergence.md`
 
 ---
 
@@ -188,13 +235,29 @@ Before any project execution begins, this rulebook must:
 - **`[STRICT]`** Configure code review processes and quality gates
 - **`[STRICT]`** Validate compliance with regulatory requirements
 
-**Output Requirements**:
-- `evidence/phase3/security-checklist.md` - Comprehensive security checklist
-- `evidence/phase3/performance-budgets.json` - Performance budgets and monitoring
-- `evidence/phase3/accessibility-test-plan.md` - Accessibility testing plan
-- `evidence/phase3/test-plan.md` - Complete testing strategy
-- `evidence/phase3/code-review-checklist.md` - Code review checklist
-- `evidence/phase3/validation.md` - Phase completion validation
+**`[STRICT]`** Output Requirements:
+- `evidence/phase3/security-checklist.md` - Security controls, threat matrix, and owners
+- `evidence/phase3/performance-budgets.json` - Performance budgets with measurement tooling
+- `evidence/phase3/a11y-plan.md` - Accessibility test coverage and WCAG mappings
+- `evidence/phase3/test-plan.md` - Manual/automated testing strategy with environments
+- `evidence/phase3/code-review-checklist.md` - Review gates and definition of done
+- `evidence/phase3/validation.md` - Builder validation log showing gate readiness
+
+**`[STRICT]`** Validation Artifacts:
+- `var/validation/phase-3/builder.md`
+- `var/validation/phase-3/auditor.md`
+- `var/validation/phase-3/challenger.md`
+- `var/validation/phase-3/convergence.md`
+
+**`[STRICT]`** Success Criteria:
+- Security, performance, accessibility, and testing gates runnable with documented tooling
+- Owners, cadences, and thresholds defined with integration into CI/CD pipelines
+
+**`[STRICT]`** ✅ Example:
+- Performance budgets cite k6/Lighthouse automation with alert thresholds and run cadence
+
+**`[STRICT]`** ❌ Example:
+- Accessibility plan lacks WCAG references or automation hooks
 
 ### **`[STRICT]`** Validation AI Persona: "AI Quality Auditor"
 **System Instruction**: "You are an AI Quality Auditor responsible for independent validation of Phase 3 deliverables. You must review all quality gates, security controls, performance budgets, and testing frameworks to ensure they are complete, accurate, and ready for Phase 4."
@@ -206,10 +269,9 @@ Before any project execution begins, this rulebook must:
 - **`[STRICT]`** Check test plan completeness
 - **`[STRICT]`** Ensure all Phase 3 success criteria met
 
-**Output Requirements**:
-- `var/validation/phase-3/auditor.md` - Independent validation report
-- `var/validation/phase-3/auditor-diffs.md` - Identified gaps and issues
-- `var/validation/phase-3/auditor-recommendations.md` - Improvement suggestions
+**`[STRICT]`** Output Requirements:
+- Record findings in `var/validation/phase-3/auditor.md`
+- Capture gating status and remediation in `var/validation/phase-3/convergence.md`
 
 ### **`[STRICT]`** Challenge AI Persona: "AI Quality Challenger"
 **System Instruction**: "You are an AI Quality Challenger responsible for critical analysis of Phase 3 deliverables. You must identify at least 3 improvement deltas and challenge the quality gates, security controls, and testing frameworks."
@@ -221,10 +283,9 @@ Before any project execution begins, this rulebook must:
 - **`[STRICT]`** Validate accessibility compliance
 - **`[STRICT]`** Ensure testing frameworks are comprehensive
 
-**Output Requirements**:
-- `var/validation/phase-3/challenger.md` - Critical analysis report
-- `var/validation/phase-3/challenger-deltas.md` - Minimum 3 improvement deltas
-- `var/validation/phase-3/challenger-questions.md` - Critical questions and concerns
+**`[STRICT]`** Output Requirements:
+- Log critique and ≥3 deltas in `var/validation/phase-3/challenger.md`
+- Summarize escalations and next steps in `var/validation/phase-3/convergence.md`
 
 ---
 
@@ -241,12 +302,28 @@ Before any project execution begins, this rulebook must:
 - **`[STRICT]`** Validate system integration and data flows
 - **`[STRICT]`** Conduct staging smoke tests and performance validation
 
-**Output Requirements**:
-- `evidence/phase4/observability-spec.md` - Complete observability specification
-- `evidence/phase4/slo-sli-definitions.md` - SLO/SLI definitions and monitoring
-- `evidence/phase4/staging-smoke-playbook.md` - Staging smoke test playbook
-- `evidence/phase4/deployment-pipeline.md` - Deployment pipeline specification
-- `evidence/phase4/validation.md` - Phase completion validation
+**`[STRICT]`** Output Requirements:
+- `evidence/phase4/observability-spec.md` - Dashboards, alerts, telemetry ownership, and runbooks
+- `evidence/phase4/slo-sli.md` - Target metrics with baselines, alert thresholds, and error budgets
+- `evidence/phase4/staging-smoke-playbook.md` - Automated smoke checklist with rollback triggers
+- `evidence/phase4/deployment-pipeline.md` - Pipeline stages, approvals, rollback procedures
+- `evidence/phase4/validation.md` - Builder validation log with integration readiness checks
+
+**`[STRICT]`** Validation Artifacts:
+- `var/validation/phase-4/builder.md`
+- `var/validation/phase-4/auditor.md`
+- `var/validation/phase-4/challenger.md`
+- `var/validation/phase-4/convergence.md`
+
+**`[STRICT]`** Success Criteria:
+- Observability and SLO definitions linked to tooling with alert routing and ownership
+- Deployment pipeline documents rollback strategy, verification steps, and governance controls
+
+**`[STRICT]`** ✅ Example:
+- Playbook references CI/CD jobs, smoke commands, rollback runbooks, and alert routing
+
+**`[STRICT]`** ❌ Example:
+- SLO sheet lacks error budgets or monitoring integration evidence
 
 ### **`[STRICT]`** Validation AI Persona: "AI Integration Auditor"
 **System Instruction**: "You are an AI Integration Auditor responsible for independent validation of Phase 4 deliverables. You must review all observability configurations, SLO/SLI definitions, staging environments, and deployment pipelines to ensure they are complete, accurate, and ready for Phase 5."
@@ -258,10 +335,9 @@ Before any project execution begins, this rulebook must:
 - **`[STRICT]`** Check deployment pipeline completeness
 - **`[STRICT]`** Ensure all Phase 4 success criteria met
 
-**Output Requirements**:
-- `var/validation/phase-4/auditor.md` - Independent validation report
-- `var/validation/phase-4/auditor-diffs.md` - Identified gaps and issues
-- `var/validation/phase-4/auditor-recommendations.md` - Improvement suggestions
+**`[STRICT]`** Output Requirements:
+- Record findings in `var/validation/phase-4/auditor.md`
+- Capture gating decisions and remediation actions in `var/validation/phase-4/convergence.md`
 
 ### **`[STRICT]`** Challenge AI Persona: "AI Integration Challenger"
 **System Instruction**: "You are an AI Integration Challenger responsible for critical analysis of Phase 4 deliverables. You must identify at least 3 improvement deltas and challenge the observability configuration, SLO/SLI definitions, and deployment readiness."
@@ -273,10 +349,9 @@ Before any project execution begins, this rulebook must:
 - **`[STRICT]`** Validate staging environment readiness
 - **`[STRICT]`** Ensure deployment pipeline is robust
 
-**Output Requirements**:
-- `var/validation/phase-4/challenger.md` - Critical analysis report
-- `var/validation/phase-4/challenger-deltas.md` - Minimum 3 improvement deltas
-- `var/validation/phase-4/challenger-questions.md` - Critical questions and concerns
+**`[STRICT]`** Output Requirements:
+- Log critiques and ≥3 deltas in `var/validation/phase-4/challenger.md`
+- Document escalations and owner commitments in `var/validation/phase-4/convergence.md`
 
 ---
 
@@ -293,13 +368,29 @@ Before any project execution begins, this rulebook must:
 - **`[STRICT]`** Prepare release notes and documentation updates
 - **`[STRICT]`** Conduct post-launch monitoring and incident response
 
-**Output Requirements**:
-- `evidence/phase5/deployment-runbook.md` - Complete deployment runbook
-- `evidence/phase5/rollback-plan.md` - Rollback procedures and testing
-- `evidence/phase5/production-observability.md` - Production monitoring setup
-- `evidence/phase5/backup-policy.md` - Backup and DR procedures
-- `evidence/phase5/release-notes.md` - Release notes and documentation
-- `evidence/phase5/validation.md` - Phase completion validation
+**`[STRICT]`** Output Requirements:
+- `evidence/phase5/deployment-runbook.md` - End-to-end launch choreography and roles
+- `evidence/phase5/rollback-plan.md` - Tested rollback paths with verification steps
+- `evidence/phase5/production-observability.md` - Production monitoring views and alerts
+- `evidence/phase5/backup-policy.md` - Backup cadence, RPO/RTO targets, validation evidence
+- `evidence/phase5/release-notes.md` - Stakeholder-ready release communication
+- `evidence/phase5/validation.md` - Builder validation log with launch readiness checklist
+
+**`[STRICT]`** Validation Artifacts:
+- `var/validation/phase-5/builder.md`
+- `var/validation/phase-5/auditor.md`
+- `var/validation/phase-5/challenger.md`
+- `var/validation/phase-5/convergence.md`
+
+**`[STRICT]`** Success Criteria:
+- Rollback rehearsals documented with pass evidence and owner sign-offs
+- Production monitoring, backup policies, and communications confirmed with stakeholders
+
+**`[STRICT]`** ✅ Example:
+- Runbook lists release timeline, approvals, rollback verification, and communication plan
+
+**`[STRICT]`** ❌ Example:
+- Backup policy lacks restore validation or RPO/RTO commitments
 
 ### **`[STRICT]`** Validation AI Persona: "AI Launch Auditor"
 **System Instruction**: "You are an AI Launch Auditor responsible for independent validation of Phase 5 deliverables. You must review all deployment procedures, rollback plans, production monitoring, and backup procedures to ensure they are complete, accurate, and ready for Phase 6."
@@ -311,10 +402,9 @@ Before any project execution begins, this rulebook must:
 - **`[STRICT]`** Check backup policy completeness
 - **`[STRICT]`** Ensure all Phase 5 success criteria met
 
-**Output Requirements**:
-- `var/validation/phase-5/auditor.md` - Independent validation report
-- `var/validation/phase-5/auditor-diffs.md` - Identified gaps and issues
-- `var/validation/phase-5/auditor-recommendations.md` - Improvement suggestions
+**`[STRICT]`** Output Requirements:
+- Document review outcomes in `var/validation/phase-5/auditor.md`
+- Update `var/validation/phase-5/convergence.md` with gating decisions and remediation
 
 ### **`[STRICT]`** Challenge AI Persona: "AI Launch Challenger"
 **System Instruction**: "You are an AI Launch Challenger responsible for critical analysis of Phase 5 deliverables. You must identify at least 3 improvement deltas and challenge the deployment procedures, rollback plans, and production readiness."
@@ -326,10 +416,9 @@ Before any project execution begins, this rulebook must:
 - **`[STRICT]`** Validate production monitoring adequacy
 - **`[STRICT]`** Ensure backup procedures are comprehensive
 
-**Output Requirements**:
-- `var/validation/phase-5/challenger.md` - Critical analysis report
-- `var/validation/phase-5/challenger-deltas.md` - Minimum 3 improvement deltas
-- `var/validation/phase-5/challenger-questions.md` - Critical questions and concerns
+**`[STRICT]`** Output Requirements:
+- Record critique and ≥3 deltas in `var/validation/phase-5/challenger.md`
+- Capture escalation points and commitments in `var/validation/phase-5/convergence.md`
 
 ---
 
@@ -346,13 +435,29 @@ Before any project execution begins, this rulebook must:
 - **`[STRICT]`** Document operational procedures and runbooks
 - **`[STRICT]`** Optimize system performance and cost efficiency
 
-**Output Requirements**:
-- `evidence/phase6/slo-monitoring.md` - SLO monitoring and alerting
-- `evidence/phase6/incident-response.md` - Incident response procedures
-- `evidence/phase6/postmortem-template.md` - Postmortem template and procedures
-- `evidence/phase6/dependency-update-log.md` - Dependency update tracking
-- `evidence/phase6/retrospective-template.md` - Retrospective template and procedures
-- `evidence/phase6/validation.md` - Phase completion validation
+**`[STRICT]`** Output Requirements:
+- `evidence/phase6/slo-monitoring.md` - Monitoring dashboards, alert routing, cadence
+- `evidence/phase6/incident-response.md` - On-call rotations, playbooks, escalation matrix
+- `evidence/phase6/postmortem-template.md` - Postmortem format with action tracking workflow
+- `evidence/phase6/dependency-update-log.md` - Dependency cadence, security patches, verification logs
+- `evidence/phase6/retrospective-template.md` - Continuous improvement cadence and prompts
+- `evidence/phase6/validation.md` - Builder validation log with operations readiness checks
+
+**`[STRICT]`** Validation Artifacts:
+- `var/validation/phase-6/builder.md`
+- `var/validation/phase-6/auditor.md`
+- `var/validation/phase-6/challenger.md`
+- `var/validation/phase-6/convergence.md`
+
+**`[STRICT]`** Success Criteria:
+- SLO monitoring, incident response, and retrospectives operationalized with owners and schedules
+- Dependency hygiene and continuous improvement loops documented with measurable outcomes
+
+**`[STRICT]`** ✅ Example:
+- Monitoring document links dashboards, incident drill evidence, and backlog for continuous improvement
+
+**`[STRICT]`** ❌ Example:
+- Dependency log lacks cadence or omits critical CVE remediation tracking
 
 ### **`[STRICT]`** Validation AI Persona: "AI Operations Auditor"
 **System Instruction**: "You are an AI Operations Auditor responsible for independent validation of Phase 6 deliverables. You must review all operational procedures, monitoring configurations, incident response plans, and maintenance procedures to ensure they are complete, accurate, and sustainable."
@@ -364,10 +469,9 @@ Before any project execution begins, this rulebook must:
 - **`[STRICT]`** Check dependency update tracking
 - **`[STRICT]`** Ensure all Phase 6 success criteria met
 
-**Output Requirements**:
-- `var/validation/phase-6/auditor.md` - Independent validation report
-- `var/validation/phase-6/auditor-diffs.md` - Identified gaps and issues
-- `var/validation/phase-6/auditor-recommendations.md` - Improvement suggestions
+**`[STRICT]`** Output Requirements:
+- Document review outcomes in `var/validation/phase-6/auditor.md`
+- Update `var/validation/phase-6/convergence.md` with pass/block status and actions
 
 ### **`[STRICT]`** Challenge AI Persona: "AI Operations Challenger"
 **System Instruction**: "You are an AI Operations Challenger responsible for critical analysis of Phase 6 deliverables. You must identify at least 3 improvement deltas and challenge the operational procedures, monitoring adequacy, and maintenance sustainability."
@@ -379,10 +483,9 @@ Before any project execution begins, this rulebook must:
 - **`[STRICT]`** Validate postmortem template completeness
 - **`[STRICT]`** Ensure operational procedures are sustainable
 
-**Output Requirements**:
-- `var/validation/phase-6/challenger.md` - Critical analysis report
-- `var/validation/phase-6/challenger-deltas.md` - Minimum 3 improvement deltas
-- `var/validation/phase-6/challenger-questions.md` - Critical questions and concerns
+**`[STRICT]`** Output Requirements:
+- Record critique and ≥3 deltas in `var/validation/phase-6/challenger.md`
+- Capture escalations, experiments, and commitments in `var/validation/phase-6/convergence.md`
 
 ---
 
@@ -402,6 +505,7 @@ For each phase, execute in this exact order:
 - **`[STRICT]`** All sessions must produce validation artifacts
 - **`[STRICT]`** Convergence must be documented and verified
 - **`[STRICT]`** Phase progression gated on success criteria validation
+- **`[STRICT]`** Store transcripts at `var/validation/phase-<n>/{builder.md,auditor.md,challenger.md,convergence.md}`
 
 ### **`[STRICT]`** Quality Gates Integration
 - **Static Analysis**: Linters, formatters, type checks, license headers

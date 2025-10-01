@@ -1,6 +1,8 @@
 ---
 alwaysApply: true
 description: Meta-Framework Generator — Produces project-specific rulebooks (personas, validators, protocols, validation) from any brief or repo
+codexAlignmentVersion: 1.0.0
+codexAlignmentHash: 2024-06-05-a
 ---
 
 # Meta-Framework Generator (Rulebook-of-Rulebooks)
@@ -65,7 +67,8 @@ For each phase:
 - [STRICT] 3-session loop per phase:
   - Builder → Auditor → Challenger → Convergence (“PASS” required)
 - [STRICT] Persist transcripts:
-  - `/var/validation/<project-id>/phase-<n>/{builder,auditor,challenger}.md`
+  - `/var/validation/<project-id>/phase-<n>/{builder.md,auditor.md,challenger.md,convergence.md}`
+- [STRICT] Record convergence PASS/FAIL plus remediation commitments before advancing
 - [STRICT] Record deltas and diffs before progressing
 - [GUIDELINE] Gate progression via JSON schema checks
 
@@ -85,61 +88,117 @@ For each phase:
 
 ## [STRICT] Canonical Phase Set (auto-pruned per project)
 1) Phase 0 — Bootstrap
-- Persona: AI Project Initializer
-- Core Principle: Context mastery before motion
-- Inputs: brief/repo
-- Outputs:
-  - `evidence/phase0/{context-kit.md, stakeholder-map.md, tech-inventory.md, validation.md}`
-- Success:
-  - Tech, scripts, configs, compliance gates enumerated and verified
-- Examples:
-  - ✅ Complete tech inventory with versions and gates_config references
-  - ❌ Missing CI/CD/security gates or unverified assumptions
+- [STRICT] Persona: AI Project Initializer
+- [STRICT] Core Principle: Context mastery before motion
+- [STRICT] Inputs: `brief.md`, `AGENTS.md`, and repository scan results
+- [STRICT] Outputs:
+  - `evidence/phase0/context-kit.md`
+  - `evidence/phase0/stakeholder-map.md`
+  - `evidence/phase0/tech-inventory.md`
+  - `evidence/phase0/validation.md`
+- [STRICT] Validation Artifacts: `var/validation/phase-0/{builder.md,auditor.md,challenger.md,convergence.md}`
+- [STRICT] Success Criteria:
+  - Tooling, CI/CD, security, and compliance gates enumerated with owners
+  - Stakeholder matrix includes decision rights and escalation paths
+- [STRICT] ✅ Example: Inventory lists all repos, pipelines, gates_config links, and pending risks
+- [STRICT] ❌ Example: Missing IaC scripts, unverified secrets policy, or empty validation log
 
 2) Phase 1 — PRD
-- Persona: AI Product Discovery Lead
-- Core Principle: Business truth first
-- Outputs:
-  - `evidence/phase1/{prd.md, business-logic.md, user-journeys.md, acceptance-criteria.md, validation.md}`
-- Success:
-  - Measurable acceptance criteria; edge cases mapped; feasibility aligned
+- [STRICT] Persona: AI Product Discovery Lead
+- [STRICT] Core Principle: Business truth first
+- [STRICT] Outputs:
+  - `evidence/phase1/prd.md`
+  - `evidence/phase1/business-logic.md`
+  - `evidence/phase1/user-journeys.md`
+  - `evidence/phase1/acceptance-criteria.md`
+  - `evidence/phase1/validation.md`
+- [STRICT] Validation Artifacts: `var/validation/phase-1/{builder.md,auditor.md,challenger.md,convergence.md}`
+- [STRICT] Success Criteria:
+  - Acceptance criteria measurable, testable, and mapped to user journeys
+  - Business logic reconciles upstream constraints and downstream dependencies
+- [STRICT] ✅ Example: PRD links personas to acceptance criteria with dependency notes and mitigation plan
+- [STRICT] ❌ Example: Business logic omits data contracts or conflicts with Phase 0 tech inventory
 
 3) Phase 2 — Design & Planning
-- Persona: AI Architecture Designer
-- Outputs:
-  - `evidence/phase2/{architecture.md, api-contracts.yaml, coding-standards.md, implementation-roadmap.md, adr-catalog.md, validation.md}`
-- Success:
-  - Contracts validated; ADRs linked; roadmap feasible with dependencies
+- [STRICT] Persona: AI Architecture Designer
+- [STRICT] Outputs:
+  - `evidence/phase2/architecture.md`
+  - `evidence/phase2/api-contracts.yaml`
+  - `evidence/phase2/coding-standards.md`
+  - `evidence/phase2/implementation-roadmap.md`
+  - `evidence/phase2/adr-catalog.md`
+  - `evidence/phase2/validation.md`
+- [STRICT] Validation Artifacts: `var/validation/phase-2/{builder.md,auditor.md,challenger.md,convergence.md}`
+- [STRICT] Success Criteria:
+  - Architecture decisions mapped to ADR IDs with risk trade-offs documented
+  - Roadmap covers critical path, dependencies, and contingency buffers
+- [STRICT] ✅ Example: Roadmap includes phased milestones, resource plan, and ADR cross-links
+- [STRICT] ❌ Example: API contracts omit error handling or drift from acceptance criteria
 
 4) Phase 3 — Quality Rails
-- Persona: AI QA Specialist
-- Outputs:
-  - `evidence/phase3/{security-checklist.md, performance-budgets.json, a11y-plan.md, test-plan.md, code-review-checklist.md, validation.md}`
-- Success:
-  - Security/perf/a11y/test gates defined and runnable
+- [STRICT] Persona: AI QA Specialist
+- [STRICT] Outputs:
+  - `evidence/phase3/security-checklist.md`
+  - `evidence/phase3/performance-budgets.json`
+  - `evidence/phase3/a11y-plan.md`
+  - `evidence/phase3/test-plan.md`
+  - `evidence/phase3/code-review-checklist.md`
+  - `evidence/phase3/validation.md`
+- [STRICT] Validation Artifacts: `var/validation/phase-3/{builder.md,auditor.md,challenger.md,convergence.md}`
+- [STRICT] Success Criteria:
+  - Security, performance, accessibility, and testing gates runnable with owners and cadence
+  - Quality rails reference tooling scripts and expected telemetry thresholds
+- [STRICT] ✅ Example: Performance budgets cite tooling (k6/Lighthouse) with pass thresholds and alert routing
+- [STRICT] ❌ Example: Accessibility plan lacks WCAG mappings or automation instructions
 
 5) Phase 4 — Integration
-- Persona: AI Integration Engineer
-- Outputs:
-  - `evidence/phase4/{observability-spec.md, slo-sli.md, staging-smoke-playbook.md, deployment-pipeline.md, validation.md}`
-- Success:
-  - Observability configured; staging smoke passing; rollback rehearsed
+- [STRICT] Persona: AI Integration Engineer
+- [STRICT] Outputs:
+  - `evidence/phase4/observability-spec.md`
+  - `evidence/phase4/slo-sli.md`
+  - `evidence/phase4/staging-smoke-playbook.md`
+  - `evidence/phase4/deployment-pipeline.md`
+  - `evidence/phase4/validation.md`
+- [STRICT] Validation Artifacts: `var/validation/phase-4/{builder.md,auditor.md,challenger.md,convergence.md}`
+- [STRICT] Success Criteria:
+  - Observability dashboards linked, SLO/SI metrics baselined, and smoke tests automated
+  - Deployment pipeline documents rollback strategy with verification steps
+- [STRICT] ✅ Example: Pipeline doc references IaC repos, approvals, and smoke test commands with owners
+- [STRICT] ❌ Example: SLO sheet lacks alert thresholds or staging telemetry evidence
 
 6) Phase 5 — Launch
-- Persona: AI Deployment Specialist
-- Outputs:
-  - `evidence/phase5/{deployment-runbook.md, rollback-plan.md, production-observability.md, backup-policy.md, release-notes.md, validation.md}`
-- Success:
-  - Rollback validated; production telemetry green; approvals recorded
+- [STRICT] Persona: AI Deployment Specialist
+- [STRICT] Outputs:
+  - `evidence/phase5/deployment-runbook.md`
+  - `evidence/phase5/rollback-plan.md`
+  - `evidence/phase5/production-observability.md`
+  - `evidence/phase5/backup-policy.md`
+  - `evidence/phase5/release-notes.md`
+  - `evidence/phase5/validation.md`
+- [STRICT] Validation Artifacts: `var/validation/phase-5/{builder.md,auditor.md,challenger.md,convergence.md}`
+- [STRICT] Success Criteria:
+  - Launch gates signed off by stakeholders with rollback rehearsals complete
+  - Production monitoring, backups, and communications scheduled and validated
+- [STRICT] ✅ Example: Runbook lists release windows, approval checklist, and rollback verification logs
+- [STRICT] ❌ Example: Backup policy missing RPO/RTO targets or restore verification evidence
 
 7) Phase 6 — Operations
-- Persona: AI Operations Manager
-- Outputs:
-  - `evidence/phase6/{slo-monitoring.md, incident-response.md, postmortem-template.md, dependency-update-log.md, retrospective-template.md, validation.md}`
-- Success:
-  - SLOs monitored; incident drills executed; updates tracked
+- [STRICT] Persona: AI Operations Manager
+- [STRICT] Outputs:
+  - `evidence/phase6/slo-monitoring.md`
+  - `evidence/phase6/incident-response.md`
+  - `evidence/phase6/postmortem-template.md`
+  - `evidence/phase6/dependency-update-log.md`
+  - `evidence/phase6/retrospective-template.md`
+  - `evidence/phase6/validation.md`
+- [STRICT] Validation Artifacts: `var/validation/phase-6/{builder.md,auditor.md,challenger.md,convergence.md}`
+- [STRICT] Success Criteria:
+  - Active SLO monitoring with alert routing and incident rehearsal cadence
+  - Postmortem and dependency hygiene processes documented with owners
+- [STRICT] ✅ Example: Monitoring deck links Grafana dashboards, on-call rotations, and incident drill results
+- [STRICT] ❌ Example: Dependency log missing patch cadence or untracked critical CVEs
 
-Each phase includes Auditor/Challenger roles and session artifacts under `/var/validation/<project-id>/phase-<n>/`.
+Each phase includes Builder, Auditor, Challenger, and Convergence session artifacts under `/var/validation/<project-id>/phase-<n>/` with PASS required before advancing.
 
 ---
 
