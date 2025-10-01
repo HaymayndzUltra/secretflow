@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Call Companion</title>
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 30px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        .status {
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: bold;
+        }
+        .status.connected {
+            background: rgba(76, 175, 80, 0.2);
+            border: 2px solid #4CAF50;
+        }
+        .status.disconnected {
+            background: rgba(244, 67, 54, 0.2);
+            border: 2px solid #f44336;
+        }
+        .controls {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+            justify-content: center;
+        }
+        button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        button:hover {
+            transform: translateY(-2px);
+        }
+        button:active {
+            transform: translateY(0);
+        }
+        .transcription {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            min-height: 100px;
+            font-family: monospace;
+        }
+        .suggestions {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        .suggestion-item {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 5px;
+        }
+        .info {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🤖 AI Call Companion</h1>
+
+        <div id="status" class="status disconnected">
+            🔴 Disconnected from server
+        </div>
+
+        <div class="controls">
+            <button id="startBtn">🎙️ Start Call Recording</button>
+            <button id="stopBtn" disabled>⏹️ Stop Recording</button>
+            <button id="getDevicesBtn">🔊 Get Audio Devices</button>
+        </div>
+
+        <div class="transcription">
+            <h3>📝 Real-time Transcription:</h3>
+            <div id="transcription">Waiting for transcription...</div>
+        </div>
+
+        <div class="suggestions">
+            <h3>💡 AI Response Suggestions:</h3>
+            <div id="suggestions">Response suggestions will appear here...</div>
+        </div>
+
+        <div class="info">
+            <h3>📋 Available Endpoints:</h3>
+            <ul>
+                <li><strong>Health Check:</strong> <a href="/health" target="_blank">/health</a></li>
+                <li><strong>Supported Languages:</strong> <a href="/supported-languages" target="_blank">/supported-languages</a></li>
+                <li><strong>Manual Transcription:</strong> POST /transcribe</li>
+                <li><strong>WebSocket:</strong> Real-time events for live calls</li>
+            </ul>
+            <p><strong>Server Status:</strong> <span id="serverStatus">Checking...</span></p>
+        </div>
+    </div>
+
+    <script>
+        let socket;
+        let isRecording = false;
+
+        // Connect to WebSocket
+        function connectSocket() {
+            socket = io('http://localhost:3000');
+
+            socket.on('connect', () => {
+                document.getElementById('status').className = 'status connected';
+                document.getElementById('status').innerHTML = '🟢 Connected to AI Call Companion';
+                document.getElementById('serverStatus').textContent = '✅ Running';
+            });
+
+            socket.on('disconnect', () => {
+                document.getElementById('status').className = 'status disconnected';
+                document.getElementById('status').innerHTML = '🔴 Disconnected from server';
+                document.getElementById('serverStatus').textContent = '❌ Not Running';
+            });
+        }
+
+        // Audio capture for WebRTC
+        let audioStream;
+        async function startAudioCapture() {
+            try {
+                audioStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                console.log('Microphone access granted');
+                return audioStream;
+            } catch (error) {
+                console.error('Error accessing microphone:', error);
+                alert('Microphone access denied or unavailable');
+                throw error;
+            }
+        }
+
+            socket.on('transcription', (data) => {
+                const transcriptionDiv = document.getElementById('transcription');
+                const speaker = data.speaker === 1 ? 'Client' : 'You';
+                transcriptionDiv.innerHTML += `<br><strong>${speaker}:</strong> ${data.transcript}`;
+
+                // Send to server for AI suggestion if available
+                if (data.transcript) {
+                    socket.emit('get-suggestion', { transcript: data.transcript, speaker: speaker });
+                }
+            });
+
+            socket.on('suggestion', (data) => {
+                if (data.suggestion && data.suggestion !== 'Suggestions disabled: No OpenAI key configured.') {
+                    showSuggestion(data.suggestion);
+                }
+            });
+
+            socket.on('call-started', (data) => {
+                document.getElementById('startBtn').disabled = true;
+                document.getElementById('stopBtn').disabled = false;
+                isRecording = true;
+                document.getElementById('transcription').innerHTML = '🎙️ Recording started...';
+            });
+
+            socket.on('call-stopped', (data) => {
+                document.getElementById('startBtn').disabled = false;
+                document.getElementById('stopBtn').disabled = true;
+                isRecording = false;
+                document.getElementById('transcription').innerHTML += '<br><br>✅ Recording stopped';
+            });
+
+            socket.on('error', (error) => {
+                alert('Error: ' + error.message);
+            });
+        }
+
+        async function startCall() {
+            if (socket && socket.connected) {
+                try {
+                    await startAudioCapture(); // Request microphone access
+                    socket.emit('start-call', { sessionId: 'demo-session-' + Date.now() });
+                    document.getElementById('callStatus').textContent = 'Recording...';
+                } catch (error) {
+                    alert('Cannot start call without microphone access');
+                }
+            } else {
+                alert('Please wait for connection to server...');
+            }
+        }
+
+        function stopCall() {
+            if (socket && socket.connected) {
+                socket.emit('stop-call');
+            }
+        }
+
+        function getDevices() {
+            if (socket && socket.connected) {
+                socket.emit('get-devices');
+            }
+        }
+
+        function showSuggestion(suggestion) {
+            const suggestionsDiv = document.getElementById('suggestions');
+            const suggestionElement = document.createElement('div');
+            suggestionElement.className = 'suggestion-item';
+            suggestionElement.innerHTML = `
+                <strong>Suggested Response:</strong><br>
+                ${suggestion}
+                <button onclick="copyToClipboard('${suggestion}')" style="margin-left: 10px; padding: 5px 10px; background: #4CAF50; color: white; border: none; border-radius: 3px; cursor: pointer;">📋 Copy</button>
+            `;
+            suggestionsDiv.appendChild(suggestionElement);
+        }
+
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                alert('Response copied to clipboard!');
+            });
+        }
+
+        // Initialize connection and event listeners
+        window.onload = function() {
+            connectSocket();
+
+            // Add event listeners for buttons
+            document.getElementById('startBtn').addEventListener('click', startCall);
+            document.getElementById('stopBtn').addEventListener('click', stopCall);
+            document.getElementById('getDevicesBtn').addEventListener('click', getDevices);
+        };
+    </script>
+</body>
+</html>

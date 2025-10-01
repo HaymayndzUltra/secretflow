@@ -8,7 +8,7 @@ codexAlignmentHash: 2024-06-05-a
 # Meta-Framework Generator (Rulebook-of-Rulebooks)
 
 ## [STRICT] Purpose
-Generate a complete, project-specific execution rulebook (personas, validators, protocols, validation flows, evidence map) from any input (brief, repo, constraints). This meta-framework does NOT execute work; it creates the system that will.
+Generate a complete, project-specific execution rulebook (personas, validators, protocols, validation flows, evidence map) from any input (brief, repo, constraints). 
 
 ## [STRICT] Core Outcomes
 - Phase personas + validator personas with system instructions and I/O contracts
