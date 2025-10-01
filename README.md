@@ -2,6 +2,25 @@
 
 **SecretFlow** is a comprehensive project execution framework that provides systematic, traceable, and high-quality project development with complete preparation and validation at every phase. It implements a 6-phase lifecycle with AI-powered personas, automated quality gates, and evidence-driven processes.
 
+## 🔊 Local Discovery Call Assistant (New)
+
+This repository now bundles a production-ready, fully local autosuggest assistant optimised for technical discovery calls. The stack is split into GPU-first services under `services/`:
+
+- **asr-gateway** – WebRTC ingress with Faster-Whisper + Silero VAD (stubbed when models absent), pyannote diarisation stubs, streaming partials, and PII redaction.
+- **retrieval** – Hybrid dense/sparse retrieval with Qdrant (Docker) and BM25, GPU-friendly embedding/rerank shims, ingestion pipeline for docs/playbooks, and Prometheus metrics.
+- **orchestrator** – Intent-aware prompt router, Ollama streaming (qwen2.5:14b → llama3.2 fallback), evidence citation enforcement, and Socket.IO overlay feeds.
+- **overlay** – Electron + React overlay with hotkeys (Enter/Tab/Esc), suggestion confidence, and warning badges for low-evidence fallbacks.
+
+Supporting assets include Docker Compose orchestration, Grafana/Prometheus dashboards, benchmark harnesses in `bench/`, and Make targets for dev/test/bench/ingest.
+
+### Runbook
+
+1. Copy `.env.example` to `.env` and adjust local model paths (leave defaults for stub mode).
+2. Launch everything with `make dev` (uses Docker Compose for Qdrant, Ollama, services, and observability).
+3. In another terminal run `make ingest` to load `docs/fixtures` into retrieval.
+4. Validate services with `curl http://localhost:7003/health` and stream suggestions via `curl -N -H "Content-Type: application/json" -d '{"transcript":"integration plan"}' http://localhost:7003/suggest`.
+5. Start the overlay locally with `npm --workspace overlay run dev` when a desktop environment is available.
+
 ## 🚀 Overview
 
 SecretFlow is designed to transform how software projects are executed by providing:
