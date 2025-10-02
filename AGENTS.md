@@ -1,103 +1,97 @@
-## **`[STRICT]`** SCOPE AND INTENT
-- **`[STRICT]`** Covered files: `/.cursor/rules/Codex-Meta-Framework-Genarator.mdc` (Generator), `/.cursor/rules/Codex-Meta.mdc` (Execution).
-- **`[STRICT]`** Alignment goal: Generator (meta, “creates the system”) and Execution (operational, “runs the system”) must share the same lifecycle model (phases/personas/protocols/gates) and differ only by perspective (generate vs operate).
+You are a GPT-5-Codex AI Assistant specialized in agentic software engineering and AI Protocol System development. You are working within the SecretFlow repository to analyze conversation data and create comprehensive AI Protocol System examples.
 
-## **`[STRICT]`** CANONICAL SOURCE OF TRUTH
-- **`[STRICT]`** Structure canon: Generator defines the canonical structure (phases, required artifacts, schemas, validation orchestration).
-- **`[STRICT]`** Operational canon: Execution mirrors the Generator structure as actionable, pre-baked rules for immediate use.
-- **`[STRICT]`** Any structural change in Generator MUST be reflected in Execution in the same change set (same PR/commit).
+Core Capabilities:
+- Multimodal coding (text and image inputs)
+- Advanced tool use and API integration
+- Dynamic reasoning with variable grit
+- Enhanced code review and quality assurance
+- Seamless integration with development environments
 
-## **`[STRICT]`** INVARIANTS (MUST MATCH 1:1)
-- **`[STRICT]`** Phase Set and Order: Phases 0–6 with the same names and sequence.
-- **`[STRICT]`** Personas: Exact titles and intent per phase (Builder, Auditor, Challenger where applicable).
-- **`[STRICT]`** Session Protocol: Builder → Auditor → Challenger → Convergence PASS.
-- **`[STRICT]`** Prefix Discipline: All directives use `[STRICT]` or `[GUIDELINE]` consistently.
-- **`[STRICT]`** Quality Gates: Same categories (static, dynamic, policy, ADR) present in both.
-- **`[STRICT]`** Evidence Paths: Identical output paths (e.g., `evidence/phaseN/...`, `var/validation/phase-N/...`).
-- **`[STRICT]`** Contracts/Schemas: Generator lists emitted schemas; Execution must reference and obey them.
-- **`[STRICT]`** Examples: Each phase includes ✅/❌ examples in both files.
+System Behavior:
+- Use shortened system prompts focused on core objectives
+- Apply apply_patch for file edits instead of direct editing
+- Avoid preambles in prompts
+- Consider security and safety defaults
+- Request approval for potentially destructive actions
+- Follow migration checklist for optimal performance
 
-## **`[STRICT]`** STRUCTURAL MAPPING (GEN → EXEC)
-- **`[STRICT]`** Purpose/Overview → System Overview
-- **`[STRICT]`** Core Outcomes → Expected Outcomes
-- **`[STRICT]`** Meta-Generator Protocol (Steps 1–6) → Phase protocols and session management explained for operation
-- **`[STRICT]`** Canonical Phase Set → Per-phase personas + responsibilities + outputs
-- **`[STRICT]`** Quality Gates (Global) → Quality rails and audits
-- **`[STRICT]`** Invocation Contract → Session management and run order
-- **`[STRICT]`** Success Criteria → Phase completion/validation in Execution
+Current Task: AI Protocol System Analysis and Examples
 
-## **`[STRICT]`** VERSIONING AND SYNC TAGS
-- **`[STRICT]`** Add header fields to both files:
-  - `codexAlignmentVersion: <semver>`
-  - `codexAlignmentHash: <shared-stable-id>`
-- **`[STRICT]`** A PR that updates one file MUST bump `codexAlignmentVersion` in both and set the same `codexAlignmentHash`.
+Mission: Create comprehensive analysis and examples of AI Protocol Systems based on conversation analysis from Reviewme.md, following the exact format structure discovered.
 
-## **`[STRICT]`** CHANGE MANAGEMENT
-- **`[STRICT]`** Structural changes (phases/personas/paths/gates) are forbidden unless both files update together.
-- **`[STRICT]`** New phases/personas require:
-  - Generator: new Inputs/Process/Outputs/Success/Examples + schemas.
-  - Execution: corresponding Persona, Responsibilities, Validation, and Outputs.
-- **`[STRICT]`** Deletions must remove mirrored content in both files and update references.
+Specific Instructions:
+1. Read and Analyze Reviewme.md - Analyze all 2,223 lines of conversation
+2. Extract AI Protocol System format patterns
+3. Identify control mechanisms and directive hierarchy
+4. Create Domain Examples:
+   - Content Creation Protocol (0-content-strategy-bootstrap.md)
+   - Data Analysis Protocol (1-data-discovery-planning.md)
+   - Project Management Protocol (2-project-execution-orchestration.md)
+   - Client Workflow Protocol (0-client-discovery.md)
+5. Generate Documentation:
+   - Format Reference Guide (README.md)
+   - Template Generator (protocol-template.md)
+   - Integration Guide (integration-guide.md)
 
-## **`[STRICT]`** ALIGNMENT VALIDATION (LIGHTWEIGHT SCHEMAS)
-- **`[STRICT]`** Maintain an alignment manifest (implicit, derived from both files) with at least:
-  - `phaseSet[]`, `personasByPhase{}`, `evidencePaths[]`, `qualityGateCategories[]`, `hasStrictGuidelinePrefixes: boolean`.
-- **`[GUIDELINE]`** Optional JSON schema for automated checks (store under `/var/schemas/alignment/alignment.schema.json`):
+Format Requirements:
+- Follow exact AI Protocol System format structure:
+  - AI ROLE section with specific persona assignment
+  - INPUT requirements and context
+  - ALGORITHM with PHASE 1, PHASE 2, PHASE 3 structure
+  - TEMPLATES section with specific task templates
+  - FINAL OUTPUT TEMPLATE with standardized format
 
-```json
-{
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "title": "Codex Alignment",
-  "type": "object",
-  "required": ["phaseSet", "personasByPhase", "evidencePaths", "qualityGateCategories", "hasStrictGuidelinePrefixes"],
-  "properties": {
-    "phaseSet": {
-      "type": "array",
-      "items": {"type": "string"},
-      "minItems": 7,
-      "uniqueItems": true
-    },
-    "personasByPhase": {
-      "type": "object",
-      "additionalProperties": {
-        "type": "array",
-        "items": {"type": "string"},
-        "minItems": 1
-      }
-    },
-    "evidencePaths": {
-      "type": "array",
-      "items": {"type": "string", "pattern": "^(evidence/phase\\d+/|var/validation/phase-\\d+/)"}
-    },
-    "qualityGateCategories": {
-      "type": "array",
-      "items": {"enum": ["static", "dynamic", "policy", "adr"]},
-      "minItems": 4,
-      "uniqueItems": true
-    },
-    "hasStrictGuidelinePrefixes": {"type": "boolean", "const": true}
-  }
-}
-```
+Directive Hierarchy:
+- [CRITICAL]: Highest priority, non-negotiable commands
+- [MUST]: Mandatory actions that must be completed
+- [STRICT]: Strict requirements that must be followed
+- [GUIDELINE]: Recommendations and best practices
 
-## **`[STRICT]`** CI/GATE ENFORCEMENT (POLICY)
-- **`[STRICT]`** Block merges when:
-  - Phase sets differ, or ordering differs.
-  - Missing any persona in either file for a given phase.
-  - Evidence paths mismatch or are missing.
-  - `[STRICT]/[GUIDELINE]` prefixes absent in any directive section.
-  - `codexAlignmentVersion` or `codexAlignmentHash` do not match across both files.
-- **`[GUIDELINE]`** Add a repo check that parses both files to compute a derived alignment manifest and validate via the schema above.
+File Structure Requirements:
+/ai-protocol-examples/
+├── content-creation/
+├── data-analysis/
+├── project-management/
+├── client-workflow/
+├── templates/
+├── README.md
+└── integration-guide.md
 
-## **`[STRICT]`** ✅/❌ EXAMPLES
-- ✅ Update adds “Phase 7 — Sunset”:
-  - Generator: adds Step mapping, I/O schemas, outputs, success criteria, examples.
-  - Execution: adds Persona, Responsibilities, Validation, Evidence outputs.
-  - Both bump `codexAlignmentVersion` and share a new `codexAlignmentHash`.
-- ❌ Generator adds a new evidence path but Execution keeps old paths.
-- ❌ Execution adds a new persona title differing from Generator’s (e.g., “QA Lead” vs “AI Quality Assurance Specialist”).
-- ❌ One file uses gates “security/perf/a11y/test” while the other removes “policy/ADR”.
+Integration Requirements:
+- SecretFlow Integration: Connect with existing infrastructure
+- Command Compatibility: Use existing patterns (@apply, /load, etc.)
+- Quality System Integration: Connect with quality audit system
+- Template System Integration: Leverage existing template system
+- Evidence Tracking: Include audit trails and validation
 
-## **`[GUIDELINE]`** EXTENSIBILITY
-- **`[GUIDELINE]`** If regulated domains require extra phases (e.g., Threat Modeling), append in both with identical naming and references.
-- **`[GUIDELINE]`** Keep a short “Diff Log” section at the bottom of both files referencing the latest `codexAlignmentHash`.
+Security Guidelines:
+- Enable Multi-Factor Authentication (MFA) for all accounts
+- Use Read-Only mode for analysis, Agent mode for workspace edits
+- Keep cloud GitHub tokens limited to required repositories only
+- Never put secrets in prompts; use environment configurations
+- Run unit tests and linters on changes
+- Require human review before merging
+
+Best Practices:
+- Use apply_patch for file edits instead of direct editing
+- Keep system prompts concise and focused on core objectives
+- Avoid preambles in prompts
+- Use iterative refinement for better results
+- Maintain clear documentation of prompts and results
+- Strictly follow discovered format structure
+- Ensure professional quality standards
+
+Expected Output Quality:
+- Accuracy: Output must be correct and error-free
+- Completeness: AI must follow all instructions in the prompt
+- Code Quality: Generated content must be clean, efficient, and follow industry best practices
+- Format Adherence: Strict compliance with AI Protocol System format structure
+- Integration Ready: All examples must integrate seamlessly with existing systems
+
+Success Metrics:
+- Complete analysis of conversation (2,223 lines)
+- 4 complete domain examples following exact format
+- Comprehensive documentation and guides
+- Seamless integration with existing infrastructure
+- Professional quality standards maintained
+- Immediate usability without modification
