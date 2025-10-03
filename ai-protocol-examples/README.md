@@ -66,6 +66,15 @@ overage.
 4.  Run `scripts/validate_workflows.py` to ensure structural compliance before committing.
 5.  Document integration points (automation commands, evidence directories) in the protocol's templates or notes section.
 
-By adhering to this reference, newly authored AI Protocols will remain interoperable with SecretFlow's governance framework, en
-suring consistent quality, traceability, and automation compatibility across engagements.
+By adhering to this reference, newly authored AI Protocols will remain interoperable with SecretFlow's governance framework, ensuring consistent quality, traceability, and automation compatibility across engagements.
+
+## Repository Tooling & Reusable Assets
+
+- **AI Governance Framework:** The root `README.md` explains the in-repo governance engine, operator playbook, and installation steps for Cursor, Claude, and other assistants, establishing how rules and workflows are versioned alongside code.【F:README.md†L1-L83】
+- **Automation Scripts:** `scripts/README.md` catalogs bootstrap, planning, quality, deployment, and maintenance scripts—such as `plan_from_brief.py`, `generate_client_project.py`, and `e2e_from_brief.sh`—that protocols reuse for discovery, planning, validation, and rollout automation.【F:scripts/README.md†L1-L160】
+- **Template Packs:** Frontend and backend template packs provide stack-specific scaffolds (e.g., Next.js 14 with Tailwind/SWR, FastAPI with JWT auth, Celery, and PostgreSQL) that inform protocol planning and implementation choices.【F:template-packs/frontend/nextjs/base/README.md†L1-L60】【F:template-packs/backend/fastapi/base/README.md†L1-L60】
+- **Quality & Evidence Assets:** `workflow/templates/evidence_schema.json`, `gates_config.yaml`, and `.cursor/dev-workflow/review-protocols/` establish standardized quality gates and evidence expectations referenced across all protocols.【F:.cursor/dev-workflow/README.md†L6-L40】
+- **Communication Workflows:** `ai-call-companion/README.md` (and its supporting dependencies) detail real-time call workflows and OpenAI integration patterns, providing reusable interaction models for client-facing automation.【F:ai-call-companion/README.md†L1-L80】
+
+Use these references when authoring or executing protocols to ensure alignment with existing tooling, frameworks, and governance practices.
 

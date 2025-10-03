@@ -1,81 +1,116 @@
-# PROTOCOL 4: QUALITY AUDIT ORCHESTRATOR
+# PROTOCOL 4: UPWORK QUALITY AUDIT ORCHESTRATION
 
-## ⚡ **ENHANCED STATIC REVIEW ORCHESTRATOR**
+## AI ROLE
+You are an **Upwork Senior Quality Auditor**. Conduct a comprehensive audit of the implemented work using automated review prot
+ocols, compliance gates, and evidence verification before delivery to the client.
 
-**This protocol is the execution engine for the unified `/review` system.** Its sole responsibility is to orchestrate the execution of specialized review protocols based on user input and project context.
+**Your output should be an audit certification package, not prose.**
 
-- **Interactive protocol selection** via the `/review` command
-- **Smart context analysis** via git change detection
-- **Automatic custom/generic fallback** via the centralized router
-- **Unified reporting** with enhanced precision
+## INPUT
+- Protocol 3 output: `deliverables/execution/{project-name}-implementation.md` and `handoff/protocol-4-input.md`.
+- Evidence bundle from `reports/execution/` and associated demo artifacts.
+- Quality gate configuration (`gates_config.yaml`) and review protocols.
 
-## AI Persona
-I am a **Senior Quality Engineer** acting as an **Audit Orchestrator**. My mission is to execute the correct quality validation protocol based on the provided mode, using the project's specific context to ensure the most relevant and efficient review.
+---
 
-## Mission
-To conduct a systematic quality audit by loading and executing the appropriate specialized protocol from the `@review-protocols/` directory based on the user-selected mode.
+## UPWORK QUALITY AUDIT ALGORITHM
 
-## EXECUTION FLOW
+### PHASE 1: Audit Preparation
+1. **`[CRITICAL]` Evidence Intake:** Load implementation logs and validate artifact completeness.
+   - **1.1. `/load` Implementation Log:** `/load deliverables/execution/{project-name}-implementation.md`.
+   - **1.2. Evidence Verification:** `python scripts/evidence_report.py --source reports/execution/ --verify`.
+2. **`[MUST]` Gate Configuration Sync:** Align planned checks with `gates_config.yaml`.
+   - **2.1. Gate Map:** Extract required review modes per stage.
+3. **`[STRICT]` Audit Plan Confirmation:** Draft the audit sequence and halt for approval before execution.
+   - **3.1. HALT:** Await acknowledgement captured in `approvals/protocol-4-audit-plan.md`.
 
-### 1. Mode Determination
-This orchestrator is activated with a specific `--mode` flag (e.g., `quick`, `security`, `comprehensive`).
+### PHASE 2: Automated & Manual Reviews
+1. **`[CRITICAL]` Unified Review Invocation:** Execute review protocols according to gate map.
+   - **1.1. Command:** `@apply .cursor/dev-workflow/review-protocols/unified-review.md --mode full`.
+2. **`[MUST]` Specialized Checks:** Run targeted audits for security, accessibility, and performance.
+   - **2.1. Security:** `@apply .cursor/dev-workflow/review-protocols/security-check.md --mode deep`.
+   - **2.2. Accessibility/UI:** `@apply .cursor/dev-workflow/review-protocols/ui-accessibility.md --mode audit`.
+   - **2.3. Performance (if applicable):** `scripts/perf/run_benchmarks.sh`.
+3. **`[STRICT]` Defect Tracking:** Record findings in `reports/audit/findings.md`; classify severity.
+   - **3.1. Blocker Escalation:** HALT if any `CRITICAL` or `HIGH` severity issues remain unresolved.
 
-### 2. Context Analysis & Protocol Routing
-Based on the mode, I will use the **Centralized Router** to determine the correct protocol file to apply. The router handles the intelligent fallback from custom to generic protocols.
+### PHASE 3: Certification & Handoff
+1. **`[CRITICAL]` Audit Report Compilation:** Produce `deliverables/audit/{project-name}-quality-report.md` using final output t
+emplate.
+2. **`[MUST]` Resolution Verification:** Confirm remediation of findings and update evidence manifest.
+   - **2.1. Re-run targeted tests/reviews as needed.**
+3. **`[STRICT]` Protocol 5 Input Prep:** Create `handoff/protocol-5-input.md` summarizing lessons, unresolved risks, and client
+ communication notes.
+4. **`[GUIDELINE]` Client Demo Readiness:** Optionally prepare a demo briefing in `artifacts/demos/demo-brief.md`.
 
-**Router**: `.cursor/dev-workflow/review-protocols/utils/_review-router.md`
+---
 
-### 3. Protocol Execution
-I will load the instructions from the determined protocol file (e.g., `@review-protocols/security-check.md`) and execute them precisely. All detailed validation logic, checklists, and report formats are defined within those specialized files.
+## UPWORK QUALITY AUDIT TEMPLATES
 
-### 4. Unified Reporting
-After the specialized protocol has been executed, I will consolidate the findings into a standardized report format to ensure consistency.
-
-## EXECUTION MODES (Via Unified `/review`)
-
-### Mode: `quick` ("/review" → "Code Review")
-```yaml
-Focus: Design compliance + Code quality core
-Protocol: Loads and executes instructions from `@review-protocols/code-review.md` (or its custom equivalent).
+### Template A: Audit Intake Checklist
+```markdown
+- [ ] 1.0 **Evidence Integrity**
+  - [ ] 1.1 **Implementation Log Loaded:** {File}. [APPLIES RULES: architecture-review]
+  - [ ] 1.2 **Artifacts Verified:** `scripts/evidence_report.py --verify`. [APPLIES RULES: compliance-audit]
+- [ ] 2.0 **Gate Alignment**
+  - [ ] 2.1 **Stages Confirmed:** `gates_config.yaml` parsed. [APPLIES RULES: project-governance]
+  - [ ] 2.2 **Review Modes Selected:** Documented per stage. [APPLIES RULES: code-review]
 ```
 
-### Mode: `security` ("/review" → "Security Check")
-```yaml
-Focus: Security + Module/Component boundaries
-Protocol: Loads and executes instructions from `@review-protocols/security-check.md` (or its custom equivalent).
+### Template B: Finding Log Entry
+```markdown
+- [ ] X.0 **Finding {ID}**
+  - [ ] X.1 **Severity Assigned:** {Critical/High/Medium/Low}. [APPLIES RULES: risk-management]
+  - [ ] X.2 **Evidence Linked:** {Artifact Reference}. [APPLIES RULES: compliance-audit]
+  - [ ] X.3 **Remediation Owner:** {Name}. [APPLIES RULES: project-governance]
 ```
 
-### Mode: `architecture` ("/review" → "Architecture Review")
-```yaml
-Focus: High-level design + Performance architecture
-Protocol: Loads and executes instructions from `@review-protocols/architecture-review.md` (or its custom equivalent).
+> **Command Pattern:** Invoke `@apply .cursor/dev-workflow/review-protocols/unified-review.md --mode full`, supplement with spec
+ialized review protocols, and run `python scripts/evidence_report.py --source reports/audit/ --out audit-summary.json` before ha
+nding off to Protocol 5.
+
+---
+
+## FINAL OUTPUT TEMPLATE
+
+```markdown
+# Upwork Quality Audit Report: {Project Name}
+
+Based on Input: `{Implementation Log Version}` • `{Gate Configuration}`
+
+> **Audit Window:** {Dates}
+> **Lead Auditor:** {Name}
+> **Overall Status:** {Pass/Conditional/Fail}
+
+## Gate Results
+
+- [ ] Stage 1 – {Name} [STATUS: {Pass/Fail}]
+> **Protocols:** {Invoked Reviews}
+> **Evidence:** {Files}
+- [ ] Stage 2 – {Name} [STATUS: {Pass/Fail}]
+> **Protocols:** {Invoked Reviews}
+> **Evidence:** {Files}
+
+## Findings & Resolutions
+
+| ID | Severity | Summary | Resolution Status | Evidence |
+|----|----------|---------|-------------------|----------|
+| F-01 | High | {Description} | {Resolved/Pending} | {Link} |
+
+## Certification Checklist
+
+- [ ] 1.0 **All Critical Findings Closed** [COMPLEXITY: Simple]
+> **WHY:** Ensures compliance and client trust.
+> **Timeline:** {Timestamp}
+- [ ] 2.0 **Protocol 5 Handoff Prepared** [COMPLEXITY: Simple]
+> **WHY:** Provides retrospective inputs and client comms context.
+> **Timeline:** {Timestamp}
+
+## Next Steps
+
+1. **Confirm Audit Sign-off:** {Approver}
+2. **Deliver Audit Report to Client:** {Channel}
+3. **Schedule Retrospective Session:** {Date}
+4. **Monitor Pending Findings:** {Owner}
 ```
-
-### Mode: `design` ("/review" → "Design System Compliance")
-```yaml
-Focus: Design system compliance + Component usage
-Protocol: Loads and executes instructions from `@review-protocols/design-system.md` (or its custom equivalent).
-```
-
-### Mode: `ui` ("/review" → "UI/UX & Accessibility")
-```yaml
-Focus: Accessibility + User experience validation
-Protocol: Loads and executes instructions from `@review-protocols/ui-accessibility.md` (or its custom equivalent).
-```
-
-### Mode: `deep-security` ("/review" → "Pre-Production Security")
-```yaml
-Focus: Complete security validation with testing
-Protocol: Loads and executes instructions from `@review-protocols/pre-production.md` (or its custom equivalent).
-```
-
-### Mode: `comprehensive` ("/review" → "🚀 Run All")
-```yaml
-Focus: Complete quality validation across all layers.
-Protocol: This mode is special. It sequentially executes ALL the above protocols (quick, security, architecture, etc.) to produce a complete, multi-faceted audit report.
-```
-
-## TOOL INTEGRATION
-This orchestrator leverages the tool integrations defined within each specialized protocol it calls.
-
 

@@ -1,95 +1,116 @@
-# PROTOCOL 0: PROJECT BOOTSTRAP & CONTEXT ENGINEERING
+# PROTOCOL 0: UPWORK PROJECT BOOTSTRAP & CONTEXT ENGINEERING
 
-## 1. AI ROLE AND MISSION
+## AI ROLE
+You are a **Project Context Orchestrator**. Translate an Upwork project brief into a governed execution environment by discoveri
+ng assets, activating automation, and packaging the baseline knowledge kit that every subsequent protocol will consume.
 
-You are an **AI Codebase Analyst & Context Architect**. Your mission is to perform an initial analysis of this project, configure the pre-installed AI Governor Framework, and propose a foundational "Context Kit" to dramatically improve all future AI collaboration.
+**Your output should be a context kit manifest, not prose.**
 
-## 2. THE BOOTSTRAP PROCESS
+## INPUT
+- Approved Upwork project brief (`docs/briefs/upwork/{project-id}.md` or client-provided equivalent).
+- Repository root with SecretFlow automation (`scripts/`, `workflow/`, `template-packs/`).
+- Access to configuration overlays (`workflow.config.json`, `gates_config.yaml`).
 
-### STEP 1: Tooling Configuration & Rule Activation
+---
 
-1.  **`[MUST]` Detect Tooling & Configure Rules:**
-    *   **Action:** Ask the user: *"Are you using Cursor as your editor? This is important for activating the rules correctly."*
-    *   **Action:** First, dynamically locate the rules directories: `find . -name "master-rules" -type d` and `find . -name "common-rules" -type d`
-    *   **Action:** If the user responds "yes" to Cursor usage, execute the following configuration steps:
-        1.  **Create Cursor structure:** Create `.cursor/rules/` and move the found rule directories there
-        2.  **Announce the next step:** *"I will now configure the `master-rules` to be compatible with Cursor by renaming them to `.mdc` and ensuring they have the correct metadata."*
-        3.  **Rename files to `.mdc`:** Execute the necessary `mv` commands to rename all rule files in the located directories from `.md` to `.mdc`.
-        4.  **Verify/Add Metadata:** For each `.mdc` file, check if it contains the `---` YAML frontmatter block with an `alwaysApply` property. If not, you MUST add it based on the rule's requirements (e.g., `1-master-rule-context-discovery.mdc` needs `alwaysApply: true`). You MUST announce which files you are modifying.
-    *   **Action:** Announce that the configuration is complete.
+## UPWORK PROJECT BOOTSTRAP ALGORITHM
 
-### STEP 2: Initial Codebase Mapping
+### PHASE 1: Brief Acquisition & Environment Discovery
+1. **`[CRITICAL]` Upwork Brief Ingestion:** Parse the project brief and normalize scope, budget, and timeline constraints.
+   - **1.1. `/load` Brief Artifacts:** `/load docs/briefs/upwork/{project-id}.md` and any attached requirement appendices.
+   - **1.2. Auto-Plan Draft:** `python scripts/plan_from_brief.py --brief docs/briefs/upwork/{project-id}.md --out PLAN0.md`.
+2. **`[MUST]` Automation Asset Scan:** Inventory automation resources and reusable templates.
+   - **2.1. Script Index:** `python scripts/doctor.py --inventory` to capture runnable scripts and health warnings.
+   - **2.2. Template Registry:** List `template-packs/` manifests relevant to the tech stack derived from the brief.
+3. **`[STRICT]` Repository Health Check:** Validate baseline configuration before enabling downstream protocols.
+   - **3.1. Config Validation:** `python scripts/validate_workflows.py --config workflow.config.json`.
+   - **3.2. Gate Readiness:** Confirm `gates_config.yaml` contains quality stages required by Protocol 4.
 
-1.  **`[MUST]` Announce the Goal:**
-    > "Now that the framework is configured, I will perform an initial analysis of your codebase to build a map of its structure and identify the key technologies."
-2.  **`[MUST]` Map the Codebase Structure and Identify Key Files:**
-    *   **Action 1: Perform Recursive File Listing.** List all files and directories to create a complete `tree` view of the project.
-    *   **Action 2: Propose an Analysis Plan.** From the file tree, identify key files that appear to be project pillars (e.g., `package.json`, `pom.xml`, `main.go`, `index.js`, core configuration files). Propose these to the user as a starting point.
-    *   **Action 3: Validate Plan with User.** Present the proposed file list for confirmation.
-        > "I have mapped your repository. To build an accurate understanding, I propose analyzing these key files: `package.json`, `src/main.tsx`, `vite.config.ts`, `README.md`. Does this list cover the main pillars of your project?"
-    *   **Halt and await user confirmation.**
-3.  **`[MUST]` Analyze Key Files and Confirm Stack:**
-    *   **Action:** Read and analyze the content of the user-approved files to confirm the technology stack, dependencies, and build scripts.
+### PHASE 2: Context Kit Assembly
+1. **`[CRITICAL]` Knowledge Graph Construction:** Cross-link README insights, automation outputs, and compliance rules into a c
+onsolidated map.
+   - **1.1. README Digest:** Extract technology stacks and governance notes from repository READMEs.
+   - **1.2. Rule Mapping:** Associate `.cursor/dev-workflow/review-protocols/` assets with applicable project domains.
+2. **`[MUST]` Shared Resource Alignment:** Document scripts, templates, and evidence schemas shared across protocols.
+   - **2.1. Evidence Schema:** Reference `workflow/templates/evidence_schema.json` for audit artifacts.
+   - **2.2. Automation Hooks:** Record command entry points for later protocols (e.g., `scripts/e2e_from_brief.sh`).
+3. **`[STRICT]` Validation Checkpoint:** Produce a draft context kit and halt for stakeholder confirmation before publication.
+   - **3.1. HALT:** Await explicit approval of the context inventory before writing to disk.
 
-### STEP 3: Thematic Investigation Plan
+### PHASE 3: Publication & Handoff
+1. **`[CRITICAL]` Context Kit Serialization:** Write `context/context-kit.md` summarizing assets, validated constraints, and re
+commended workflows.
+2. **`[MUST]` Protocol Handoff Brief:** Generate `handoff/protocol-1-input.md` that highlights key findings required for PRD s
+ynthesis.
+3. **`[STRICT]` Evidence Logging:** Register artifacts in `reports/bootstrap/manifest.json` for downstream audit traceability.
+4. **`[GUIDELINE]` Optional Delta Sync:** If existing context assets are outdated, schedule Protocol 5 follow-up to reconcile l
+egacy guidance.
 
-1.  **`[MUST]` Generate and Announce Thematic Questions:**
-    *   **Action:** Based on the confirmed stack, generate a list of key architectural questions, grouped by theme.
-    *   **Communication:** Announce the plan to the user.
-        > "To understand your project's conventions, I will now investigate the following key areas:
-        > - **Security:** How are users authenticated and sessions managed?
-        > - **Data Flow:** How do different services communicate?
-        > - **Conventions:** What are the standard patterns for error handling, data validation, and logging?
-        > I will now perform a deep analysis of the code to answer these questions autonomously."
+---
 
-### STEP 4: Autonomous Deep Dive & Synthesis
+## UPWORK PROJECT BOOTSTRAP TEMPLATES
 
-1.  **`[MUST]` Perform Deep Semantic Analysis:**
-    *   **Action:** For each thematic question, use a **semantic search tool** (in accordance with the **Tool Usage Protocol**) to investigate core architectural processes. The goal is to find concrete implementation patterns in the code.
-2.  **`[MUST]` Synthesize Findings into Principles:**
-    *   **Action:** For each answer found, synthesize the code snippets into a high-level architectural principle.
-    *   **[GUIDELINE] Avoid Over-Engineering:** The synthesized principle should represent the simplest, most direct solution to the problem observed. Do not abstract prematurely or introduce patterns that are not explicitly present and justified in the codebase. Favor pragmatic, clear conventions over complex, theoretical ones.
-    *   **Example:**
-        *   **Finding:** "The code shows a `validateHmac` middleware on multiple routes."
-        *   **Synthesized Principle:** "Endpoint security relies on HMAC signature validation."
+### Template A: Auto-Discovery Checklist
+```markdown
+- [ ] 1.0 **Brief Capture**
+  - [ ] 1.1 **Scope Parsed:** Budget, timeline, deliverables extracted. [APPLIES RULES: architecture-review]
+  - [ ] 1.2 **Risk Flags Logged:** Compliance, integration, or staffing risks documented. [APPLIES RULES: security-check]
+- [ ] 2.0 **Asset Inventory**
+  - [ ] 2.1 **Scripts Indexed:** `scripts/doctor.py --inventory` output archived. [APPLIES RULES: pre-production]
+  - [ ] 2.2 **Templates Tagged:** Relevant `template-packs/` recorded with stack metadata. [APPLIES RULES: design-system]
+```
 
-### STEP 5: Collaborative Validation (The "Checkpoint")
+### Template B: Context Kit Outline
+```markdown
+- [ ] 3.0 **Knowledge Graph Assembly**
+  - [ ] 3.1 **README Insights:** Tooling, frameworks, and workflows captured. [APPLIES RULES: architecture-review]
+  - [ ] 3.2 **Governance Links:** Review protocols mapped to lifecycle phases. [APPLIES RULES: code-review]
+- [ ] 4.0 **Handoff Prep**
+  - [ ] 4.1 **Protocol Alignment:** Inputs/outputs for Protocol 1 confirmed. [APPLIES RULES: pre-production]
+  - [ ] 4.2 **Evidence Registration:** Artifacts logged in `reports/bootstrap/`. [APPLIES RULES: security-check]
+```
 
-1.  **`[MUST]` Present a Consolidated Report for Validation:**
-    *   **Action:** Present a clear, consolidated report to the user.
-    *   **Communication:**
-        > "My analysis is complete. Here is what I've understood. Please validate, correct, or complete this summary.
-        >
-        > ### ✅ My Understanding (Self-Answered)
-        > - **Authentication:** It appears you use HMAC signatures for securing endpoints.
-        > - **Error Handling:** Errors are consistently returned in a `{ success: false, error: { ... } }` structure.
-        >
-        > ### ❓ My Questions (Needs Clarification)
-        > - **Inter-service Communication:** I have not found a clear, consistent pattern. How should microservices communicate with each other?
-        >
-        > I will await your feedback before building the Context Kit."
-    *   **Halt and await user validation.**
+> **Command Pattern:** Run `python scripts/plan_from_brief.py` for structured extraction, `python scripts/doctor.py --inventory`
+ for automation indexing, and `@apply .cursor/dev-workflow/review-protocols/architecture-review.md --mode discovery` prior to f
+inalizing the context kit.
 
-### STEP 6: Iterative Generation Phase 1: Documentation (READMEs)
+---
 
-1.  **`[MUST]` Announce the Goal:**
-    > "Thank you for the validation. I will now create or enrich the `README.md` files to serve as a human-readable source of truth for these architectural principles."
-2.  **`[MUST]` Generate, Review, and Validate READMEs:**
-    *   Propose a plan of `README.md` to create/update.
-    *   Generate each file iteratively, based on the **validated principles** from STEP 4, and await user approval for each one.
+## FINAL OUTPUT TEMPLATE
 
-### STEP 7: Iterative Generation Phase 2: Project Rules
+```markdown
+# Upwork Context Kit Summary: {Project Name}
 
-1.  **`[MUST]` Announce the Goal:**
-    > "With the documentation in place as our source of truth, I will now generate the corresponding `project-rules` to enforce these conventions programmatically."
-2.  **`[MUST]` Generate, Review, and Validate Rules from READMEs:**
-    *   Propose a plan of rules to create, explicitly linking each rule to its source `README.md`.
-    *   Generate each rule iteratively, ensuring it follows the rule creation guidelines found in the `master-rules` directory, and await user approval.
+Based on Input: `{Upwork Brief Reference}`
 
-### FINALIZATION
-> "The initial context bootstrapping is complete. We now have a solid 'Version 1.0' of the project's knowledge base, containing both human-readable documentation and machine-actionable rules.
->
-> This is a living system. Every future implementation will give us an opportunity to refine this context through the `5-implementation-retrospective.md` protocol, making our collaboration progressively more intelligent and efficient.
->
-> You are now ready to use the main development workflow, starting with `1-create-prd.md`." 
+> **Primary Delivery Window:** {Start → Finish}
+> **Budget Alignment:** {Budget Notes}
+> **Stack Signals:** {Detected Technologies}
+
+## Asset Inventory
+
+### Automation & Scripts
+- `scripts/{script}` → {Purpose}
+- `workflow/{asset}` → {Purpose}
+
+### Governance & Quality
+- `.cursor/dev-workflow/review-protocols/{protocol}` → {Usage}
+- `gates_config.yaml` → {Stage Summary}
+
+## Protocol Handoff
+
+- [ ] 1.0 **Protocol 1 Input Packet** [COMPLEXITY: Simple]
+> **WHY:** Supplies validated scope, risks, and automation references for PRD generation.
+> **Timeline:** {Timestamp}
+- [ ] 2.0 **Evidence Registration** [COMPLEXITY: Simple]
+> **WHY:** Enables audit traceability across Protocols 1–5.
+> **Timeline:** {Timestamp}
+
+## Next Steps
+
+1. **Confirm Context Kit Approval:** {Responsible Party}
+2. **Distribute Handoff Packet:** {Channels}
+3. **Schedule Protocol 1 Kickoff:** {Date}
+4. **Monitor Automation Health:** {Follow-up Task}
+```
 

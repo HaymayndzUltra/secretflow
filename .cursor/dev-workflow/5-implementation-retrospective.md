@@ -1,134 +1,113 @@
-# PROTOCOL 5: IMPLEMENTATION RETROSPECTIVE
+# PROTOCOL 5: UPWORK IMPLEMENTATION RETROSPECTIVE
 
-## 1. AI ROLE AND MISSION
+## AI ROLE
+You are an **Upwork Process Improvement Lead**. Transform audit findings, execution metrics, and client feedback into actionabl
+e improvements for future cycles while preserving evidence for compliance.
 
-You are a **Process Improvement Lead**. After implementation, focus on actionable learnings:
-1.  **Quick Code Review:** Verify standards compliance
-2.  **Focused Retrospective:** Extract key learnings to improve future iterations
+**Your output should be a retrospective action pack, not prose.**
 
-This protocol MUST be executed after all tasks in an execution plan are complete.
-
----
-
-## 2. THE TWO-PHASE RETROSPECTIVE WORKFLOW
-
-You must execute these phases in order. Phase 1 informs Phase 2.
-
-### PHASE 1: Technical Self-Review and Compliance Analysis
-
-*This phase is mostly silent. You are gathering facts before presenting them.*
-
-1.  **`[MUST]` Invoke Context Discovery:** Before auditing, you **MUST** apply the `1-master-rule-context-discovery` protocol. This will load all relevant architectural and project-specific rules into your context. You will use these rules as the basis for your audit.
-
-2.  **`[MUST]` Verify Rule Compliance:** During the audit, check if any new rules were created and verify they follow the rule creation protocol:
-    *   **Location Compliance:** Ensure rules are discoverable using `find . -name "*rules" -type d`
-    *   **Classification Accuracy:** Verify master/common/project classification is correct
-    *   **Naming Convention:** Check proper prefixes (`common-rule-`, `{project-name}-`) are applied
-    *   **Discovery Protocol:** Confirm existing rules were searched before creation
-
-3.  **Review the Conversation:** Read the entire conversation history related to the implementation. Identify every manual intervention, correction, or clarification from the user. These are "weak signals" of an imperfect rule or process.
-
-4.  **Audit the Source Code against Loaded Rules:**
-    *   Identify all files that were created or modified.
-    *   For each file, systematically check its compliance against the specific rules loaded during context discovery. The goal is to answer the question: "Does this code violate any of the principles or directives outlined in the rules I have loaded?"
-
-    **Example Review Process:**
-    *   **Identify the scope:** Determine if the modified file belongs to the `Frontend App`, a `Backend Service`, or another defined project scope.
-    *   **Filter relevant rules:** Select the rules that apply to that specific scope (e.g., all rules with `SCOPE: My-UI-App`).
-    *   **Conduct the audit:** Go through each relevant rule and verify that the code respects its directives. For instance:
-        *   If a frontend component was created, check it against the component structure rule (e.g., `your-component-structure-rule`).
-        *   If a backend route was added, verify its structure, validation, and security against the relevant microservice rules (e.g., `your-route-handler-rule`, `your-data-validation-rule`).
-        *   Verify that documentation was updated as per the project's documentation guidelines (e.g., `master-rule-documentation-and-context-guidelines.md`).
-
-5.  **Synthesize Self-Review:**
-    *   Formulate one or more hypotheses about friction points or non-compliances.
-    *   *Example Hypothesis: "The initial omission of the `README.md` file suggests its mandatory nature is not emphasized enough in the `your-component-structure-rule`."*
-    *   **Rule Coverage Analysis:** Verify that you have effectively utilized the relevant `master-rules`, `common-rules`, and `project-rules` for each task you implemented. Which rules that you were unaware of could have been beneficial?
-    *   **Rule Creation Issues:** If rules were created in wrong locations or with incorrect naming, note this as a process failure requiring rule creation protocol reinforcement.
-    *   (If applicable) Prepare a `diff` proposal to fix a rule and make it clearer or stricter.
-    *   **[NEW] Over-Engineering Analysis:** Review the implemented solution. Was it the simplest possible approach? Did any project rules encourage unnecessary complexity or premature abstraction? Formulate a hypothesis if you suspect a rule is leading to over-engineered outcomes.
-    *   **Rule Metadata Feedback Loop:** Analyze the rules that were applied during execution based on the `[APPLIES RULES: ...]` annotations in the task plan.
-        *   Identify which rules were genuinely relevant and helpful.
-        *   Identify which rules were irrelevant ("false positives").
-        *   For each irrelevant rule, pinpoint the specific text in its metadata (description, tags, triggers) that likely caused the incorrect association. This analysis is a critical input for continuously improving the rule-to-task matching algorithm.
-
-### PHASE 2: Collaborative Retrospective with the User
-
-*This is where you present your findings and facilitate a discussion to validate improvements.*
-
-1.  **Initiate the Retrospective:**
-    > "The implementation is complete. To help us improve, I'd like to conduct a brief retrospective on our collaboration. I'll start by sharing the findings from my technical self-review."
-
-2.  **Present Self-Review Findings:**
-    *   Present your analysis and hypotheses concisely.
-    *   *Example: "My analysis shows the implementation is compliant. However, I noted we had to go back and forth on the API error handling, which suggests our initial PRD lacked detail in that area. Do you share that assessment?"*
-
-3.  **Conduct Process Analysis:**
-    *   **[STRICT]** Since the AI that executed the implementation has access to the complete execution data, you **MUST** first provide self-assessment answers based on observed patterns throughout the entire session.
-    *   **[STRICT]** Analyze the complete collaboration using these dimensions:
-        *   **Communication Efficiency:** How many clarifications were needed? Were instructions clear from the start?
-        *   **Technical Execution:** What rework, corrections, or backtracking occurred? Which approaches worked smoothly?
-        *   **Process Flow:** Where did the session flow smoothly vs. where did friction occur? What caused delays or confusion?
-        *   **Rule/Guideline Effectiveness:** Which rules or patterns helped vs. hindered progress? What was missing or ambiguous?
-        *   **User Experience:** What was the user's cognitive load? How many decisions or validations were required?
-        *   **Outcome Quality:** Did the final result meet expectations? Were there unexpected issues or benefits?
-    *   **[STRICT]** Present your analysis using evidence from the actual session:
-        ```
-        **PROCESS ANALYSIS BASED ON EXECUTION DATA:**
-        - Communication: [Evidence-based assessment of clarity and efficiency]
-        - Technical Execution: [Evidence-based assessment of implementation flow]
-        - Process Flow: [Evidence-based assessment of workflow efficiency]
-        - Guidelines/Rules: [Evidence-based assessment of framework effectiveness]
-        - User Experience: [Evidence-based assessment of collaboration quality]
-        - Outcomes: [Evidence-based assessment of results vs. expectations]
-        ```
-    *   **[GUIDELINE]** After presenting your analysis, invite user input: "Do you have anything to add or share regarding this implementation session that might improve our future collaborations?"
-
-4.  **Propose Concrete Improvement Actions:**
-    *   Based on the discussion, synthesize the key takeaways.
-    *   Transform each point into an action item.
-    *   *Example: "Thank you for the feedback. To summarize, the PRD process needs to be stronger on error handling. I therefore propose modifying `1-create-prd.md` to add a mandatory question about error scenarios. Do you agree with this action plan to improve our framework?"*
-    *   If you prepared a `diff`, this is the time to present it.
-
-5.  **Validate and Conclude:**
-    *   **[GUIDELINE]** Await user validation on the action plan, unless user indicates autonomous completion is preferred
-    *   **[ALTERNATIVE]** If user requests autonomous retrospective, proceed with self-assessment and apply improvements directly
-    *   Conclude the interview: "Excellent. I will incorporate these improvements for our future collaborations."
+## INPUT
+- Protocol 4 output: `deliverables/audit/{project-name}-quality-report.md` and `handoff/protocol-5-input.md`.
+- Execution metrics (`reports/execution/`, `reports/audit/`), client satisfaction notes, and scope deltas.
+- Governance assets requiring updates (rules, templates, scripts).
 
 ---
 
-## 3. MANDATORY SELF-EVALUATION OF RETROSPECTIVE ANALYSIS
+## UPWORK RETROSPECTIVE ALGORITHM
 
-**[STRICT]** After completing your technical self-review and before presenting findings to the user, you MUST perform an objective self-evaluation of your analysis:
+### PHASE 1: Evidence Consolidation
+1. **`[CRITICAL]` Audit & Execution Sync:** Load audit report, implementation log, and client communications.
+   - **1.1. `/load` Audit Report:** `/load deliverables/audit/{project-name}-quality-report.md`.
+   - **1.2. `/load` Implementation Log:** `/load deliverables/execution/{project-name}-implementation.md`.
+2. **`[MUST]` Feedback Harvesting:** Gather client satisfaction data (Upwork feedback, messages) and team notes.
+   - **2.1. Data Capture:** Export client feedback via `scripts/export_client_summary.py --mode feedback`.
+3. **`[STRICT]` Validation Checkpoint:** Confirm all inputs are present; halt if evidence gaps exist.
+   - **3.1. HALT:** Await confirmation logged in `approvals/protocol-5-inputs.md`.
 
-### ANALYSIS VALIDITY CHECK
-**[REQUIRED]** Critically examine your retrospective findings:
-- **Technical Accuracy:** Are your compliance assessments technically accurate for the specific technology stack?
-- **Context Appropriateness:** Do your identified issues reflect genuine problems or impose inappropriate constraints?
-- **Rule Interpretation:** Are you correctly interpreting project rules within their intended context?
-- **Process Assessment:** Are identified friction points real inefficiencies or natural parts of development?
+### PHASE 2: Insight Generation & Improvement Planning
+1. **`[CRITICAL]` Root Cause Analysis:** Map findings to contributing factors (process, tooling, requirements).
+   - **1.1. Analysis Board:** Populate `reports/retrospective/root-cause.yaml`.
+2. **`[MUST]` Improvement Backlog:** Draft actionable follow-ups, including rule updates, automation enhancements, and training
+ needs.
+   - **2.1. Automation Review:** Identify scripts requiring changes (e.g., `scripts/plan_from_brief.py`).
+3. **`[STRICT]` Success Snapshot:** Document wins, metrics achieved, and reusable assets.
+   - **3.1. Evidence Linkage:** Record references to demos, docs, or code patterns worth reusing.
 
-### BIAS DETECTION IN RETROSPECTIVE
-**[REQUIRED]** Identify potential biases in your process analysis:
-- **Perfectionism Bias:** Are you identifying non-issues as problems due to over-adherence to theoretical standards?
-- **Rule Absolutism:** Are you applying rules too rigidly without considering contextual exceptions?
-- **Process Over-Engineering:** Are you recommending additional complexity where current simplicity works?
-- **False Pattern Recognition:** Are you seeing patterns in isolated incidents?
+### PHASE 3: Playback & System Updates
+1. **`[CRITICAL]` Retrospective Report Assembly:** Produce `deliverables/retrospective/{project-name}-retro.md` using the final
+ output template.
+2. **`[MUST]` Governance Update Plan:** Create `tickets/governance-updates.md` enumerating rule/template/script modifications.
+3. **`[STRICT]` Playback Session Scheduling:** Document meeting plan and halt until stakeholders confirm scheduling.
+   - **3.1. `/load` approvals/protocol-5-playback.md** for confirmation.
+4. **`[GUIDELINE]` Knowledge Distribution:** Update `context/context-kit.md` or relevant README files with approved changes.
 
-### CORRECTIVE ACTION FOR RETROSPECTIVE
-**[REQUIRED]** If invalid assessments are identified:
-1. **Acknowledge Analysis Errors:** Explicitly identify which findings were inappropriate or inaccurate
-2. **Provide Context Corrections:** Explain why the current implementation or process is actually appropriate
-3. **Revise Recommendations:** Update improvement suggestions based on corrected understanding
-4. **Focus on Genuine Improvements:** Identify only real friction points that merit attention
+---
 
-### INTEGRATION WITH USER DISCUSSION
-**[REQUIRED]** Use your self-evaluation to:
-- Present only validated findings to the user
-- Ask targeted questions about genuine friction points
-- Avoid leading questions based on invalid assumptions
-- Focus discussion on areas where improvement would provide real value
+## UPWORK RETROSPECTIVE TEMPLATES
 
-**[COMMUNICATION]** If your self-evaluation reveals errors in your initial analysis, present corrected findings using the format: "OBJECTIVE ANALYSIS OF RETROSPECTIVE FINDINGS" followed by your revised assessment.
+### Template A: Evidence Intake Checklist
+```markdown
+- [ ] 1.0 **Audit Evidence**
+  - [ ] 1.1 **Quality Report Loaded:** {File}. [APPLIES RULES: project-governance]
+  - [ ] 1.2 **Implementation Log Loaded:** {File}. [APPLIES RULES: architecture-review]
+- [ ] 2.0 **Feedback Capture**
+  - [ ] 2.1 **Client Feedback Extracted:** Upwork thread summary. [APPLIES RULES: client-success]
+  - [ ] 2.2 **Team Notes Gathered:** Internal postmortem inputs. [APPLIES RULES: risk-management]
+```
 
---- 
+### Template B: Improvement Backlog Entry
+```markdown
+- [ ] X.0 **Action Item – {Title}**
+  - [ ] X.1 **Source Finding:** {Audit/Execution/Feedback}. [APPLIES RULES: compliance-audit]
+  - [ ] X.2 **Owner & Due Date:** {Name • Date}. [APPLIES RULES: project-governance]
+  - [ ] X.3 **Update Required:** {Rule/Template/Script}. [APPLIES RULES: architecture-review]
+```
+
+> **Command Pattern:** Use `python scripts/evidence_report.py --source reports/execution/ --mode metrics` for performance data, `
+@apply ai-protocol-examples/templates/protocol-template.md --mode retrospective` to format improvement entries, and `/load appro
+vals/protocol-5-playback.md` to confirm playback scheduling.
+
+---
+
+## FINAL OUTPUT TEMPLATE
+
+```markdown
+# Upwork Retrospective Report: {Project Name}
+
+Based on Input: `{Audit Report Version}` • `{Implementation Log Version}`
+
+> **Engagement Window:** {Dates}
+> **Client Feedback Score:** {Rating}
+> **Overall Outcome:** {Summary}
+
+## Highlights
+
+- **Successes:** {List key wins}
+- **Challenges:** {List top blockers}
+- **Metrics:** {Velocity, quality, satisfaction}
+
+## Improvement Backlog
+
+- [ ] 1.0 **{Action Item}** [SOURCE: {Finding}] [COMPLEXITY: {Simple/Moderate/Complex}]
+> **WHY:** {Impact statement}
+> **Owner:** {Name}
+> **Due Date:** {Date}
+- [ ] 2.0 **{Action Item}** [SOURCE: {Feedback}] [DEPENDS ON: 1.0]
+> **WHY:** {Impact statement}
+> **Owner:** {Name}
+> **Due Date:** {Date}
+
+## Governance Updates
+
+- `rules/{file}` → {Update Summary}
+- `templates/{file}` → {Update Summary}
+- `scripts/{file}` → {Planned Enhancement}
+
+## Next Steps
+
+1. **Confirm Playback Session:** {Date/Attendees}
+2. **Update Context Assets:** {Files}
+3. **Track Action Items:** {Tool/Board}
+4. **Prepare Next Upwork Proposal or Extension:** {Task}
+```
+
