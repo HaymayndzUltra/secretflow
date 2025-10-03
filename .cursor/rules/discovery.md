@@ -1,4 +1,3 @@
-
 ---
 description: "TAGS: [client,discovery,codex,questions,forms] | TRIGGERS: jobpost,discovery client | SCOPE: global | DESCRIPTION: Reusable rules and instructions for conducting project discovery from client job posts (e.g., Upwork). Provides tailored questions, forms, and Codex integration for flexible, AI-informed processes."
 globs: docs/brief/jobpost.md
