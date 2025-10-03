@@ -1,4 +1,0 @@
-# UI Map
-
-## Pages
-## Components

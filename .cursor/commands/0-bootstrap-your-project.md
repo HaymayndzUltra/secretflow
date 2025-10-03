@@ -25,9 +25,9 @@
 
 ### Phase 0 · Rule & Instruction Refresh
 1. Re-discover all rule directories: `find . -type d -name "*rules"`.
-2. Load mandatory instruction sets (e.g., `elaboration-specialist.mdc`, master/common rules, domain-specific overlays).
-3. Summarize active rule scopes and clarify any conflicts or waivers.
-4. Record the refresh in the Context Kit.
+master/common rules, domain-specific overlays).
+2. Summarize active rule scopes and clarify any conflicts or waivers.
+3. Record the refresh in the Context Kit.
 
 ### Phase 1 · Stakeholder & Vision Alignment
 1. Identify sponsor, product owner, technical lead, and QA contact.

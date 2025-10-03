@@ -1,88 +1,195 @@
 #!/usr/bin/env python3
-import re, sys
+"""Lightweight quality audit for project rule documents."""
+from __future__ import annotations
+
+import argparse
+from dataclasses import dataclass
 from pathlib import Path
+import re
+from typing import Iterable, Sequence
+
 import yaml
 
-ROOT = Path(".cursor/rules/project-rules").resolve()
-FM_SPLIT = re.compile(r"^---\s*$", re.M)
-REQ_SECTIONS = ["AI Persona","Core Principle"]
-PROTO_SECTIONS = ["Protocol","Requirements","Rules"]
-EXAMPLES = ["Examples","Example"]
-VALIDATION = ["Validation","Checks","Acceptance"]
-BAD_COPY = ["Liquid Development Guidelines"]
+DEFAULT_ROOT = Path(".cursor/rules/project-rules")
+FRONTMATTER_SPLIT = re.compile(r"^---\s*$", re.MULTILINE)
+REQUIRED_SECTIONS = ["AI Persona", "Core Principle"]
+PROTO_SECTIONS = ["Protocol", "Requirements", "Rules"]
+EXAMPLE_SECTIONS = ["Examples", "Example"]
+VALIDATION_SECTIONS = ["Validation", "Checks", "Acceptance"]
+UNWANTED_COPY = ["Liquid Development Guidelines"]
 
-def read_rule(p: Path):
-    text = p.read_text(encoding="utf-8", errors="ignore")
-    parts = FM_SPLIT.split(text)
+
+@dataclass(frozen=True)
+class RuleIssue:
+    code: str
+    path: Path
+    detail: str | None = None
+
+
+@dataclass(frozen=True)
+class GlobOverlap:
+    glob: str
+    paths: list[Path]
+
+
+@dataclass(frozen=True)
+class AuditSummary:
+    total_rules: int
+    issues: list[RuleIssue]
+    overlaps: list[GlobOverlap]
+
+
+def _read_rule(path: Path) -> tuple[dict[str, object] | None, str | None]:
+    text = path.read_text(encoding="utf-8", errors="ignore")
+    parts = FRONTMATTER_SPLIT.split(text, maxsplit=2)
     if len(parts) < 3:
         return None, None
     try:
-        fm = yaml.safe_load(parts[1]) or {}
+        frontmatter = yaml.safe_load(parts[1]) or {}
     except Exception:
-        fm = {}
+        frontmatter = {}
     body = parts[2]
-    return fm, body
+    return frontmatter, body
 
-issues = []
-overlaps = []
-by_globs = {}
-count = 0
-for p in sorted(ROOT.rglob("*.mdc")):
-    fm, body = read_rule(p)
-    count += 1
-    if fm is None:
-        issues.append(("MALFORMED_FRONTMATTER", str(p)))
-        continue
-    desc = str(fm.get("description") or "")
-    globs = fm.get("globs")
-    if not globs:
-        issues.append(("MISSING_GLOBS", str(p)))
-    if "TAGS:" not in desc or "TRIGGERS:" not in desc or "SCOPE:" not in desc:
-        issues.append(("DESCRIPTION_FORMAT", str(p)))
-    if "alwaysApply" not in fm:
-        issues.append(("MISSING_ALWAYS_APPLY", str(p)))
-    scope = fm.get("scope")
-    if scope and scope != "project-rules":
-        issues.append(("SCOPE_NOT_PROJECT_RULES", f"{p} -> {scope}"))
-    if globs is not None:
-        key = str(globs)
-        by_globs.setdefault(key, []).append(str(p))
-    # body checks
-    if not body or len(body.splitlines()) < 3:
-        issues.append(("WEAK_BODY", str(p)))
-    low = body.lower()
-    for sec in REQ_SECTIONS:
-        if sec.lower() not in low:
-            issues.append((f"MISSING_SECTION:{sec}", str(p)))
-    if not any(s.lower() in low for s in PROTO_SECTIONS):
-        issues.append(("MISSING_SECTION:Protocol", str(p)))
-    if not any(s.lower() in low for s in EXAMPLES):
-        issues.append(("SUGGEST_ADD:Examples", str(p)))
-    if not any(s.lower() in low for s in VALIDATION):
-        issues.append(("SUGGEST_ADD:Validation", str(p)))
-    for bad in BAD_COPY:
-        if bad.lower() in low:
-            issues.append(("CROSS_CONTENT:LIQUID", str(p)))
 
-for k, lst in by_globs.items():
-    if k != "None" and len(lst) > 1:
-        overlaps.append((f"globs={k}", lst))
+def _check_body_sections(body: str, issues: list[RuleIssue], path: Path, min_lines: int) -> None:
+    if not body or len(body.splitlines()) < min_lines:
+        issues.append(RuleIssue("WEAK_BODY", path))
+        return
 
-out = ROOT/"AUDIT_REPORT.md"
-with out.open("w", encoding="utf-8") as f:
-    f.write("# Project Rules Audit\n\n")
-    f.write(f"Total rules: {count}\n")
-    f.write(f"Issues: {len(issues)}\n")
-    f.write(f"Potential overlaps: {len(overlaps)}\n\n")
-    f.write("## Issues\n")
-    for t, path in issues:
-        f.write(f"- {t}: {path}\n")
-    f.write("\n## Overlaps by globs\n")
-    for k, lst in overlaps:
-        f.write(f"- {k}\n")
-        for p in lst:
-            f.write(f"  - {p}\n")
-print("SUMMARY:")
-print(f"rules={count} issues={len(issues)} overlaps={len(overlaps)}")
-for t, path in issues[:20]:
-    print(f"- {t}: {path}")
+    lowered = body.lower()
+    for section in REQUIRED_SECTIONS:
+        if section.lower() not in lowered:
+            issues.append(RuleIssue(f"MISSING_SECTION:{section}", path))
+    if not any(section.lower() in lowered for section in PROTO_SECTIONS):
+        issues.append(RuleIssue("MISSING_SECTION:Protocol", path))
+    if not any(section.lower() in lowered for section in EXAMPLE_SECTIONS):
+        issues.append(RuleIssue("SUGGEST_ADD:Examples", path))
+    if not any(section.lower() in lowered for section in VALIDATION_SECTIONS):
+        issues.append(RuleIssue("SUGGEST_ADD:Validation", path))
+    for copy in UNWANTED_COPY:
+        if copy.lower() in lowered:
+            issues.append(RuleIssue("CROSS_CONTENT:LIQUID", path))
+
+
+def _collect_glob_overlaps(by_globs: dict[str, list[Path]]) -> list[GlobOverlap]:
+    overlaps: list[GlobOverlap] = []
+    for glob, paths in sorted(by_globs.items()):
+        if glob != "None" and len(paths) > 1:
+            overlaps.append(GlobOverlap(glob=glob, paths=sorted(paths)))
+    return overlaps
+
+
+def audit_rules(root: Path, min_body_lines: int) -> AuditSummary:
+    issues: list[RuleIssue] = []
+    by_globs: dict[str, list[Path]] = {}
+    total = 0
+
+    for rule_path in sorted(root.rglob("*.mdc")):
+        total += 1
+        frontmatter, body = _read_rule(rule_path)
+        if frontmatter is None or body is None:
+            issues.append(RuleIssue("MALFORMED_FRONTMATTER", rule_path))
+            continue
+
+        description = str(frontmatter.get("description") or "")
+        globs = frontmatter.get("globs")
+        if not globs:
+            issues.append(RuleIssue("MISSING_GLOBS", rule_path))
+        if "TAGS:" not in description or "TRIGGERS:" not in description or "SCOPE:" not in description:
+            issues.append(RuleIssue("DESCRIPTION_FORMAT", rule_path))
+        if "alwaysApply" not in frontmatter:
+            issues.append(RuleIssue("MISSING_ALWAYS_APPLY", rule_path))
+
+        scope = frontmatter.get("scope")
+        if scope and scope != "project-rules":
+            issues.append(RuleIssue("SCOPE_NOT_PROJECT_RULES", rule_path, detail=str(scope)))
+
+        if globs is not None:
+            key = str(globs)
+            by_globs.setdefault(key, []).append(rule_path)
+
+        _check_body_sections(body, issues, rule_path, min_body_lines)
+
+    overlaps = _collect_glob_overlaps(by_globs)
+    return AuditSummary(total_rules=total, issues=issues, overlaps=overlaps)
+
+
+def write_report(summary: AuditSummary, destination: Path) -> None:
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    with destination.open("w", encoding="utf-8") as handle:
+        handle.write("# Project Rules Audit\n\n")
+        handle.write(f"Total rules: {summary.total_rules}\n")
+        handle.write(f"Issues: {len(summary.issues)}\n")
+        handle.write(f"Potential overlaps: {len(summary.overlaps)}\n\n")
+
+        handle.write("## Issues\n")
+        for issue in summary.issues:
+            if issue.detail:
+                handle.write(f"- {issue.code}: {issue.path} ({issue.detail})\n")
+            else:
+                handle.write(f"- {issue.code}: {issue.path}\n")
+
+        handle.write("\n## Overlaps by globs\n")
+        for overlap in summary.overlaps:
+            handle.write(f"- {overlap.glob}\n")
+            for path in overlap.paths:
+                handle.write(f"  - {path}\n")
+
+
+def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
+    parser = argparse.ArgumentParser(
+        description="Run heuristic checks across .cursor/rules/project-rules/*.mdc files.",
+    )
+    parser.add_argument(
+        "--root",
+        type=Path,
+        default=DEFAULT_ROOT,
+        help="Directory that contains the project rule markdown files.",
+    )
+    parser.add_argument(
+        "--output",
+        type=Path,
+        default=None,
+        help="Optional path for the generated markdown report (defaults to <root>/AUDIT_REPORT.md).",
+    )
+    parser.add_argument(
+        "--min-body-lines",
+        type=int,
+        default=3,
+        help="Minimum number of body lines required before a rule is considered substantive.",
+    )
+    parser.add_argument(
+        "--fail-on-issues",
+        action="store_true",
+        help="Return exit code 2 when any issues are detected.",
+    )
+    return parser.parse_args(argv)
+
+
+def main(argv: Sequence[str] | None = None) -> int:
+    args = parse_args(argv)
+    root = args.root.resolve()
+    output = (args.output or (root / "AUDIT_REPORT.md")).resolve()
+
+    if not root.exists():  # pragma: no cover - CLI guard
+        raise SystemExit(f"Project rules directory not found: {root}")
+
+    summary = audit_rules(root=root, min_body_lines=args.min_body_lines)
+    write_report(summary, output)
+
+    print("SUMMARY:")
+    print(
+        f"rules={summary.total_rules} issues={len(summary.issues)} overlaps={len(summary.overlaps)}"
+    )
+    for issue in summary.issues[:20]:
+        detail = f" ({issue.detail})" if issue.detail else ""
+        print(f"- {issue.code}: {issue.path}{detail}")
+
+    if args.fail_on_issues and summary.issues:
+        return 2
+    return 0
+
+
+if __name__ == "__main__":  # pragma: no cover - CLI entrypoint
+    raise SystemExit(main())

@@ -1,0 +1,10 @@
+{
+    "snapshot": "POPULATED_FROM_SETTINGS",
+    "install": "npm install && npm run build",
+    "terminals": [
+      {
+        "name": "Dev Server",
+        "command": "npm run dev"
+      }
+    ]
+  }
