@@ -1,0 +1,488 @@
+[
+  {
+    "id": "FE-LAYOUT",
+    "title": "FE: implement page template-packs/frontend/nextjs/base/src/app/layout.tsx",
+    "area": "frontend",
+    "blocked_by": []
+  },
+  {
+    "id": "FE-PAGE.TEST",
+    "title": "FE: implement page template-packs/frontend/nextjs/base/src/app/page.test.tsx",
+    "area": "frontend",
+    "blocked_by": []
+  },
+  {
+    "id": "FE-GLOBALS",
+    "title": "FE: implement page template-packs/frontend/nextjs/base/src/app/globals.css",
+    "area": "frontend",
+    "blocked_by": []
+  },
+  {
+    "id": "FE-PROVIDERS",
+    "title": "FE: implement page template-packs/frontend/nextjs/base/src/app/providers.tsx",
+    "area": "frontend",
+    "blocked_by": []
+  },
+  {
+    "id": "FE-PAGE",
+    "title": "FE: implement page template-packs/frontend/nextjs/base/src/app/dashboard/page.tsx",
+    "area": "frontend",
+    "blocked_by": []
+  },
+  {
+    "id": "FE-APP",
+    "title": "FE: implement page template-packs/frontend/nuxt/base/app/app.vue",
+    "area": "frontend",
+    "blocked_by": []
+  },
+  {
+    "id": "FE-INDEX",
+    "title": "FE: implement page template-packs/frontend/nuxt/base/app/pages/dashboard/index.vue",
+    "area": "frontend",
+    "blocked_by": []
+  },
+  {
+    "id": "FE-SETTINGS",
+    "title": "FE: implement page template-packs/frontend/nuxt/base/app/pages/dashboard/settings.vue",
+    "area": "frontend",
+    "blocked_by": []
+  },
+  {
+    "id": "FE-USERS",
+    "title": "FE: implement page template-packs/backend/fastapi/base/app/api/v1/endpoints/users.py",
+    "area": "frontend",
+    "blocked_by": []
+  },
+  {
+    "id": "FE-REGISTER",
+    "title": "FE: implement page template-packs/frontend/nuxt/base/app/pages/auth/register.vue",
+    "area": "frontend",
+    "blocked_by": []
+  },
+  {
+    "id": "FE-LOGIN",
+    "title": "FE: implement page template-packs/frontend/nuxt/base/app/pages/auth/login.vue",
+    "area": "frontend",
+    "blocked_by": []
+  },
+  {
+    "id": "FE-FEATURECARD.TEST",
+    "title": "FE: implement page template-packs/frontend/nuxt/base/app/components/FeatureCard.test.ts",
+    "area": "frontend",
+    "blocked_by": []
+  },
+  {
+    "id": "FE-USERDROPDOWN",
+    "title": "FE: implement page template-packs/frontend/nuxt/base/app/components/UserDropdown.vue",
+    "area": "frontend",
+    "blocked_by": []
+  },
+  {
+    "id": "FE-FEATURECARD",
+    "title": "FE: implement page template-packs/frontend/nuxt/base/app/components/FeatureCard.vue",
+    "area": "frontend",
+    "blocked_by": []
+  },
+  {
+    "id": "FE-ICON",
+    "title": "FE: implement page template-packs/frontend/nuxt/base/app/components/Icon.vue",
+    "area": "frontend",
+    "blocked_by": []
+  },
+  {
+    "id": "FE-LOADINGSPINNER",
+    "title": "FE: implement page template-packs/frontend/nuxt/base/app/components/LoadingSpinner.vue",
+    "area": "frontend",
+    "blocked_by": []
+  },
+  {
+    "id": "FE-STATSCARD",
+    "title": "FE: implement page template-packs/frontend/nuxt/base/app/components/StatsCard.vue",
+    "area": "frontend",
+    "blocked_by": []
+  },
+  {
+    "id": "FE-NOTIFICATIONBELL",
+    "title": "FE: implement page template-packs/frontend/nuxt/base/app/components/NotificationBell.vue",
+    "area": "frontend",
+    "blocked_by": []
+  },
+  {
+    "id": "FE-MAIN",
+    "title": "FE: implement page template-packs/frontend/nuxt/base/app/assets/css/main.css",
+    "area": "frontend",
+    "blocked_by": []
+  },
+  {
+    "id": "FE-DEFAULT",
+    "title": "FE: implement page template-packs/frontend/nuxt/base/app/layouts/default.vue",
+    "area": "frontend",
+    "blocked_by": []
+  },
+  {
+    "id": "FE-AUTH",
+    "title": "FE: implement page template-packs/backend/fastapi/base/app/api/v1/endpoints/auth.py",
+    "area": "frontend",
+    "blocked_by": []
+  },
+  {
+    "id": "FE-DASHBOARD",
+    "title": "FE: implement page template-packs/frontend/nuxt/base/app/layouts/dashboard.vue",
+    "area": "frontend",
+    "blocked_by": []
+  },
+  {
+    "id": "FE-USEAPI",
+    "title": "FE: implement page template-packs/frontend/nuxt/base/app/composables/useApi.ts",
+    "area": "frontend",
+    "blocked_by": []
+  },
+  {
+    "id": "FE-USEAUTH",
+    "title": "FE: implement page template-packs/frontend/nuxt/base/app/composables/useAuth.ts",
+    "area": "frontend",
+    "blocked_by": []
+  },
+  {
+    "id": "FE-GUEST",
+    "title": "FE: implement page template-packs/frontend/nuxt/base/app/middleware/guest.ts",
+    "area": "frontend",
+    "blocked_by": []
+  },
+  {
+    "id": "FE-SETTINGSSCREEN",
+    "title": "FE: implement page template-packs/frontend/expo/base/src/screens/app/SettingsScreen.tsx",
+    "area": "frontend",
+    "blocked_by": []
+  },
+  {
+    "id": "FE-PROFILESCREEN",
+    "title": "FE: implement page template-packs/frontend/expo/base/src/screens/app/ProfileScreen.tsx",
+    "area": "frontend",
+    "blocked_by": []
+  },
+  {
+    "id": "FE-HOMESCREEN",
+    "title": "FE: implement page template-packs/frontend/expo/base/src/screens/app/HomeScreen.tsx",
+    "area": "frontend",
+    "blocked_by": []
+  },
+  {
+    "id": "FE-APP.COMPONENT",
+    "title": "FE: implement page template-packs/frontend/angular/base/src/app/app.component.ts",
+    "area": "frontend",
+    "blocked_by": []
+  },
+  {
+    "id": "FE-APP.CONFIG",
+    "title": "FE: implement page template-packs/frontend/angular/base/src/app/app.config.ts",
+    "area": "frontend",
+    "blocked_by": []
+  },
+  {
+    "id": "FE-APP.COMPONENT.SPE",
+    "title": "FE: implement page template-packs/frontend/angular/base/src/app/app.component.spec.ts",
+    "area": "frontend",
+    "blocked_by": []
+  },
+  {
+    "id": "FE-APP.ROUTES",
+    "title": "FE: implement page template-packs/frontend/angular/base/src/app/app.routes.ts",
+    "area": "frontend",
+    "blocked_by": []
+  },
+  {
+    "id": "FE-HOME.COMPONENT.SP",
+    "title": "FE: implement page template-packs/frontend/angular/base/src/app/features/home/home.component.spec.ts",
+    "area": "frontend",
+    "blocked_by": []
+  },
+  {
+    "id": "FE-HOME.COMPONENT",
+    "title": "FE: implement page template-packs/frontend/angular/base/src/app/features/home/home.component.ts",
+    "area": "frontend",
+    "blocked_by": []
+  },
+  {
+    "id": "FE-NOT-FOUND.COMPONE",
+    "title": "FE: implement page template-packs/frontend/angular/base/src/app/features/not-found/not-found.component.ts",
+    "area": "frontend",
+    "blocked_by": []
+  },
+  {
+    "id": "FE-DASHBOARD.COMPONE",
+    "title": "FE: implement page template-packs/frontend/angular/base/src/app/features/dashboard/dashboard.component.ts",
+    "area": "frontend",
+    "blocked_by": []
+  },
+  {
+    "id": "FE-REGISTER.COMPONEN",
+    "title": "FE: implement page template-packs/frontend/angular/base/src/app/features/auth/register/register.component.ts",
+    "area": "frontend",
+    "blocked_by": []
+  },
+  {
+    "id": "FE-LOGIN.COMPONENT",
+    "title": "FE: implement page template-packs/frontend/angular/base/src/app/features/auth/login/login.component.ts",
+    "area": "frontend",
+    "blocked_by": []
+  },
+  {
+    "id": "FE-AUTH.INTERCEPTOR",
+    "title": "FE: implement page template-packs/frontend/angular/base/src/app/core/interceptors/auth.interceptor.ts",
+    "area": "frontend",
+    "blocked_by": []
+  },
+  {
+    "id": "FE-ERROR.INTERCEPTOR",
+    "title": "FE: implement page template-packs/frontend/angular/base/src/app/core/interceptors/error.interceptor.ts",
+    "area": "frontend",
+    "blocked_by": []
+  },
+  {
+    "id": "FE-AUTH.SERVICE",
+    "title": "FE: implement page template-packs/frontend/angular/base/src/app/core/services/auth.service.ts",
+    "area": "frontend",
+    "blocked_by": []
+  },
+  {
+    "id": "FE-AUTH.MODEL",
+    "title": "FE: implement page template-packs/frontend/angular/base/src/app/core/models/auth.model.ts",
+    "area": "frontend",
+    "blocked_by": []
+  },
+  {
+    "id": "FE-GUEST.GUARD",
+    "title": "FE: implement page template-packs/frontend/angular/base/src/app/core/guards/guest.guard.ts",
+    "area": "frontend",
+    "blocked_by": []
+  },
+  {
+    "id": "FE-AUTH.GUARD",
+    "title": "FE: implement page template-packs/frontend/angular/base/src/app/core/guards/auth.guard.ts",
+    "area": "frontend",
+    "blocked_by": []
+  },
+  {
+    "id": "FE---INIT--",
+    "title": "FE: implement page template-packs/backend/fastapi/base/app/schemas/__init__.py",
+    "area": "frontend",
+    "blocked_by": []
+  },
+  {
+    "id": "FE-CONFIG",
+    "title": "FE: implement page template-packs/backend/fastapi/base/app/config.py",
+    "area": "frontend",
+    "blocked_by": []
+  },
+  {
+    "id": "FE-DATABASE",
+    "title": "FE: implement page template-packs/backend/fastapi/base/app/database.py",
+    "area": "frontend",
+    "blocked_by": []
+  },
+  {
+    "id": "FE-DEPS",
+    "title": "FE: implement page template-packs/backend/fastapi/base/app/api/deps.py",
+    "area": "frontend",
+    "blocked_by": []
+  },
+  {
+    "id": "FE-ROUTER",
+    "title": "FE: implement page template-packs/backend/fastapi/base/app/api/v1/router.py",
+    "area": "frontend",
+    "blocked_by": []
+  },
+  {
+    "id": "FE-BASE",
+    "title": "FE: implement page template-packs/backend/fastapi/base/app/crud/base.py",
+    "area": "frontend",
+    "blocked_by": []
+  },
+  {
+    "id": "FE-CRUD-USER",
+    "title": "FE: implement page template-packs/backend/fastapi/base/app/crud/crud_user.py",
+    "area": "frontend",
+    "blocked_by": []
+  },
+  {
+    "id": "FE-SECURITY",
+    "title": "FE: implement page template-packs/backend/fastapi/base/app/core/security.py",
+    "area": "frontend",
+    "blocked_by": []
+  },
+  {
+    "id": "FE-USER",
+    "title": "FE: implement page template-packs/backend/fastapi/base/app/schemas/user.py",
+    "area": "frontend",
+    "blocked_by": []
+  },
+  {
+    "id": "FE-MSG",
+    "title": "FE: implement page template-packs/backend/fastapi/base/app/schemas/msg.py",
+    "area": "frontend",
+    "blocked_by": []
+  },
+  {
+    "id": "FE-TOKEN",
+    "title": "FE: implement page template-packs/backend/fastapi/base/app/schemas/token.py",
+    "area": "frontend",
+    "blocked_by": []
+  },
+  {
+    "id": "BE-GENERATOR",
+    "title": "BE: implement endpoint(s) in project_generator/core/generator.py",
+    "area": "backend",
+    "blocked_by": []
+  },
+  {
+    "id": "BE-TEMPLATE-ENGINE",
+    "title": "BE: implement endpoint(s) in project_generator/templates/template_engine.py",
+    "area": "backend",
+    "blocked_by": []
+  },
+  {
+    "id": "BE-SYNC-FROM-SCAFFOL",
+    "title": "BE: implement endpoint(s) in scripts/sync_from_scaffold.py",
+    "area": "backend",
+    "blocked_by": []
+  },
+  {
+    "id": "BE-ROUTER",
+    "title": "BE: implement endpoint(s) in template-packs/backend/fastapi/base/app/api/v1/router.py",
+    "area": "backend",
+    "blocked_by": []
+  },
+  {
+    "id": "BE-AUTH",
+    "title": "BE: implement endpoint(s) in template-packs/backend/fastapi/base/app/api/v1/endpoints/auth.py",
+    "area": "backend",
+    "blocked_by": []
+  },
+  {
+    "id": "BE-USERS",
+    "title": "BE: implement endpoint(s) in template-packs/backend/fastapi/base/app/api/v1/endpoints/users.py",
+    "area": "backend",
+    "blocked_by": []
+  },
+  {
+    "id": "DB-MIGRATION-LOCK",
+    "title": "DB: migration present template-packs/backend/nestjs/prisma/prisma/migrations/migration_lock.toml",
+    "area": "db",
+    "blocked_by": []
+  },
+  {
+    "id": "DB-MIGRATION",
+    "title": "DB: migration present template-packs/backend/nestjs/prisma/prisma/migrations/20250919215905_init/migration.sql",
+    "area": "db",
+    "blocked_by": []
+  },
+  {
+    "id": "DB-README",
+    "title": "DB: migration present template-packs/backend/fastapi/base/alembic/README",
+    "area": "db",
+    "blocked_by": []
+  },
+  {
+    "id": "DB-SCRIPT.PY",
+    "title": "DB: migration present template-packs/backend/fastapi/base/alembic/script.py.mako",
+    "area": "db",
+    "blocked_by": []
+  },
+  {
+    "id": "DB-ENV",
+    "title": "DB: migration present template-packs/backend/fastapi/base/alembic/env.py",
+    "area": "db",
+    "blocked_by": []
+  },
+  {
+    "id": "QA-TEST-GENERATOR-UN",
+    "title": "QA: tests present project_generator/core/tests/test_generator_unit.py",
+    "area": "qa",
+    "blocked_by": []
+  },
+  {
+    "id": "QA---INIT--",
+    "title": "QA: tests present template-packs/backend/fastapi/base/tests/__init__.py",
+    "area": "qa",
+    "blocked_by": []
+  },
+  {
+    "id": "QA-TEST-VALIDATION",
+    "title": "QA: tests present project_generator/tests/test_validation.py",
+    "area": "qa",
+    "blocked_by": []
+  },
+  {
+    "id": "QA-TEST-VALIDATE-WOR",
+    "title": "QA: tests present project_generator/tests/test_unit/test_validate_workflows_script.py",
+    "area": "qa",
+    "blocked_by": []
+  },
+  {
+    "id": "QA-TEST-VALIDATOR",
+    "title": "QA: tests present project_generator/tests/test_unit/test_validator.py",
+    "area": "qa",
+    "blocked_by": []
+  },
+  {
+    "id": "QA-TEST-GENERATOR",
+    "title": "QA: tests present project_generator/tests/test_unit/test_generator.py",
+    "area": "qa",
+    "blocked_by": []
+  },
+  {
+    "id": "QA-TEST-VALIDATOR.CP",
+    "title": "QA: tests present project_generator/tests/test_unit/__pycache__/test_validator.cpython-310-pytest-7.4.3.pyc",
+    "area": "qa",
+    "blocked_by": []
+  },
+  {
+    "id": "QA-TEST-GENERATED-PR",
+    "title": "QA: tests present project_generator/tests/test_e2e/test_generated_projects.py",
+    "area": "qa",
+    "blocked_by": []
+  },
+  {
+    "id": "QA-TEST-GENERATION-F",
+    "title": "QA: tests present project_generator/tests/test_integration/test_generation_flow.py",
+    "area": "qa",
+    "blocked_by": []
+  },
+  {
+    "id": "QA-PROMPTROUTER.TEST",
+    "title": "QA: tests present ai-suggestion/services/orchestrator/tests/promptRouter.test.ts",
+    "area": "qa",
+    "blocked_by": []
+  },
+  {
+    "id": "QA-STORE.TEST",
+    "title": "QA: tests present ai-suggestion/services/overlay/tests/store.test.ts",
+    "area": "qa",
+    "blocked_by": []
+  },
+  {
+    "id": "QA-ASRPIPELINE.TEST",
+    "title": "QA: tests present ai-suggestion/services/asr-gateway/tests/asrPipeline.test.ts",
+    "area": "qa",
+    "blocked_by": []
+  },
+  {
+    "id": "QA-INGESTION.TEST",
+    "title": "QA: tests present ai-suggestion/services/retrieval/tests/ingestion.test.ts",
+    "area": "qa",
+    "blocked_by": []
+  },
+  {
+    "id": "QA-TEST-MAIN",
+    "title": "QA: tests present template-packs/backend/fastapi/base/tests/test_main.py",
+    "area": "qa",
+    "blocked_by": []
+  },
+  {
+    "id": "QA-CONFTEST",
+    "title": "QA: tests present template-packs/backend/fastapi/base/tests/conftest.py",
+    "area": "qa",
+    "blocked_by": []
+  }
+]
