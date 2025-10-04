@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { z } from 'zod';
-import { queryVector } from '../services/vectorStore';
+import { queryVector, RetrievalResult } from '../services/vectorStore';
 import { searchBM25 } from '../services/bm25Service';
 import { rerank } from '../services/rerankerService';
 
@@ -18,15 +18,24 @@ router.post('/', async (req, res) => {
   }
 
   const { query, limit } = parse.data;
-  const [dense, sparse] = await Promise.all([queryVector(query, limit), Promise.resolve(searchBM25(query, limit))]);
-  const unionMap = new Map<string, any>();
+  const [dense, sparse] = await Promise.all([
+    queryVector(query, limit),
+    Promise.resolve(searchBM25(query, limit))
+  ]);
+
+  const unionMap = new Map<string, RetrievalResult>();
   [...dense, ...sparse].forEach(item => {
-    if (!unionMap.has(item.id)) {
+    const existing = unionMap.get(item.id);
+    if (!existing) {
       unionMap.set(item.id, { ...item, score: item.score ?? 0 });
+      return;
     }
+    const score = Math.max(existing.score ?? 0, item.score ?? 0);
+    unionMap.set(item.id, { ...existing, ...item, score });
   });
+
   const union = Array.from(unionMap.values());
-  const reranked = await rerank(query, union).slice(0, limit);
+  const reranked = (await rerank(query, union)).slice(0, limit);
   res.json({
     status: 'ok',
     results: reranked,
