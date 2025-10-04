@@ -1,8 +1,8 @@
 import { Router } from 'express';
 import { z } from 'zod';
-import { queryVector } from '../services/vectorStore';
+import { queryVector, type RetrievalResult } from '../services/vectorStore';
 import { searchBM25 } from '../services/bm25Service';
-import { rerank } from '../services/rerankerService';
+import { rerank, type RerankResult } from '../services/rerankerService';
 
 const router = Router();
 
@@ -18,15 +18,21 @@ router.post('/', async (req, res) => {
   }
 
   const { query, limit } = parse.data;
-  const [dense, sparse] = await Promise.all([queryVector(query, limit), Promise.resolve(searchBM25(query, limit))]);
-  const unionMap = new Map<string, any>();
-  [...dense, ...sparse].forEach(item => {
-    if (!unionMap.has(item.id)) {
-      unionMap.set(item.id, { ...item, score: item.score ?? 0 });
+  const [dense, sparse] = await Promise.all([
+    queryVector(query, limit),
+    Promise.resolve(searchBM25(query, limit))
+  ]);
+
+  const unionMap = new Map<string, RetrievalResult>();
+  for (const item of [...dense, ...sparse]) {
+    const existing = unionMap.get(item.id);
+    if (!existing || item.score > existing.score) {
+      unionMap.set(item.id, { ...item });
     }
-  });
+  }
+
   const union = Array.from(unionMap.values());
-  const reranked = await rerank(query, union).slice(0, limit);
+  const reranked: RerankResult[] = (await rerank(query, union)).slice(0, limit);
   res.json({
     status: 'ok',
     results: reranked,

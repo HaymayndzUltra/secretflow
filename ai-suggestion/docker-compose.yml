@@ -18,7 +18,8 @@ services:
       - '11434:11434'
   asr-gateway:
     build:
-      context: ./services/asr-gateway
+      context: .
+      dockerfile: services/asr-gateway/Dockerfile
     environment:
       - PORT=7001
       - FWHISPER_PATH=${FWHISPER_PATH}
@@ -30,7 +31,8 @@ services:
       - ollama
   retrieval:
     build:
-      context: ./services/retrieval
+      context: .
+      dockerfile: services/retrieval/Dockerfile
     environment:
       - PORT=7002
       - QDRANT_URL=http://qdrant:6333
@@ -43,7 +45,8 @@ services:
       - qdrant
   orchestrator:
     build:
-      context: ./services/orchestrator
+      context: .
+      dockerfile: services/orchestrator/Dockerfile
     environment:
       - PORT=7003
       - RETRIEVAL_URL=http://retrieval:7002
@@ -58,7 +61,8 @@ services:
       - asr-gateway
   overlay:
     build:
-      context: ./services/overlay
+      context: .
+      dockerfile: services/overlay/Dockerfile
     environment:
       - VITE_ORCHESTRATOR_URL=http://orchestrator:7003
     depends_on:
