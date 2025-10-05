@@ -1,66 +1,129 @@
-# AGENTS Quick Guide: Mabilisang Pag-intindi sa System via README.md
+# Codex Agent Guide (Primary Entrypoint)
 
-## Objective
-Makuha ang high-level na larawan ng buong system sa loob ng ilang minuto sa pamamagitan ng pag-scan ng lahat ng `README.md` at mga pangunahing protocol.
+## Purpose
+Define the exact steps Codex performs from this file as the first instruction source, aligned with the Unified Developer Workflow and existing automation.
 
-## TL;DR Flow (5–15 minutes)
-1) Basahin muna ang root `README.md` upang makuha ang core concept at architecture ng framework.
-2) Basahin ang `.cursor/dev-workflow/README.md` para sa 5-protocol lifecycle at unified review.
-3) Basahin ang `workflow1/README.md` para sa phase capsules (2–6), evidence flow, at scripts.
-4) I-skim ang bawat phase README/protocol sa `workflow1/codex-phase*/` at ang `review-protocols/` kung kailangan ng quality deep-dive.
-5) Optional: Sulyapan ang automation scripts sa bawat phase (`scripts/`) para makita ang tunay na outputs/evidence.
+## Execution Order (Strict)
+1. [STRICT] Load kernel/master rules and the System Instruction Formatter (SIF) profile.
+2. [STRICT] Read `UNIFIED_DEVELOPER_WORKFLOW.md` → map phases 0–6.
+3. [STRICT] Read `unified-workflow/README.md` and `unified-workflow/LAUNCH_SUMMARY.md` → confirm components.
+4. [STRICT] Load `INTEGRATION_PLAN.md` and `INTEGRATION_ANALYSIS.md` → planned integrations and dependencies.
+5. [STRICT] If external validation is requested → use `VALIDATION_PROMPT.md`; pause implementation until validated.
+6. [STRICT] Execute phases in order (0→6), honoring validation gates and human checkpoints.
 
-## One-Click Listing (All README.md)
-Gamitin ito para makita lahat ng READMEs at mabilis na mag-navigate:
-```bash
-find . -type f -iname "README.md" | sort
-```
+## Phase Map → Responsibilities → Artifacts → Commands
 
-Pro tip: Para makita rin ang mga pangunahing protocol files:
-```bash
-printf "\n# Protocols in .cursor/dev-workflow\n" && ls -1 ./.cursor/dev-workflow/*.md 2>/dev/null
-printf "\n# Phase protocols in workflow1\n" && find ./workflow1 -maxdepth 2 -type f -name "protocol.md" | sort
-```
+### Phase 0 — Bootstrap & Context Engineering
+- Responsibilities
+  - Discover rules; normalize directives via SIF.
+  - Build Context Kit and project config; prepare evidence roots.
+- Artifacts
+  - `projects/<name>/project-config.json`
+  - `evidence/phase0/{manifest.json, run.log, validation.md}`
+- Commands
+  - `python3 unified-workflow/automation/ai_executor.py --phase 0 --project "<name>"`
+  - (Optional generation) `python scripts/bootstrap_project.py --brief docs/briefs/<name>/brief.md`
 
-## Recommended Reading Order (and What to Look For)
-- `README.md` (root): Why the framework exists, 2 core components, high-level workflow.
-- `.cursor/dev-workflow/README.md`: 5-protocol lifecycle, session strategy, unified quality audit entrypoint.
-- `.cursor/dev-workflow/0-5*.md`: Roles per step, exact prompts/commands, outputs per protocol.
-- `workflow1/README.md`: Phase capsules (2–6), evidence manifests/logs, script usage.
-- `workflow1/codex-phase3-quality-rails/protocol.md`: Quality rails objectives, gates, required artefacts, automation.
-- Other `workflow1/codex-phase*/protocol.md`: Inputs → Procedure → Exit Criteria → Evidence logging.
+### Phase 1 — PRD Creation
+- Responsibilities
+  - Parse brief → `PLAN.md` + `tasks.json`; produce PRD evidence.
+- Artifacts
+  - `PLAN.md`, `tasks.json`, `evidence/phase1/*`
+- Commands
+  - `python scripts/plan_from_brief.py --brief docs/briefs/<name>/brief.md`
+  - `python3 unified-workflow/automation/ai_executor.py --phase 1 --project "<name>"`
 
-## Rapid Comprehension Checklist
-- Governance vs. Operator split malinaw (`/rules` vs. `/dev-workflow`).
-- Lifecycle: 0 Bootstrap → 1 PRD → 2 Plan → 3 Implement → 4 Audit → 5 Retro → 6 Ops.
-- Evidence trail: `evidence/phaseX/manifest.json`, `run.log`, `validation.md` updates.
-- Quality gates: security, performance, a11y, analytics, tests, code review.
-- Session hygiene: one parent task per session; audit + retro in the same session.
+### Phase 2 — Task Generation / Design
+- Responsibilities
+  - Apply workflow1 design templates; generate architecture, ADRs, OpenAPI skeletons.
+- Artifacts
+  - `docs/Architecture.md`, `docs/C4/*`, `docs/ADR/*.md`, `openapi/*`, `evidence/phase2/*`
+- Commands
+  - `python workflow1/codex-phase2-design/scripts/generate_architecture_pack.py`
+  - `python workflow1/codex-phase2-design/scripts/generate_contract_assets.py`
+  - `python3 unified-workflow/automation/ai_executor.py --phase 2 --project "<name>"`
 
-## Verify with Commands (Spot-Check)
-```bash
-# 1) Core docs
-sed -n '1,140p' README.md | sed -n '1,60p'
-sed -n '1,140p' ./.cursor/dev-workflow/README.md | sed -n '1,140p'
-sed -n '1,120p' ./workflow1/README.md | sed -n '1,120p'
+### Phase 3 — Implementation / Quality Rails
+- Responsibilities
+  - Install and enforce security/perf/a11y/analytics/testing rails; configure feature flags.
+- Artifacts
+  - `docs/Security_Checklist.md`, `perf/budgets.json`, `A11y_Test_Plan.md`, `Feature_Flags.md`, `Test_Plan.md`, `evidence/phase3/*`
+- Commands
+  - `bash workflow1/codex-phase3-quality-rails/scripts/run_quality_gates.sh --bootstrap`
+  - `python workflow1/codex-phase3-quality-rails/scripts/configure_feature_flags.py`
+  - `python3 unified-workflow/automation/ai_executor.py --phase 3 --project "<name>"`
 
-# 2) Quality rails protocol (key requirements)
-sed -n '1,120p' ./workflow1/codex-phase3-quality-rails/protocol.md
+### Phase 4 — Integration / Quality Audit
+- Responsibilities
+  - Run unified quality audit orchestrator; generate observability pack and SLO/SLI.
+- Artifacts
+  - `docs/Observability_Spec.md`, `docs/SLO_SLI.md`, `CHANGELOG.md`, `evidence/phase4/*`
+- Commands
+  - `python workflow1/codex-phase4-integration/scripts/generate_observability_pack.py`
+  - `bash workflow1/codex-phase4-integration/scripts/run_staging_smoke.sh`
+  - `python3 unified-workflow/automation/ai_executor.py --phase 4 --project "<name>"`
 
-# 3) Evidence skeletons exist
-find ./workflow1/evidence -maxdepth 2 -type f -name "manifest.json" -o -name "validation.md" | sort
-```
+### Phase 5 — Launch
+- Responsibilities
+  - Create deployment runbooks, rollback plan, backup/DR, release notes; readiness review.
+- Artifacts
+  - `Deployment_Runbook.md`, `Rollback_Plan.md`, `Prod_Observability.md`, `Backup_Policy.md`, `DR_Plan.md`, `GoLive_Checklist.md`, `Release_Notes.md`, `evidence/phase5/*`
+- Commands
+  - `bash workflow1/codex-phase5-launch/scripts/rehearse_rollback.sh`
+  - `bash workflow1/codex-phase5-launch/scripts/verify_dr_restore.sh`
+  - `python3 unified-workflow/automation/ai_executor.py --phase 5 --project "<name>"`
 
-## When Deeper Context Is Needed
-- Buksan ang anumang `protocol.md` ng phase na relevant at sundan ang "Inputs → Procedure → Exit Criteria → Evidence" pattern.
-- Tingnan ang `scripts/` sa loob ng phase para sa actual file outputs at manifest updates.
-- Para sa reviews, gamitin ang `.cursor/dev-workflow/4-quality-audit.md` bilang central orchestrator.
+### Phase 6 — Operations
+- Responsibilities
+  - Monitor SLOs, schedule retros, maintain dependency/security logs; perform RCA when needed.
+- Artifacts
+  - `Postmortem_*.md`, `Dependency_Update_Log.md`, `Security_Update_Log.md`, `evidence/phase6/*`
+- Commands
+  - `python workflow1/codex-phase6-operations/scripts/monitor_slo.py`
+  - `python workflow1/codex-phase6-operations/scripts/schedule_retros.py`
+  - `python3 unified-workflow/automation/ai_executor.py --phase 6 --project "<name>"`
 
-## Outputs na Dapat Naiintindihan Mo Pagkatapos
-- Paano umiikot ang buong lifecycle at saan nagaganap ang approvals/gates.
-- Saan sinusulat ang ebidensiya (manifests, logs, validations) at paano ito nava-validate.
-- Paano tumatakbo ang quality rails at ano ang minimum na artefacts.
-- Paano pinapamahalaan ang sessions para sa predictable na progress.
+## Quality & Validation Gates (Unified)
+- Always log via `unified-workflow/automation/evidence_manager.py`.
+- Run quality gates per phase using `unified-workflow/automation/quality_gates.py`.
+- Use human validation checkpoints from `validation_gates.py`:
+  - `phase_{n}_approval | phase_{n}_confirmation | phase_{n}_review | phase_{n}_audit_results | phase_{n}_retrospective | phase_{n}_operations_readiness`.
 
-—
-Tip: Kung nag-o-onboard ng bagong contributor, ipabasa ang sections na ito sa pagkakasunod-sunod, tapos ipagawa ang spot-check commands para ma-validate ang understanding agad.
+## System Instruction Formatter (SIF) Usage
+- Normalize directives in protocols/rules before applying.
+- Canonical tags: `[STRICT]`, `[GUIDELINE]`, `[CRITICAL]`, `[REQUIRED]`, `[OPTIONAL]`.
+- Conflict handling:
+  - Apply precedence (Master > Project > Local; `[STRICT]` > `[CRITICAL]` > `[REQUIRED]` > `[GUIDELINE]` > `[OPTIONAL]`).
+  - If not auto-resolvable → emit `[RULE CONFLICT]` with quotes and pause.
+
+## When to Use Original Scripts
+- Generation:
+  - `scripts/generate_client_project.py`, `scripts/generate_from_brief.py`
+- Planning:
+  - `scripts/plan_from_brief.py`, `scripts/pre_lifecycle_plan.py`
+- Compliance/Validation:
+  - `scripts/validate_compliance_assets.py`, `scripts/validate_tasks.py`, `scripts/enforce_gates.py`
+- Orchestration (legacy configs):
+  - `scripts/run_workflow.py` with `scripts/workflow_automation/*`
+
+## Evidence Canonical Structure
+
+evidence/
+phaseN/
+manifest.json
+run.log
+validation.md
+
+- Checksums only for files (directories logged without checksum).
+
+## Safety & Approvals
+- Stop at human gates for:
+  - Security-sensitive changes
+  - Deployments and DR rehearsals
+  - Policy conflicts or formatter validation errors
+
+## Fallbacks
+- If any phase asset is missing → scaffold using workflow1 templates, then re-run the unified executor.
+- If configs diverge → prefer unified-workflow conventions; record deviations in `validation.md`.
+
+## Quickstart (All Phases)
