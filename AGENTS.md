@@ -1,52 +1,39 @@
 # AGENTS.md
 
-## Project Setup
-- **Install Dependencies**: Run `pip install -r requirements.txt` to install all necessary packages
-- **Verify Week 2**: Ensure Week 2 modules are functional before starting Week 3
+## META INSTRUCTIONS FOR GPT-5-CODEX
 
-## Build & Test
-- **Run Tests**: Execute `python3 -m pytest tests/` to run all tests
-- **Code Style Check**: Use `python3 -m flake8` to enforce code style guidelines
-- **Integration Tests**: Run `python3 -c "from unified_workflow.automation import *"` to verify imports
+### Core Principles
+- **Follow Instructions Precisely**: Always adhere to the guidelines in this document
+- **Provide High-Quality Code**: Generate production-ready code with proper error handling
+- **Use Clear Documentation**: Include comprehensive docstrings and comments
+- **Maintain Consistency**: Follow established patterns and conventions
 
-## Development Guidelines
-- **Python Version**: Use Python 3.8+ as specified in requirements
-- **File Structure**:
-  - Place template registry in `unified_workflow/core/template_registry.py`
-  - Place CLI in `unified_workflow/cli.py`
-  - Place compliance validator in `unified_workflow/automation/compliance_validator.py`
-- **Code Style**:
-  - Use type hints for all function parameters and return values
-  - Follow PEP 8 naming conventions
-  - Add docstrings for all public methods
+### Code Generation Standards
+- **Type Hints**: Always include type hints for all function parameters and return values
+- **PEP 8 Compliance**: Follow Python naming conventions and formatting
+- **Error Handling**: Implement robust error handling with meaningful error messages
+- **Logging**: Include appropriate logging for debugging and monitoring
 
-## Week 3 Implementation Tasks
+### Project Context Requirements
+- **Setup Instructions**: Provide clear installation and setup commands
+- **Dependencies**: List all required packages and versions
+- **File Structure**: Document expected directory layout and file organization
+- **Environment**: Specify Python version and environment requirements
 
-### Day 1-2: Template Pack Migration
-- **Fix Duplicate Templates**: Update `unified_workflow/core/template_registry.py` to handle duplicates
-- **Update Project Generator**: Modify `unified_workflow/automation/project_generator.py` to use unified registry
-- **Test Template Application**: Verify templates can be applied correctly
-- **Document Template Governance**: Create `unified_workflow/templates/TEMPLATE_GOVERNANCE.md`
+### Testing and Quality Assurance
+- **Unit Tests**: Generate comprehensive test coverage for all functions
+- **Integration Tests**: Test component interactions and workflows
+- **Code Review**: Ensure code meets quality standards before submission
+- **Validation**: Verify all functionality works as expected
 
-### Day 3-4: CLI Compatibility Layer
-- **Enhance CLI**: Update `unified_workflow/cli.py` with command routing functionality
-- **Implement Telemetry**: Add usage tracking for deprecation decisions
-- **Test Backward Compatibility**: Ensure legacy scripts still work
-- **Verify Command Routing**: Test unified CLI routes correctly
+### Documentation Standards
+- **API Documentation**: Document all public interfaces and methods
+- **Usage Examples**: Provide clear examples of how to use the code
+- **Troubleshooting**: Include common issues and solutions
+- **Operator Instructions**: Clear guidance for manual operations
 
-### Day 5-7: Compliance Validation Integration
-- **Complete Compliance Validator**: Enhance `unified_workflow/automation/compliance_validator.py`
-- **Implement Validators**: Add HIPAA/SOC2/PCI validation methods
-- **Test Asset Generation**: Verify compliance assets are generated correctly
-- **Update Gates**: Integrate compliance validator with quality gates
-
-## Validation Gate 3 Requirements
-- All templates accessible via unified registry
-- Legacy CLI commands route correctly
-- Compliance validation produces correct assets
-- Integration tests pass
-
-## Pull Request
-- **Title Format**: Follow Conventional Commits (e.g., `feat: implement Week 3 template migration`)
-- **Pre-commit Check**: Run `python3 -m pytest` and `python3 -m flake8` before submitting
-- **Documentation**: Update relevant documentation files
+### Pull Request Guidelines
+- **Commit Format**: Use Conventional Commits specification
+- **Pre-commit Checks**: Run all tests and linting before submission
+- **Code Review**: Ensure all changes are reviewed and approved
+- **Documentation**: Update relevant documentation with changes
