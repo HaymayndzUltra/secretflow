@@ -1,0 +1,475 @@
+{
+  "reports": [
+    {
+      "id": "A",
+      "scores": {
+        "evidence_quality": {
+          "raw": 9,
+          "weight": 0.30,
+          "weighted": 2.70,
+          "rationale": "24 specific citations with precise file:line format (【F:INTEGRATION_PLAN.md†L17-L52】). All major claims backed by verifiable code references. Correctly identifies sys.path.insert(0, str(ROOT)) at scripts/validate_compliance_assets.py:12. Accurately notes missing scripts/__init__.py making it non-package."
+        },
+        "technical_correctness": {
+          "raw": 9,
+          "weight": 0.25,
+          "weighted": 2.25,
+          "rationale": "Correctly identifies that scripts is not a Python package (verified: no __init__.py at scripts/ level). Accurately describes sys.path manipulation in validate_compliance_assets.py. Correctly notes project_generator/template-packs vs top-level template-packs duplication. Accurately identifies workflow1/*/scripts/ directories that would be lost in markdown merge."
+        },
+        "completeness_prioritization": {
+          "raw": 8,
+          "weight": 0.15,
+          "weighted": 1.20,
+          "rationale": "Comprehensive coverage of integration gaps: missing high-use scripts (generate_client_project.py, generate_from_brief.py, pre_lifecycle_plan.py), template consolidation issues, protocol automation preservation, dependency inversion in timeline. Identifies 4 major issue categories with 4 risk areas and 5 missing components."
+        },
+        "practicality_feasibility": {
+          "raw": 8,
+          "weight": 0.15,
+          "weighted": 1.20,
+          "rationale": "Recommendations are actionable: expand Phase 1 to modularize scripts, create adapters for sys.path dependencies, build shared registry services, reorder timeline. All suggestions directly address identified technical barriers. Correctly notes 5-week timeline is insufficient for 50+ scripts."
+        },
+        "consistency": {
+          "raw": 9,
+          "weight": 0.10,
+          "weighted": 0.90,
+          "rationale": "No contradictions. All arguments flow logically from evidence. Assessment score (5/10) aligns with severity of issues identified. Recommendations directly address each issue category systematically."
+        },
+        "risk_mitigation": {
+          "raw": 8,
+          "weight": 0.05,
+          "weighted": 0.40,
+          "rationale": "Identifies 4 concrete risks with specific mitigations: Import/packaging failures (address sys.path), Template divergence (compare registries), Loss of protocol automation (explicit migration plan), Schedule slippage (budget extra time). Each risk tied to technical evidence."
+        }
+      },
+      "total_weighted": 8.65,
+      "key_claims": [
+        {
+          "claim": "scripts is not a package (no top-level __init__.py), so imports from scripts.lifecycle_tasks will fail",
+          "citations": ["INTEGRATION_PLAN.md:86-99", "scripts/lifecycle_tasks.py:1-200"],
+          "uncited": false,
+          "verified": true,
+          "verification_note": "Confirmed: scripts/__init__.py does not exist. scripts/workflow_automation/__init__.py exists but parent scripts/ is not a package."
+        },
+        {
+          "claim": "validate_compliance_assets.py relies on sys.path.insert(0, str(ROOT)) hacks",
+          "citations": ["INTEGRATION_PLAN.md:211-217", "scripts/validate_compliance_assets.py:1-99"],
+          "uncited": false,
+          "verified": true,
+          "verification_note": "Confirmed at scripts/validate_compliance_assets.py:12-13: sys.path.insert(0, str(ROOT))"
+        },
+        {
+          "claim": "Copying template-packs/ ignores existing project_generator/template-packs and project_generator.templates engine",
+          "citations": ["INTEGRATION_PLAN.md:132-147"],
+          "uncited": false,
+          "verified": true,
+          "verification_note": "Confirmed: both /template-packs/ and /project_generator/template-packs/ exist. TemplateRegistry in project_generator/templates/registry.py references template-packs/ location."
+        },
+        {
+          "claim": "Merging workflow1 protocols risks losing scripts in workflow1/codex-phase*/scripts/ directories",
+          "citations": ["INTEGRATION_PLAN.md:148-167"],
+          "uncited": false,
+          "verified": true,
+          "verification_note": "Confirmed: workflow1/codex-phase2-design/scripts/ exists. Plan only mentions merging protocol.md files."
+        },
+        {
+          "claim": "Timeline sequences template-pack work (Week 3) after phase protocol edits (Week 2), creating dependency inversion",
+          "citations": ["INTEGRATION_PLAN.md:219-433"],
+          "uncited": false,
+          "verified": true,
+          "verification_note": "Confirmed: INTEGRATION_PLAN.md Week 2 updates protocols, Week 3 integrates templates. Protocols reference templates they don't have yet."
+        }
+      ],
+      "strengths": [
+        "Highest citation density (24 precise file:line references)",
+        "Identifies critical technical blockers (non-package imports, sys.path hacks)",
+        "Specific, actionable recommendations with clear sequencing fixes",
+        "Correctly identifies timeline dependency inversions",
+        "Comprehensive coverage of missing components (50+ scripts, tests, CLI)"
+      ],
+      "weaknesses": [
+        "Could provide more detail on specific adapter patterns needed",
+        "Assessment score (5/10) could explain scoring rationale more explicitly",
+        "Minor: uses shorthand citation format (1b0226, d46f6a) without explaining these are commit hashes"
+      ],
+      "red_flags": [],
+      "uncertainties": []
+    },
+    {
+      "id": "B",
+      "scores": {
+        "evidence_quality": {
+          "raw": 3,
+          "weight": 0.30,
+          "weighted": 0.90,
+          "rationale": "13 vague references with no line numbers ([Reference: INTEGRATION_ANALYSIS.md]). No specific code citations. Cannot verify claims against actual code. Format provides no reproducibility."
+        },
+        "technical_correctness": {
+          "raw": 5,
+          "weight": 0.25,
+          "weighted": 1.25,
+          "rationale": "Claims about 50+ scripts are accurate but unsourced. States project_generator.py and brief_processor.py 'do not exist today' which is correct for unified-workflow but lacks specificity about what does exist. Template collision concerns are valid but not tied to actual registry.py code. Misses critical sys.path and packaging issues."
+        },
+        "completeness_prioritization": {
+          "raw": 6,
+          "weight": 0.15,
+          "weighted": 0.90,
+          "rationale": "Covers main integration categories (core scripts, templates, protocols, reviews). Identifies 5 issues and 4 risks. Missing critical details about packaging failures, sys.path manipulation, and specific script categorization. Recommendations are general rather than specific."
+        },
+        "practicality_feasibility": {
+          "raw": 5,
+          "weight": 0.15,
+          "weighted": 0.75,
+          "rationale": "Recommendations are high-level (produce architecture doc, build dependency matrix, develop script inventory) but lack actionable specifics. Doesn't address technical blockers like sys.path or non-package imports. Missing sequencing details."
+        },
+        "consistency": {
+          "raw": 7,
+          "weight": 0.10,
+          "weighted": 0.70,
+          "rationale": "Internally consistent. Score 6/10 aligns with moderate issues identified. No contradictions but lacks depth to demonstrate strong logical flow."
+        },
+        "risk_mitigation": {
+          "raw": 6,
+          "weight": 0.05,
+          "weighted": 0.30,
+          "rationale": "Identifies 4 risks (evidence divergence, dependency conflicts, protocol regression, security gaps) but mitigations are general. Doesn't tie risks to specific code patterns or provide concrete implementation steps."
+        }
+      },
+      "total_weighted": 4.80,
+      "key_claims": [
+        {
+          "claim": "Integration targets (project_generator.py, brief_processor.py) do not exist today",
+          "citations": ["unified-workflow/automation"],
+          "uncited": true,
+          "verified": true,
+          "verification_note": "Claim is accurate but citation provides no verifiable path or line number. Generalized reference."
+        },
+        {
+          "claim": "Plan omits migration mapping for 50+ legacy scripts",
+          "citations": ["INTEGRATION_ANALYSIS.md"],
+          "uncited": true,
+          "verified": true,
+          "verification_note": "Claim is accurate (40+ Python scripts confirmed) but citation has no line numbers, cannot verify exact statement."
+        },
+        {
+          "claim": "Template pack integration lacks handling for template collisions and versioning",
+          "citations": ["template-packs"],
+          "uncited": true,
+          "verified": false,
+          "verification_note": "Claim is plausible but citation is directory-level only, no specific registry code or collision scenarios referenced."
+        },
+        {
+          "claim": "Dual evidence managers may diverge if consolidation slips",
+          "citations": ["Duplicate Logic section"],
+          "uncited": true,
+          "verified": true,
+          "verification_note": "Valid concern but citation is section-level, not file:line. Cannot verify exact duplicate code references."
+        }
+      ],
+      "strengths": [
+        "Identifies all major integration categories (scripts, templates, protocols, reviews)",
+        "Recognizes duplicate logic problem across evidence, gates, validation, orchestration",
+        "Acknowledges dependency conflict risks",
+        "Structured format with clear sections"
+      ],
+      "weaknesses": [
+        "Weakest evidence quality: no specific line-number citations",
+        "Cannot verify any claims against actual code",
+        "Misses critical technical issues (sys.path, packaging)",
+        "Recommendations too general to be actionable",
+        "No mention of timeline sequencing problems"
+      ],
+      "red_flags": [],
+      "uncertainties": [
+        "Cannot verify most claims due to lack of specific citations"
+      ]
+    },
+    {
+      "id": "C",
+      "scores": {
+        "evidence_quality": {
+          "raw": 9,
+          "weight": 0.30,
+          "weighted": 2.70,
+          "rationale": "26 specific citations with precise file:line format. Highest citation count. References both INTEGRATION_PLAN.md and INTEGRATION_ANALYSIS.md with line ranges. All major claims have verifiable code references. Cites evidence_manager.py and scripts/workflow_automation/evidence.py for schema conflicts."
+        },
+        "technical_correctness": {
+          "raw": 8,
+          "weight": 0.25,
+          "weighted": 2.00,
+          "rationale": "Correctly identifies CLI retirement issues, protocol automation scripts, template registry reconciliation needs, and evidence schema conflicts. Accurately describes workflow1/*/scripts directories. Notes circular dependency risks from wildcard imports. Doesn't explicitly call out sys.path issues like VERSION_A."
+        },
+        "completeness_prioritization": {
+          "raw": 9,
+          "weight": 0.15,
+          "weighted": 1.35,
+          "rationale": "Most comprehensive coverage: 5 detailed issues, 5 risks, 4 missing components with specific examples. Covers CLI consolidation, protocol automation, template registry, compliance artifacts, quality gate mapping, dependency graphs, external services, testing strategy, and evidence migration. Recommendations are detailed and numbered."
+        },
+        "practicality_feasibility": {
+          "raw": 8,
+          "weight": 0.15,
+          "weighted": 1.20,
+          "rationale": "Highly actionable recommendations: CLI compatibility layer, protocol script cataloging, template registry migration design, compliance validator scope elaboration, dependency graph documentation, structured verification phase. Each recommendation tied to specific integration workstream."
+        },
+        "consistency": {
+          "raw": 9,
+          "weight": 0.10,
+          "weighted": 0.90,
+          "rationale": "Excellent internal coherence. Issues map 1:1 to risks and recommendations. Score 6/10 matches moderate severity with comprehensive concerns. Next steps flow logically from analysis."
+        },
+        "risk_mitigation": {
+          "raw": 8,
+          "weight": 0.05,
+          "weighted": 0.40,
+          "rationale": "5 concrete risks with specific mitigations: Conflicting evidence schemas (migration plan), Circular dependency/imports (initialization order), Template drift (governance), Protocol misalignment (gating scripts), CLI confusion (deprecation). Each tied to specific files and components."
+        }
+      },
+      "total_weighted": 8.55,
+      "key_claims": [
+        {
+          "claim": "Plan stops at creating adapter files but never defines how legacy CLIs like scripts/run_workflow.py will be retired",
+          "citations": ["INTEGRATION_PLAN.md:187-199"],
+          "uncited": false,
+          "verified": true,
+          "verification_note": "Confirmed: INTEGRATION_PLAN Week 4-5 mentions orchestrator updates but no CLI migration. scripts/run_workflow.py exists and would remain active."
+        },
+        {
+          "claim": "Phase 3 protocol merges ignore automation scripts and evidence templates in workflow1/*/scripts",
+          "citations": ["INTEGRATION_PLAN.md:153-165", "INTEGRATION_ANALYSIS.md:86-103"],
+          "uncited": false,
+          "verified": true,
+          "verification_note": "Confirmed: workflow1/codex-phase2-design/scripts/ exists. Plan only references merging protocol.md files."
+        },
+        {
+          "claim": "Template-pack integration proposes straight copy without registry reconciliation between project_generator.templates and unified location",
+          "citations": ["INTEGRATION_PLAN.md:130-147", "INTEGRATION_ANALYSIS.md:58-70"],
+          "uncited": false,
+          "verified": true,
+          "verification_note": "Confirmed: project_generator/templates/registry.py exists. Plan says 'Copy template-packs/ to unified-workflow/templates/' without reconciliation."
+        },
+        {
+          "claim": "Conflicting evidence schemas between evidence_manager.py and scripts/workflow_automation/evidence.py could corrupt history",
+          "citations": ["INTEGRATION_PLAN.md:29-39"],
+          "uncited": false,
+          "verified": true,
+          "verification_note": "Confirmed: both unified-workflow/automation/evidence_manager.py and scripts/workflow_automation/evidence.py exist. Plan acknowledges duplicate but no migration."
+        },
+        {
+          "claim": "Wildcard imports from scripts.workflow_automation into unified-workflow risk circular initialization",
+          "citations": ["INTEGRATION_PLAN.md:109-118"],
+          "uncited": false,
+          "verified": true,
+          "verification_note": "INTEGRATION_PLAN.md:114 shows 'from scripts.workflow_automation.gates import *'. scripts not being a package makes this even worse."
+        }
+      ],
+      "strengths": [
+        "Highest completeness score: 9 major issues, 5 risks, 4 missing components",
+        "Most comprehensive recommendations with 6 detailed action items",
+        "Excellent citation density (26 references)",
+        "Strong consistency: issues → risks → recommendations flow logically",
+        "Identifies both INTEGRATION_PLAN and INTEGRATION_ANALYSIS issues",
+        "Explicitly notes missing test/validation strategy"
+      ],
+      "weaknesses": [
+        "Doesn't explicitly mention sys.path hacks (though mentions wildcard import risks)",
+        "Could be more explicit about non-package import failures",
+        "Some citations span large ranges (L44-L117) reducing precision slightly"
+      ],
+      "red_flags": [],
+      "uncertainties": []
+    },
+    {
+      "id": "D",
+      "scores": {
+        "evidence_quality": {
+          "raw": 2,
+          "weight": 0.30,
+          "weighted": 0.60,
+          "rationale": "No specific code citations. Uses general statements without file:line references. Cannot verify any claims against actual code. Provides numbered issues but no evidence backing. Lowest citation quality of all reports."
+        },
+        "technical_correctness": {
+          "raw": 6,
+          "weight": 0.25,
+          "weighted": 1.50,
+          "rationale": "Issues identified are generally accurate (40+ scripts unmapped, duplicate logic unresolved, template registry conflicts, workflow1 mechanics unclear). References project_generator/templates/registry.py correctly. Compliance dependencies concern is valid. Misses sys.path and packaging failures completely."
+        },
+        "completeness_prioritization": {
+          "raw": 8,
+          "weight": 0.15,
+          "weighted": 1.20,
+          "rationale": "Comprehensive structure: 8 numbered issues, 4 risks with mitigations, 4 missing components, 5 recommendations. Covers script inventory, consolidation strategy, template alignment, protocol mechanics, review hooks, compliance deps, sequencing conflicts, and testing gaps. Well-organized presentation."
+        },
+        "practicality_feasibility": {
+          "raw": 7,
+          "weight": 0.15,
+          "weighted": 1.05,
+          "rationale": "Recommendations are detailed: integration matrix, canonical module governance, sequencing refinement, milestone-based validation, operational readiness plan. Provides inline recommendations after each issue. More actionable than VERSION_B but less specific than A or C."
+        },
+        "consistency": {
+          "raw": 8,
+          "weight": 0.10,
+          "weighted": 0.80,
+          "rationale": "Well-structured and internally consistent. Issues flow logically to risks and recommendations. Score 6/10 aligns with identified concerns. Strong organizational clarity despite weak evidence."
+        },
+        "risk_mitigation": {
+          "raw": 7,
+          "weight": 0.05,
+          "weighted": 0.35,
+          "rationale": "4 risks with specific mitigations: Orchestrator regression (compatibility adapters, replay tests), Artifact schema drift (validate against schema.json), Compliance scope creep (feature flags per domain), Dependency explosion (shared requirements.txt). More detailed than B but lacks code-level specificity of A/C."
+        }
+      },
+      "total_weighted": 5.50,
+      "key_claims": [
+        {
+          "claim": "Plan references '... (40+ more scripts)' without mapping to owners, targets, or deprecation paths",
+          "citations": [],
+          "uncited": true,
+          "verified": true,
+          "verification_note": "Accurate: scripts/ contains 40+ files per scripts/README.md. But no citation provided in report."
+        },
+        {
+          "claim": "Missing consolidation strategy for duplicate logic (evidence_manager.py vs scripts/workflow_automation/evidence.py)",
+          "citations": [],
+          "uncited": true,
+          "verified": true,
+          "verification_note": "Accurate: both files exist. But no specific line references or code evidence provided."
+        },
+        {
+          "claim": "Template pack integration ignores project_generator/templates/registry.py and template engine",
+          "citations": [],
+          "uncited": true,
+          "verified": true,
+          "verification_note": "Accurate: registry.py exists and would be affected. But report doesn't cite the actual file or line numbers."
+        },
+        {
+          "claim": "Workflow1 protocol merge path underspecified (mechanics unclear: Markdown import, script symlinks, automation triggers)",
+          "citations": [],
+          "uncited": true,
+          "verified": true,
+          "verification_note": "Valid concern: workflow1/codex-phase*/scripts/ directories exist. But no evidence provided."
+        },
+        {
+          "claim": "Implementation sequence conflicts: Template integration (Phase 2) precedes orchestrator update (Week 4)",
+          "citations": [],
+          "uncited": true,
+          "verified": true,
+          "verification_note": "Accurate: timeline dependency issue. But no citation to INTEGRATION_PLAN timeline section."
+        }
+      ],
+      "strengths": [
+        "Best organizational structure: 8 numbered issues with inline recommendations",
+        "Comprehensive coverage of integration domains",
+        "Detailed risk mitigations with specific strategies",
+        "Strong readability and presentation",
+        "Identifies timeline sequencing conflicts",
+        "Includes operational readiness planning"
+      ],
+      "weaknesses": [
+        "Worst evidence quality: zero specific code citations",
+        "Cannot verify any claims - all statements are uncited",
+        "Misses critical sys.path and packaging issues",
+        "No file:line references reduce reproducibility",
+        "Recommendations lack code-level specificity"
+      ],
+      "red_flags": [
+        "Complete absence of verifiable evidence raises concern about depth of code analysis"
+      ],
+      "uncertainties": [
+        "Unclear if report author actually examined code or only read INTEGRATION_PLAN text"
+      ]
+    }
+  ],
+  "decision_matrix": [
+    {"id": "A", "total_weighted": 8.65},
+    {"id": "C", "total_weighted": 8.55},
+    {"id": "D", "total_weighted": 5.50},
+    {"id": "B", "total_weighted": 4.80}
+  ],
+  "winner": {
+    "id": "A",
+    "justification": "VERSION_A achieves the highest weighted score (8.65) through superior evidence quality (9/10, 24 precise citations), technical correctness (9/10, correctly identifies sys.path hacks and non-package imports), and strong consistency (9/10). Most critically, VERSION_A is the ONLY report to identify the fatal packaging flaw: scripts/ lacks __init__.py, making 'from scripts.lifecycle_tasks' imports impossible as written in INTEGRATION_PLAN.md:89. It also uniquely identifies sys.path.insert(0, str(ROOT)) manipulation in validate_compliance_assets.py:12-13 that would break in a long-lived service. VERSION_C scores nearly as high (8.55) with excellent completeness (9/10, 26 citations), but misses these critical packaging issues. VERSION_A's recommendations are more technically precise and directly address implementation blockers."
+  },
+  "merge_list": [
+    {
+      "from": "C",
+      "insight": "CLI consolidation strategy: introduce compatibility layer in unified orchestrator that proxies legacy commands, then deprecate with telemetry",
+      "citations": ["INTEGRATION_ANALYSIS.md:107-117"],
+      "value": "VERSION_A identifies CLI deprecation gap but VERSION_C provides specific implementation pattern (compatibility layer + telemetry) that would enable gradual migration without breaking existing users."
+    },
+    {
+      "from": "C",
+      "insight": "External services integration (Git, AI governor, policy DSL) from project_generator.integrations are unmentioned but influence security and audit logging",
+      "citations": ["INTEGRATION_ANALYSIS.md:64-70"],
+      "value": "VERSION_A focuses on core automation but VERSION_C uniquely identifies external service dependencies that could block end-to-end workflows if not integrated."
+    },
+    {
+      "from": "D",
+      "insight": "Artifact schema drift mitigation: validate artifacts against evidence/schema.json and update schema extensions before rollout",
+      "citations": [],
+      "value": "VERSION_D provides most explicit schema validation checkpoint. While VERSION_A and C note evidence schema conflicts, VERSION_D specifies the validation mechanism (evidence/schema.json) as concrete gate."
+    },
+    {
+      "from": "D",
+      "insight": "Milestone-based validation with incremental testing per phase rather than deferred Week 5 consolidated testing",
+      "citations": [],
+      "value": "VERSION_D explicitly recommends phase-specific test plans with gating criteria before subsequent weeks. This reduces late regression discovery risk noted by VERSION_A's schedule slippage concern."
+    }
+  ],
+  "action_plan": [
+    {
+      "step": 1,
+      "task": "Create comprehensive script inventory with packaging audit: categorize all 40+ scripts in scripts/ by function (generators, validators, helpers), identify sys.path manipulations, and make scripts/ a proper package by adding __init__.py",
+      "citations": ["scripts/validate_compliance_assets.py:12-13", "INTEGRATION_PLAN.md:86-99", "scripts/lifecycle_tasks.py:1-50"],
+      "risk": "Current plan imports scripts.lifecycle_tasks but scripts is not a package - imports will fail at runtime",
+      "mitigation": "Add scripts/__init__.py and refactor scripts using sys.path.insert() to use proper package imports or create adapter modules in unified-workflow/automation that handle path resolution"
+    },
+    {
+      "step": 2,
+      "task": "Design and implement template registry consolidation: compare project_generator/templates/registry.py with unified-workflow template loading, define single source of truth, create shared TemplateRegistry service that both systems use",
+      "citations": ["project_generator/templates/registry.py:1-50", "INTEGRATION_PLAN.md:132-147"],
+      "risk": "Blind copying of template-packs/ to unified-workflow/templates/ will fork registries and cause template discovery divergence",
+      "mitigation": "Build unified TemplateRegistry class in shared location (e.g., unified-workflow/core/template_registry.py) that both project_generator and unified executor import; define template metadata schema and version registration"
+    },
+    {
+      "step": 3,
+      "task": "Catalog workflow1 automation assets: inventory all scripts/ directories under workflow1/codex-phase*/, document evidence templates in workflow1/evidence/, map each to unified-workflow phase executors with explicit invocation strategy",
+      "citations": ["workflow1/codex-phase2-design/scripts/", "INTEGRATION_PLAN.md:148-167"],
+      "risk": "Merging only protocol.md files will lose executable scripts, evidence templates, and quality gate automation living beside protocols",
+      "mitigation": "Create migration manifest mapping each workflow1 script to unified-workflow/automation module; preserve script functionality through direct imports or CLI wrappers; update phase protocols to reference unified automation entry points"
+    },
+    {
+      "step": 4,
+      "task": "Resolve evidence schema conflicts: define canonical evidence format by comparing unified-workflow/automation/evidence_manager.py with scripts/workflow_automation/evidence.py, create schema migration script for historical artifacts",
+      "citations": ["INTEGRATION_PLAN.md:29-39", "unified-workflow/evidence/schema.json"],
+      "risk": "Dual evidence managers with different manifest formats could corrupt audit history or fail validation during merge",
+      "mitigation": "Designate unified-workflow/automation/evidence_manager.py as canonical; create converter that reads legacy scripts/workflow_automation/evidence.py format and writes unified format; validate all conversions against evidence/schema.json before cutover"
+    },
+    {
+      "step": 5,
+      "task": "Resequence integration timeline: move shared infrastructure (template registry, CLI consolidation, evidence schema) to Week 1, defer protocol merges to Week 3 after dependencies are ready, add phase-specific testing gates at week boundaries",
+      "citations": ["INTEGRATION_PLAN.md:219-433"],
+      "risk": "Current timeline sequences template work (Week 3) after protocol edits (Week 2), but protocols require templates - creates dependency inversion that will block execution",
+      "mitigation": "New sequence: Week 1 (shared infra + packaging fixes), Week 2 (template registry + CLI), Week 3 (protocol automation + merges), Week 4 (integration testing), Week 5 (end-to-end validation); add gate at end of each week requiring tests to pass before proceeding"
+    },
+    {
+      "step": 6,
+      "task": "Implement CLI compatibility layer: create unified-workflow/cli.py entry point that wraps legacy scripts/run_workflow.py, add telemetry tracking which commands are used, publish migration guide with deprecation timeline",
+      "citations": ["scripts/run_workflow.py", "INTEGRATION_ANALYSIS.md:107-117"],
+      "risk": "Multiple CLI entry points (scripts/run_workflow.py, unified-workflow executor) create user confusion and inconsistent evidence collection",
+      "mitigation": "Build compatibility shim that proxies legacy CLI to unified orchestrator; instrument with usage telemetry; after 2 weeks of no legacy usage, mark scripts/run_workflow.py deprecated and update docs to point to unified CLI"
+    },
+    {
+      "step": 7,
+      "task": "Integrate external services layer: identify project_generator/integrations/ components (git.py, ai_governor.py, policy DSL), map to unified-workflow phases requiring them, create adapters or direct imports with credential management strategy",
+      "citations": ["project_generator/integrations/", "INTEGRATION_ANALYSIS.md:64-70"],
+      "risk": "External services (Git integration, AI governor, policy validation) influence security, audit logging, and deployment readiness but are unmentioned in plan",
+      "mitigation": "Audit project_generator/integrations/ for all external service clients; document credential requirements; integrate Git operations into Phase 0 bootstrap, AI governor into Phase 3 quality rails, policy DSL into compliance validator"
+    },
+    {
+      "step": 8,
+      "task": "Build integration test suite with phase-specific gates: create pytest suite in unified-workflow/tests/ covering project generation, brief processing, template application, evidence collection; require tests pass before advancing weeks",
+      "citations": ["INTEGRATION_PLAN.md:327-345", "project_generator/tests/"],
+      "risk": "Deferred Week 5 consolidated testing invites late regression discovery across 50+ integrated scripts",
+      "mitigation": "Implement milestone-based validation: Week 1 gate (packaging tests, import resolution), Week 2 gate (template registry tests, CLI smoke tests), Week 3 gate (protocol automation tests, evidence schema tests), Week 4 gate (integration tests), Week 5 gate (end-to-end validation); each gate must pass before team proceeds"
+    }
+  ]
+}
+

@@ -407,30 +407,29 @@ from scripts.workflow_automation.exceptions import *
 
 ## Timeline
 
-### Week 1: Core Infrastructure Integration
-- Day 1-2: Project Generator Integration
-- Day 3-4: Brief Processing Integration
-- Day 5-7: Workflow Automation Integration
+**IMPORTANT: The original 5-week timeline has critical dependency inversions. See REVISED_INTEGRATION_TIMELINE.md for the corrected 7-week timeline that:**
+- Fixes packaging issues BEFORE integration (Week 1)
+- Sequences dependencies correctly (templates before protocols)
+- Adds validation gates between each week
+- Includes proper documentation and deployment phases
 
-### Week 2: Phase Protocol Enhancement
-- Day 1-2: Phase 0-1 Enhancement
-- Day 3-4: Phase 2-3 Enhancement
-- Day 5-7: Phase 4-6 Enhancement
+### Original Timeline Issues Identified:
+1. Week 2 protocols need Week 3 templates (dependency inversion)
+2. No foundational infrastructure work scheduled
+3. Testing only at end (Week 5) risks late regression discovery
+4. No time allocated for documentation or training
+5. sys.path and packaging issues not addressed
 
-### Week 3: Template Packs Integration
-- Day 1-3: Template Copy and Integration
-- Day 4-5: Template Registry Update
-- Day 6-7: Template Validation
+### Revised 7-Week Timeline Summary:
+- **Week 1**: Foundation & Infrastructure (NEW) - Fix packaging, unified registry, evidence schema
+- **Week 2**: Core Integration Modules - Project generator, brief processor, workflow automation
+- **Week 3**: Template & CLI Integration - Complete migration, compatibility layer
+- **Week 4**: Protocol & Automation Integration - Merge WITH script preservation
+- **Week 5**: External Services & Review Protocols - Integrations and quality gates
+- **Week 6**: Testing & Validation - Comprehensive test suites
+- **Week 7**: Documentation & Deployment (NEW) - Training and production rollout
 
-### Week 4: AI Orchestrator Update
-- Day 1-3: Orchestrator Enhancement
-- Day 4-5: Executor Enhancement
-- Day 6-7: Integration Testing
-
-### Week 5: Testing & Validation
-- Day 1-3: Integration Testing
-- Day 4-5: End-to-End Testing
-- Day 6-7: Documentation and Deployment
+See `REVISED_INTEGRATION_TIMELINE.md` for complete details with daily tasks and validation gates.
 
 ## Next Steps
 
