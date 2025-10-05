@@ -9,15 +9,11 @@ import argparse
 import json
 from pathlib import Path
 from typing import Dict, List
-
 import sys
 
-ROOT = Path(__file__).resolve().parents[1]
-if str(ROOT) not in sys.path:
-    sys.path.insert(0, str(ROOT))
-
+# Import via proper package path (scripts should be run from repo root)
+# If running from elsewhere, use: python -m scripts.plan_from_brief
 from project_generator.core.brief_parser import BriefParser
-
 from scripts.lifecycle_tasks import build_plan
 
 

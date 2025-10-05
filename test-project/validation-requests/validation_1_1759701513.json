@@ -1,0 +1,51 @@
+{
+  "phase": 1,
+  "checkpoint": {
+    "name": "phase_1_approval",
+    "title": "PRD Creation Approval",
+    "description": "Approve Product Requirements Document",
+    "required_approvals": [
+      "product_owner",
+      "stakeholder"
+    ],
+    "artifacts": [
+      "prd-{project}.md"
+    ],
+    "validation_criteria": [
+      "Business goals are clearly defined",
+      "Technical specifications are complete",
+      "User stories are testable",
+      "API contracts are specified",
+      "Security model is defined"
+    ]
+  },
+  "context": {
+    "project_name": "test-project",
+    "config": {
+      "brief_path": "/tmp/test-brief.md",
+      "requirements": [
+        "authentication",
+        "dashboard",
+        "api"
+      ]
+    },
+    "artifacts": [
+      "PRD.md"
+    ]
+  },
+  "request_id": "validation_1_1759701513",
+  "created_at": "2025-10-05T21:58:33.077984Z",
+  "status": "pending",
+  "approvals": {},
+  "comments": [],
+  "artifacts": [
+    "prd-{project}.md"
+  ],
+  "validation_criteria": [
+    "Business goals are clearly defined",
+    "Technical specifications are complete",
+    "User stories are testable",
+    "API contracts are specified",
+    "Security model is defined"
+  ]
+}

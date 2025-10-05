@@ -1,0 +1,66 @@
+{
+  "artifacts": [
+    {
+      "category": "requirements",
+      "checksum": "",
+      "created_at": "2025-10-05T21:54:03.434078Z",
+      "description": "Project brief and requirements",
+      "path": "brief.md",
+      "phase": 0
+    },
+    {
+      "category": "configuration",
+      "checksum": "",
+      "created_at": "2025-10-05T21:58:53.978200Z",
+      "description": "Phase bootstrap artifact",
+      "path": "project.json",
+      "phase": 0
+    },
+    {
+      "category": "requirements",
+      "checksum": "",
+      "created_at": "2025-10-05T21:58:55.992336Z",
+      "description": "Phase prd_creation artifact",
+      "path": "PRD.md",
+      "phase": 1
+    },
+    {
+      "category": "configuration",
+      "checksum": "",
+      "created_at": "2025-10-05T22:01:02.382065Z",
+      "description": "Phase bootstrap artifact",
+      "path": "project.json",
+      "phase": 0
+    },
+    {
+      "category": "configuration",
+      "checksum": "",
+      "created_at": "2025-10-05T22:02:09.136606Z",
+      "description": "Phase bootstrap artifact",
+      "path": "project.json",
+      "phase": 0
+    },
+    {
+      "category": "configuration",
+      "checksum": "",
+      "created_at": "2025-10-05T22:03:23.988610Z",
+      "description": "Phase bootstrap artifact",
+      "path": "project.json",
+      "phase": 0
+    },
+    {
+      "category": "configuration",
+      "checksum": "",
+      "created_at": "2025-10-05T22:04:49.147835Z",
+      "description": "Phase bootstrap artifact",
+      "path": "project.json",
+      "phase": 0
+    }
+  ],
+  "metadata": {
+    "generated_at": "2025-10-05T22:04:49.147888Z",
+    "project_name": "",
+    "total_artifacts": 7,
+    "workflow_version": "1.0.0"
+  }
+}

@@ -8,13 +8,10 @@ import logging
 from pathlib import Path
 import sys
 
-CURRENT_DIR = Path(__file__).resolve().parent
-REPO_ROOT = CURRENT_DIR.parent
-if str(REPO_ROOT) not in sys.path:
-    sys.path.insert(0, str(REPO_ROOT))
-
-from workflow_automation import WorkflowConfig, WorkflowOrchestrator
-from workflow_automation.exceptions import GateFailedError, WorkflowError
+# Import via proper package path (scripts should be run from repo root)
+# If running from elsewhere, use: python -m scripts.run_workflow
+from scripts.workflow_automation import WorkflowConfig, WorkflowOrchestrator
+from scripts.workflow_automation.exceptions import GateFailedError, WorkflowError
 
 
 def configure_logging(verbose: bool) -> None:

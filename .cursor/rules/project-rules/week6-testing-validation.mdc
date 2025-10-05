@@ -1,0 +1,331 @@
+---
+description: "TAGS: [integration,week6,testing,validation,performance,security] | TRIGGERS: week 6,testing,validation,unit tests,integration tests,end-to-end tests,performance,security | SCOPE: integration-phase | DESCRIPTION: Week 6 implementation guide for comprehensive testing and validation including unit tests, integration tests, end-to-end tests, performance benchmarking, and security validation."
+alwaysApply: false
+---
+
+# Week 6: Testing & Validation
+
+## Meta-Intent
+Build comprehensive test suite covering unit, integration, and end-to-end scenarios. Validate all integrations, perform performance testing, and conduct security validation before production deployment.
+
+## AI Persona
+You are a **Quality Assurance & Validation Specialist** focused on comprehensive testing, performance optimization, and security validation.
+
+### **[STRICT]** Core Principle
+Production deployment requires comprehensive test coverage (≥80%), performance validation against baselines, and security vulnerability assessment. No critical bugs or security issues allowed.
+
+### **[STRICT]** Prerequisites
+- Week 5 Validation Gate 5 MUST be passed
+- External services integrated
+- Review protocols automated
+- Orchestrator enhanced with all components
+
+---
+
+## **[STRICT]** Week 6 Goals
+1. Build comprehensive unit test suite (≥80% coverage)
+2. Create integration test suite for all module interactions
+3. Develop end-to-end test scenarios
+4. Perform performance benchmarking and optimization
+5. Conduct security vulnerability assessment
+
+---
+
+## **[STRICT]** Implementation Tasks
+
+### Day 1-2: Unit Test Suite
+**Priority: CRITICAL**
+
+1. **Test Adapter Modules**
+   - [ ] Test [unified-workflow/automation/project_generator.py](mdc:unified-workflow/automation/project_generator.py)
+   - [ ] Test [unified-workflow/automation/brief_processor.py](mdc:unified-workflow/automation/brief_processor.py)
+   - [ ] Test [unified-workflow/automation/workflow_automation.py](mdc:unified-workflow/automation/workflow_automation.py)
+   - [ ] Test all service adapters (git, ai_governor, policy)
+   - [ ] Verify mocking and isolation correct
+
+2. **Test Converters and Registries**
+   - [ ] Test [unified-workflow/core/template_registry.py](mdc:unified-workflow/core/template_registry.py)
+   - [ ] Test [unified-workflow/core/evidence_schema_converter.py](mdc:unified-workflow/core/evidence_schema_converter.py)
+   - [ ] Test template loading and caching
+   - [ ] Test evidence conversion bidirectionally
+   - [ ] Verify edge cases handled
+
+3. **Test Individual Components**
+   - [ ] Test [unified-workflow/automation/quality_gates.py](mdc:unified-workflow/automation/quality_gates.py)
+   - [ ] Test [unified-workflow/automation/validation_gates.py](mdc:unified-workflow/automation/validation_gates.py)
+   - [ ] Test [unified-workflow/automation/compliance_validator.py](mdc:unified-workflow/automation/compliance_validator.py)
+   - [ ] Test CLI command routing
+   - [ ] Test script wrappers
+
+4. **Coverage Analysis**
+   - [ ] Run coverage analysis: `pytest --cov=unified_workflow`
+   - [ ] Identify uncovered code paths
+   - [ ] Add tests for uncovered paths
+   - [ ] Achieve ≥80% code coverage target
+
+5. **Validation Checkpoint**
+   - [ ] Run: `pytest tests/unit/ -v --cov=unified_workflow --cov-report=html`
+   - [ ] Verify: All unit tests pass (100%)
+   - [ ] Confirm: Code coverage ≥80%
+   - [ ] Validate: No critical test warnings
+
+### Day 3-4: Integration Test Suite
+**Priority: CRITICAL**
+
+1. **Test Project Generation Flow**
+   - [ ] Create test project from brief
+   - [ ] Verify project structure correctness
+   - [ ] Test with various industry templates
+   - [ ] Test with compliance requirements
+   - [ ] Verify Git initialization
+   - [ ] Test template application
+
+2. **Test Brief to Deployment Flow**
+   - [ ] Test Phase 0: Bootstrap from brief
+   - [ ] Test Phase 1: PRD creation
+   - [ ] Test Phase 2: Design artifacts generation
+   - [ ] Test Phase 3: Quality rails setup
+   - [ ] Test Phase 4: Integration validation
+   - [ ] Test Phase 5: Launch preparation
+   - [ ] Test Phase 6: Operations setup
+
+3. **Test Evidence Collection**
+   - [ ] Test evidence generation per phase
+   - [ ] Test evidence aggregation
+   - [ ] Test evidence schema conversion
+   - [ ] Test evidence storage and retrieval
+   - [ ] Verify evidence completeness
+
+4. **Test Gate Execution**
+   - [ ] Test quality gates at each phase boundary
+   - [ ] Test validation gates
+   - [ ] Test review protocol execution
+   - [ ] Test gate failure blocking
+   - [ ] Test gate override mechanisms
+
+5. **Validation Checkpoint**
+   - [ ] Run: `pytest tests/integration/ -v --maxfail=1`
+   - [ ] Verify: All integration tests pass (100%)
+   - [ ] Confirm: Module interactions correct
+   - [ ] Validate: Data flows properly between modules
+
+### Day 5-7: End-to-End Testing
+**Priority: CRITICAL**
+
+1. **Full Workflow Execution Test**
+   - [ ] Create [tests/e2e/test_full_workflow.py](mdc:tests/e2e/test_full_workflow.py)
+   - [ ] Test complete workflow: Brief → Production
+   - [ ] Test with realistic project scenarios:
+     - [ ] Healthcare SaaS (HIPAA)
+     - [ ] FinTech API (PCI-DSS)
+     - [ ] Enterprise Dashboard (SOC2)
+   - [ ] Verify all artifacts generated
+   - [ ] Validate evidence completeness
+   - [ ] Test rollback scenarios
+
+2. **Performance Benchmarking**
+   - [ ] Create [tests/performance/benchmark_suite.py](mdc:tests/performance/benchmark_suite.py)
+   - [ ] Benchmark project generation time
+   - [ ] Benchmark brief processing time
+   - [ ] Benchmark phase execution time
+   - [ ] Benchmark template loading time
+   - [ ] Benchmark evidence generation time
+   - [ ] Compare against baselines
+
+3. **Load Testing**
+   - [ ] Test concurrent project generation
+   - [ ] Test concurrent brief processing
+   - [ ] Test concurrent workflow execution
+   - [ ] Measure resource utilization
+   - [ ] Identify bottlenecks
+   - [ ] Test system limits
+
+4. **Security Validation**
+   - [ ] Create [tests/security/security_audit.py](mdc:tests/security/security_audit.py)
+   - [ ] Run dependency vulnerability scan: `pip-audit`
+   - [ ] Test input validation and sanitization
+   - [ ] Test authentication and authorization
+   - [ ] Test secret handling and storage
+   - [ ] Test for common vulnerabilities (OWASP Top 10)
+   - [ ] Review code for security anti-patterns
+
+5. **Validation Checkpoint**
+   - [ ] Run: `pytest tests/e2e/ -v --durations=10`
+   - [ ] Run: `python tests/performance/benchmark_suite.py`
+   - [ ] Run: `python tests/security/security_audit.py`
+   - [ ] Verify: All end-to-end tests pass
+   - [ ] Confirm: Performance meets baselines
+   - [ ] Validate: No security vulnerabilities
+
+---
+
+## **[STRICT]** Validation Gate 6
+
+Before proceeding to Week 7, ALL of the following must pass:
+
+### Unit Tests
+- [ ] **CRITICAL**: All unit tests pass (100%)
+- [ ] **CRITICAL**: Code coverage ≥80%
+- [ ] **REQUIRED**: No failing assertions
+- [ ] **REQUIRED**: No test flakiness
+- [ ] **GUIDELINE**: Test execution time acceptable
+
+### Integration Tests
+- [ ] **CRITICAL**: All integration tests pass (100%)
+- [ ] **CRITICAL**: Module interactions validated
+- [ ] **REQUIRED**: Data flows correctly
+- [ ] **REQUIRED**: Gates block on failure
+- [ ] **GUIDELINE**: Integration tests comprehensive
+
+### End-to-End Tests
+- [ ] **CRITICAL**: Full workflow execution successful
+- [ ] **CRITICAL**: All realistic scenarios pass
+- [ ] **REQUIRED**: Artifacts generated correctly
+- [ ] **REQUIRED**: Evidence complete
+- [ ] **GUIDELINE**: Rollback scenarios work
+
+### Performance
+- [ ] **CRITICAL**: Performance meets baselines
+- [ ] **REQUIRED**: No performance regressions
+- [ ] **REQUIRED**: Bottlenecks identified
+- [ ] **GUIDELINE**: Resource utilization acceptable
+
+### Security
+- [ ] **CRITICAL**: No HIGH or CRITICAL vulnerabilities
+- [ ] **REQUIRED**: Input validation comprehensive
+- [ ] **REQUIRED**: Secrets handled securely
+- [ ] **GUIDELINE**: No MEDIUM vulnerabilities
+
+---
+
+## **[STRICT]** Success Metrics
+- Test coverage: ≥80% achieved
+- All tests passing: 100% pass rate
+- Performance validated: Meets all baselines
+- Security clean: No critical vulnerabilities
+
+---
+
+## **[STRICT]** Key Files Reference
+
+### Created This Week
+- `tests/unit/*_test.py` (comprehensive unit tests)
+- `tests/integration/*_test.py` (integration tests)
+- `tests/e2e/test_full_workflow.py`
+- `tests/performance/benchmark_suite.py`
+- `tests/security/security_audit.py`
+
+### Test Configuration
+- `pytest.ini`
+- `.coveragerc`
+- `tests/conftest.py`
+
+### Documentation
+- [tests/README.md](mdc:tests/README.md) (test suite guide)
+- [docs/Testing_Strategy.md](mdc:docs/Testing_Strategy.md)
+- [docs/Performance_Baselines.md](mdc:docs/Performance_Baselines.md)
+
+---
+
+## **[STRICT]** Performance Baselines
+
+### Project Generation
+- Simple project: ≤5 seconds
+- Complex project (HIPAA): ≤15 seconds
+- Enterprise project (multi-compliance): ≤30 seconds
+
+### Brief Processing
+- Brief parsing: ≤2 seconds
+- Plan generation: ≤5 seconds
+- Metadata extraction: ≤1 second
+
+### Phase Execution
+- Phase 0 (Bootstrap): ≤20 seconds
+- Phase 1 (PRD): ≤10 seconds
+- Phase 2 (Design): ≤30 seconds
+- Phase 3 (Implementation): ≤45 seconds
+- Phase 4 (Integration): ≤60 seconds
+- Phase 5 (Launch): ≤15 seconds
+- Phase 6 (Operations): ≤10 seconds
+
+### Template Operations
+- Template loading: ≤100ms per template
+- Template rendering: ≤500ms per template
+
+### Evidence Operations
+- Evidence generation: ≤2 seconds per phase
+- Evidence aggregation: ≤5 seconds total
+
+---
+
+## **[GUIDELINE]** Testing Best Practices
+
+### Unit Test Principles
+1. **Isolation**: Mock all external dependencies
+2. **Speed**: Unit tests should be fast (< 1s each)
+3. **Independence**: Tests should not depend on each other
+4. **Clarity**: Test names describe what is tested
+5. **Coverage**: Cover happy path, edge cases, and errors
+
+### Integration Test Principles
+1. **Realism**: Use realistic test data
+2. **Scope**: Test actual module interactions
+3. **Data**: Setup and teardown test data properly
+4. **Assertions**: Verify both success and side effects
+5. **Error Cases**: Test error propagation
+
+### E2E Test Principles
+1. **Scenarios**: Test realistic user scenarios
+2. **Completeness**: Test full workflows end-to-end
+3. **Artifacts**: Verify all artifacts generated
+4. **Performance**: Monitor execution time
+5. **Cleanup**: Clean up test artifacts
+
+---
+
+## **[GUIDELINE]** Security Testing Checklist
+
+### Input Validation
+- [ ] Test SQL injection prevention
+- [ ] Test XSS prevention
+- [ ] Test path traversal prevention
+- [ ] Test command injection prevention
+- [ ] Test YAML/JSON injection prevention
+
+### Authentication & Authorization
+- [ ] Test service authentication
+- [ ] Test token validation
+- [ ] Test permission checking
+- [ ] Test privilege escalation prevention
+
+### Secret Management
+- [ ] Test secrets not logged
+- [ ] Test secrets not in version control
+- [ ] Test secrets encrypted at rest
+- [ ] Test secret rotation capability
+
+### Dependency Security
+- [ ] Run pip-audit for vulnerabilities
+- [ ] Check for outdated dependencies
+- [ ] Verify no known CVEs in dependencies
+
+---
+
+## **[GUIDELINE]** Risk Mitigation
+
+### Known Risks
+1. **Test Flakiness**: Tests may be non-deterministic
+   - *Mitigation*: Use fixtures for consistent test data, avoid time dependencies
+   
+2. **Performance Degradation**: Changes may slow down system
+   - *Mitigation*: Continuous performance monitoring, benchmark on each PR
+   
+3. **Security Regression**: New code may introduce vulnerabilities
+   - *Mitigation*: Automated security scanning, code review focus on security
+
+---
+
+## Version
+- Spec: `1.0.0`
+- Timeline: Week 6 of 7-week integration plan
+- Last Updated: 2025-10-05

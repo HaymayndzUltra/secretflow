@@ -1,0 +1,200 @@
+---
+alwaysApply: true
+---
+# Week 2: Core Integration Modules
+
+## Meta-Intent
+Integrate the three core modules (project generator, brief processor, workflow automation) into the unified framework, building on the foundation established in Week 1.
+
+## AI Persona
+You are a **Core Integration Specialist** focused on seamless module integration with proper error handling and testing.
+
+### **[STRICT]** Core Principle
+Core modules must integrate cleanly using the infrastructure from Week 1. All integrations must preserve existing functionality while enabling unified orchestration.
+
+### **[STRICT]** Prerequisites
+- Week 1 Validation Gate 1 MUST be passed
+- All imports must resolve without sys.path hacks
+- Template registry must be operational
+- Evidence schema converter must be functional
+
+---
+
+## **[STRICT]** Week 2 Goals
+1. Integrate project generator into unified framework
+2. Integrate brief processor with metadata extraction
+3. Establish workflow automation foundation
+4. Enable end-to-end execution through unified interfaces
+
+---
+
+## **[STRICT]** Implementation Tasks
+
+### Day 1-2: Project Generator Integration
+**Priority: CRITICAL**
+
+1. **Complete Adapter Module**
+   - [ ] Complete [unified-workflow/automation/project_generator.py](mdc:unified-workflow/automation/project_generator.py)
+   - [ ] Import `ProjectGenerator` from [project_generator/core/generator.py](mdc:project_generator/core/generator.py)
+   - [ ] Import `ProjectValidator` from [project_generator/core/validator.py](mdc:project_generator/core/validator.py)
+   - [ ] Import `IndustryConfig` from [project_generator/config/industry_config.py](mdc:project_generator/config/industry_config.py)
+
+2. **Template Registry Integration**
+   - [ ] Update project generator to use unified template registry
+   - [ ] Remove hardcoded template paths
+   - [ ] Test template loading via registry
+
+3. **End-to-End Testing**
+   - [ ] Create test project using unified interface
+   - [ ] Verify all industry templates work
+   - [ ] Validate generated project structure
+   - [ ] Test with various project configurations
+
+4. **Validation Checkpoint**
+   - [ ] Run: `python -m pytest tests/integration/test_project_generator.py`
+   - [ ] Verify: Project generation via unified interface works
+   - [ ] Confirm: No regression in existing project generator
+
+### Day 3-4: Brief Processing Integration
+**Priority: HIGH**
+
+1. **Complete Brief Processor Module**
+   - [ ] Complete [unified-workflow/automation/brief_processor.py](mdc:unified-workflow/automation/brief_processor.py)
+   - [ ] Import `BriefParser` from [scripts/brief_parser.py](mdc:scripts/brief_parser.py)
+   - [ ] Import lifecycle tasks from [scripts/lifecycle_tasks.py](mdc:scripts/lifecycle_tasks.py)
+   - [ ] Add metadata extraction capabilities
+
+2. **Plan Generation Integration**
+   - [ ] Integrate with [scripts/plan_from_brief.py](mdc:scripts/plan_from_brief.py) logic
+   - [ ] Generate [PLAN.md](mdc:PLAN.md) and [tasks.json](mdc:tasks.json)
+   - [ ] Extract project metadata (name, type, complexity, compliance)
+
+3. **End-to-End Testing**
+   - [ ] Test brief to plan generation flow
+   - [ ] Verify metadata extraction accuracy
+   - [ ] Validate generated PLAN.md structure
+   - [ ] Test with various brief formats
+
+4. **Validation Checkpoint**
+   - [ ] Run: `python -m pytest tests/integration/test_brief_processor.py`
+   - [ ] Verify: Brief processing produces valid plans
+   - [ ] Confirm: Metadata extraction works correctly
+
+### Day 5-7: Workflow Automation Foundation
+**Priority: CRITICAL**
+
+1. **Complete Workflow Automation Module**
+   - [ ] Complete [unified-workflow/automation/workflow_automation.py](mdc:unified-workflow/automation/workflow_automation.py)
+   - [ ] Import `WorkflowOrchestrator` from [scripts/workflow_automation/orchestrator.py](mdc:scripts/workflow_automation/orchestrator.py)
+   - [ ] Import `WorkflowConfig` from [scripts/workflow_automation/config.py](mdc:scripts/workflow_automation/config.py)
+   - [ ] Integrate gate implementations
+
+2. **Gate Integration**
+   - [ ] Wire quality gates from [unified-workflow/automation/quality_gates.py](mdc:unified-workflow/automation/quality_gates.py)
+   - [ ] Wire validation gates from [unified-workflow/automation/validation_gates.py](mdc:unified-workflow/automation/validation_gates.py)
+   - [ ] Test gate execution at each phase boundary
+
+3. **Workflow Execution Testing**
+   - [ ] Test single-phase workflow execution
+   - [ ] Test multi-phase workflow execution
+   - [ ] Verify gate checkpoints work correctly
+   - [ ] Test error handling and rollback
+
+4. **Validation Checkpoint**
+   - [ ] Run: `python -m pytest tests/integration/test_workflow_automation.py`
+   - [ ] Verify: Workflow orchestration executes gates
+   - [ ] Confirm: Error handling works properly
+
+---
+
+## **[STRICT]** Validation Gate 2
+
+Before proceeding to Week 3, ALL of the following must pass:
+
+### Project Generator Integration
+- [ ] **CRITICAL**: Project generation works via unified interface
+- [ ] **CRITICAL**: All industry templates accessible
+- [ ] **REQUIRED**: Template registry integration complete
+- [ ] **GUIDELINE**: Performance acceptable for typical projects
+
+### Brief Processor Integration
+- [ ] **CRITICAL**: Brief processing produces valid plans
+- [ ] **CRITICAL**: Metadata extraction accurate
+- [ ] **REQUIRED**: Integration with lifecycle tasks works
+- [ ] **GUIDELINE**: Handles edge cases gracefully
+
+### Workflow Automation
+- [ ] **CRITICAL**: Workflow orchestration executes gates
+- [ ] **CRITICAL**: Phase transitions work correctly
+- [ ] **REQUIRED**: Error handling prevents data corruption
+- [ ] **REQUIRED**: Rollback mechanisms functional
+
+### Testing & Quality
+- [ ] **CRITICAL**: All unit tests pass (100%)
+- [ ] **CRITICAL**: All integration tests pass (100%)
+- [ ] **REQUIRED**: Code coverage ≥ 80% for new code
+- [ ] **GUIDELINE**: No critical linter warnings
+
+---
+
+## **[STRICT]** Success Metrics
+- Core modules integrated: 100% test pass rate
+- Project generation works: End-to-end success
+- Brief processing operational: Valid plan generation
+- Workflow automation functional: Gate execution verified
+
+---
+
+## **[STRICT]** Key Files Reference
+
+### Created/Modified This Week
+- [unified-workflow/automation/project_generator.py](mdc:unified-workflow/automation/project_generator.py)
+- [unified-workflow/automation/brief_processor.py](mdc:unified-workflow/automation/brief_processor.py)
+- [unified-workflow/automation/workflow_automation.py](mdc:unified-workflow/automation/workflow_automation.py)
+
+### Dependencies
+- [project_generator/core/generator.py](mdc:project_generator/core/generator.py)
+- [scripts/brief_parser.py](mdc:scripts/brief_parser.py)
+- [scripts/workflow_automation/orchestrator.py](mdc:scripts/workflow_automation/orchestrator.py)
+
+### Testing Files
+- `tests/integration/test_project_generator.py`
+- `tests/integration/test_brief_processor.py`
+- `tests/integration/test_workflow_automation.py`
+
+---
+
+## **[GUIDELINE]** Best Practices
+
+### Integration Patterns
+1. **Adapter Pattern**: Wrap legacy modules, don't modify them
+2. **Facade Pattern**: Provide simple unified interface
+3. **Dependency Injection**: Pass dependencies via constructors
+4. **Error Propagation**: Wrap and enrich errors with context
+
+### Testing Strategy
+1. **Unit Tests**: Test each module in isolation
+2. **Integration Tests**: Test module interactions
+3. **End-to-End Tests**: Test complete workflows
+4. **Regression Tests**: Ensure no existing functionality breaks
+
+---
+
+## **[GUIDELINE]** Risk Mitigation
+
+### Known Risks
+1. **Module Coupling**: Legacy modules may have tight coupling
+   - *Mitigation*: Use adapter pattern to isolate coupling
+   
+2. **State Management**: Workflow state may be inconsistent
+   - *Mitigation*: Implement transaction-like semantics with rollback
+   
+3. **Error Handling**: Legacy code may not handle errors gracefully
+   - *Mitigation*: Wrap all calls with try-except and proper logging
+
+---
+
+## Version
+- Spec: `1.0.0`
+- Timeline: Week 2 of 7-week integration plan
+- Last Updated: 2025-10-05

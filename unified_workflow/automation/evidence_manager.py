@@ -13,6 +13,12 @@ from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Any, Optional
 import click
+import sys
+
+# Add parent directory to path for evidence_schema_converter import
+sys.path.append(str(Path(__file__).resolve().parents[2]))
+
+from unified_workflow.automation.evidence_schema_converter import EvidenceSchemaConverter
 
 
 class EvidenceManager:
@@ -102,6 +108,88 @@ class EvidenceManager:
                 return json.load(f)
         except (FileNotFoundError, json.JSONDecodeError):
             return {}
+
+    def load_evidence(self, project_name: str = "", workflow_version: str = "1.0.0") -> Dict[str, Any]:
+        """Load evidence, automatically converting from legacy format if needed.
+
+        Args:
+            project_name: Name of the project (for legacy conversion)
+            workflow_version: Version of the workflow (for legacy conversion)
+
+        Returns:
+            Evidence in unified format
+        """
+        # Try to load as unified format first
+        if self.manifest_path.exists():
+            try:
+                manifest = self._read_json(self.manifest_path)
+                run_log = self._read_json(self.run_log_path)
+
+                # Check if this looks like unified format
+                if (isinstance(manifest, dict) and "artifacts" in manifest and
+                    isinstance(run_log, dict) and "entries" in run_log):
+
+                    # Load validation content
+                    validation_content = ""
+                    if self.validation_path.exists():
+                        validation_content = self.validation_path.read_text()
+
+                    return {
+                        "manifest": manifest,
+                        "run_log": run_log,
+                        "validation": validation_content
+                    }
+            except Exception:
+                pass
+
+        # If not unified format, try to load as legacy format and convert
+        if self.manifest_path.exists():
+            try:
+                legacy_evidence = self._read_json(self.manifest_path)
+
+                # Check if this looks like legacy format (list of artifacts)
+                if isinstance(legacy_evidence, list) and legacy_evidence:
+                    first_item = legacy_evidence[0]
+                    if isinstance(first_item, dict) and ("file" in first_item or "path" in first_item):
+                        # This is legacy format, convert it
+                        unified_evidence = EvidenceSchemaConverter.legacy_to_unified(
+                            legacy_evidence,
+                            project_name=project_name or "unknown",
+                            workflow_version=workflow_version,
+                            phase=0  # Default phase for legacy evidence
+                        )
+
+                        # Update our files with the converted format
+                        self._write_json(self.manifest_path, unified_evidence["manifest"])
+                        self._write_json(self.run_log_path, unified_evidence["run_log"])
+                        self._write_file(self.validation_path, unified_evidence["validation"])
+
+                        return unified_evidence
+            except Exception:
+                pass
+
+        # If neither format works, return empty unified structure
+        return {
+            "manifest": {
+                "artifacts": [],
+                "metadata": {
+                    "project_name": project_name,
+                    "workflow_version": workflow_version,
+                    "generated_at": self._get_timestamp(),
+                    "total_artifacts": 0
+                }
+            },
+            "run_log": {
+                "entries": [],
+                "metadata": {
+                    "project_name": project_name,
+                    "workflow_version": workflow_version,
+                    "total_entries": 0,
+                    "last_updated": self._get_timestamp()
+                }
+            },
+            "validation": ""
+        }
     
     def log_artifact(self, path: str, category: str, description: str, phase: int) -> bool:
         """

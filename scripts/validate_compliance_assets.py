@@ -9,9 +9,8 @@ import sys
 from pathlib import Path
 from types import SimpleNamespace
 
-ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(ROOT))
-
+# Import via proper package path (scripts should be run from repo root)
+# If running from elsewhere, use: python -m scripts.validate_compliance_assets
 from project_generator.core.generator import ProjectGenerator
 from project_generator.core.industry_config import IndustryConfig
 from project_generator.core.validator import ProjectValidator

@@ -79,16 +79,33 @@ class EvidenceSchemaConverter:
             }
         }
         
-        # Convert artifacts
+        # Convert artifacts (handle different legacy formats)
         for artifact in legacy_evidence:
-            unified_artifact = {
-                "path": artifact["path"],
-                "category": artifact["category"],
-                "description": artifact["description"],
-                "checksum": artifact["checksum"],
-                "created_at": artifact["created_at"],
-                "phase": phase  # Add phase information
-            }
+            # Handle workflow1 format (file, phase, project, checksum)
+            if "file" in artifact:
+                unified_artifact = {
+                    "path": artifact["file"],
+                    "category": "artifact",  # Default category
+                    "description": f"Phase {artifact.get('phase', 'unknown')} artifact",
+                    "checksum": artifact["checksum"],
+                    "created_at": artifact.get("created_at", artifact.get("timestamp", "2025-01-01T00:00:00Z")),
+                    "phase": phase  # Add phase information
+                }
+            # Handle standard legacy format (path, category, description, checksum, created_at)
+            elif "path" in artifact:
+                unified_artifact = {
+                    "path": artifact["path"],
+                    "category": artifact.get("category", "artifact"),
+                    "description": artifact.get("description", "Artifact"),
+                    "checksum": artifact["checksum"],
+                    "created_at": artifact["created_at"],
+                    "phase": phase  # Add phase information
+                }
+            else:
+                # Skip artifacts without path or file
+                logger.warning(f"Skipping artifact without path or file: {artifact}")
+                continue
+
             unified["manifest"]["artifacts"].append(unified_artifact)
         
         # Add a basic run log entry for the conversion

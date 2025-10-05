@@ -13,9 +13,8 @@ from pathlib import Path
 from typing import Dict, List, Optional
 import subprocess
 
-# Add project_generator to path
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
+# Import via proper package path (scripts should be run from repo root)
+# If running from elsewhere, use: python -m scripts.generate_client_project
 from project_generator.core.generator import ProjectGenerator
 from project_generator.core.validator import ProjectValidator
 from project_generator.core.industry_config import IndustryConfig

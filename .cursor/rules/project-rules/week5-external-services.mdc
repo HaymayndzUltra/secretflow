@@ -1,0 +1,307 @@
+---
+description: "TAGS: [integration,week5,external-services,review-protocols,quality-gates,orchestration] | TRIGGERS: week 5,external services,git integration,ai governor,review protocols,orchestrator | SCOPE: integration-phase | DESCRIPTION: Week 5 implementation guide for integrating external service dependencies, merging review protocols, and completing quality gate enhancements."
+alwaysApply: false
+---
+
+# Week 5: External Services & Review Protocols
+
+## Meta-Intent
+Integrate external service dependencies (Git, AI Governor, Policy DSL), merge review protocols into quality gates, and enhance orchestrator with all integrated components.
+
+## AI Persona
+You are an **External Integration & Quality Specialist** focused on secure external service integration and automated review processes.
+
+### **[STRICT]** Core Principle
+External services must be integrated securely with proper authentication, error handling, and fallback mechanisms. Review protocols must be automated within quality gates. Orchestrator must handle all components gracefully.
+
+### **[STRICT]** Prerequisites
+- Week 4 Validation Gate 4 MUST be passed
+- All workflow1 scripts integrated
+- Evidence templates merged
+- Phase protocols updated
+
+---
+
+## **[STRICT]** Week 5 Goals
+1. Integrate external service dependencies
+2. Merge review protocols into quality gates
+3. Enhance orchestrator with all integrations
+4. Setup comprehensive error handling and monitoring
+
+---
+
+## **[STRICT]** Implementation Tasks
+
+### Day 1-2: External Services Integration
+**Priority: CRITICAL**
+
+1. **Integrate Git Service (Phase 0)**
+   - [ ] Import Git integration from [project_generator/integrations/git_integration.py](mdc:project_generator/integrations/git_integration.py)
+   - [ ] Create adapter in [unified-workflow/automation/git_service.py](mdc:unified-workflow/automation/git_service.py)
+   - [ ] Implement repository initialization
+   - [ ] Implement initial commit creation
+   - [ ] Add branch creation support
+   - [ ] Test Git operations with various configurations
+
+2. **Integrate AI Governor (Phase 3)**
+   - [ ] Import AI Governor from [project_generator/integrations/ai_governor.py](mdc:project_generator/integrations/ai_governor.py)
+   - [ ] Create adapter in [unified-workflow/automation/ai_governor_service.py](mdc:unified-workflow/automation/ai_governor_service.py)
+   - [ ] Implement rule validation
+   - [ ] Implement workflow routing
+   - [ ] Add policy enforcement
+   - [ ] Test with various rule configurations
+
+3. **Integrate Policy DSL (Compliance)**
+   - [ ] Import Policy DSL from `project_generator/integrations/policy_dsl.py`
+   - [ ] Create adapter in [unified-workflow/automation/policy_service.py](mdc:unified-workflow/automation/policy_service.py)
+   - [ ] Implement policy parsing
+   - [ ] Implement policy evaluation
+   - [ ] Add policy reporting
+   - [ ] Test with HIPAA/SOC2/PCI policies
+
+4. **External Service Configuration**
+   - [ ] Create [unified-workflow/config/external_services.yaml](mdc:unified-workflow/config/external_services.yaml)
+   - [ ] Document service authentication methods
+   - [ ] Setup service health checks
+   - [ ] Configure service timeouts and retries
+   - [ ] Test service failover mechanisms
+
+5. **Validation Checkpoint**
+   - [ ] Run: `python -m pytest tests/integration/test_external_services.py`
+   - [ ] Verify: External services authenticate correctly
+   - [ ] Confirm: Service health checks work
+   - [ ] Validate: Failover mechanisms functional
+
+### Day 3-4: Review Protocol Integration
+**Priority: HIGH**
+
+1. **Import Review Protocols**
+   - [ ] Catalog protocols in `.cursor/dev-workflow/review-protocols/`
+   - [ ] Identify protocol triggers and execution points
+   - [ ] Map protocols to quality gates and phases
+   - [ ] Document protocol dependencies
+
+2. **Wire into Quality Gates**
+   - [ ] Update [unified-workflow/automation/quality_gates.py](mdc:unified-workflow/automation/quality_gates.py)
+   - [ ] Add code review protocol execution
+   - [ ] Add architecture review protocol execution
+   - [ ] Add security review protocol execution
+   - [ ] Add performance review protocol execution
+   - [ ] Test review execution in gates
+
+3. **Wire into Validation Gates**
+   - [ ] Update [unified-workflow/automation/validation_gates.py](mdc:unified-workflow/automation/validation_gates.py)
+   - [ ] Add design validation protocol
+   - [ ] Add implementation validation protocol
+   - [ ] Add integration validation protocol
+   - [ ] Test validation execution in gates
+
+4. **Review Execution Testing**
+   - [ ] Test each review protocol in isolation
+   - [ ] Test review protocol chaining
+   - [ ] Verify review output format
+   - [ ] Test review failure handling
+   - [ ] Validate review metrics collection
+
+5. **Validation Checkpoint**
+   - [ ] Run: `python -m pytest tests/test_review_protocols.py`
+   - [ ] Verify: Review protocols execute in gates
+   - [ ] Confirm: Review results captured correctly
+   - [ ] Validate: Failed reviews block progression
+
+### Day 5-7: Orchestrator Enhancement
+**Priority: CRITICAL**
+
+1. **Update AI Orchestrator**
+   - [ ] Update [unified-workflow/automation/ai_orchestrator.py](mdc:unified-workflow/automation/ai_orchestrator.py)
+   - [ ] Integrate project generator module
+   - [ ] Integrate brief processor module
+   - [ ] Integrate workflow automation module
+   - [ ] Integrate external services
+   - [ ] Integrate review protocols
+   - [ ] Add comprehensive logging
+
+2. **Update AI Executor**
+   - [ ] Update [unified-workflow/automation/ai_executor.py](mdc:unified-workflow/automation/ai_executor.py)
+   - [ ] Add phase-specific execution logic
+   - [ ] Integrate all new components per phase
+   - [ ] Add error recovery mechanisms
+   - [ ] Implement checkpoint/resume functionality
+
+3. **Error Handling Enhancement**
+   - [ ] Add structured error types
+   - [ ] Implement error recovery strategies
+   - [ ] Add error reporting and alerting
+   - [ ] Create error troubleshooting guide
+   - [ ] Test error scenarios systematically
+
+4. **Orchestration Testing**
+   - [ ] Test orchestration with all phases
+   - [ ] Test orchestration with external services
+   - [ ] Test orchestration with review protocols
+   - [ ] Test error handling and recovery
+   - [ ] Test checkpoint/resume functionality
+
+5. **Validation Checkpoint**
+   - [ ] Run: `python -m pytest tests/integration/test_orchestrator.py`
+   - [ ] Verify: Orchestrator handles all phases
+   - [ ] Confirm: All components integrated
+   - [ ] Validate: Error handling prevents corruption
+
+---
+
+## **[STRICT]** Validation Gate 5
+
+Before proceeding to Week 6, ALL of the following must pass:
+
+### External Services
+- [ ] **CRITICAL**: External services authenticate correctly
+- [ ] **CRITICAL**: Service health checks operational
+- [ ] **REQUIRED**: Failover mechanisms work
+- [ ] **REQUIRED**: Service timeouts configured
+- [ ] **GUIDELINE**: Service monitoring active
+
+### Review Protocols
+- [ ] **CRITICAL**: Review protocols execute in gates
+- [ ] **CRITICAL**: Failed reviews block progression
+- [ ] **REQUIRED**: Review results captured correctly
+- [ ] **GUIDELINE**: Review metrics useful
+
+### Orchestrator
+- [ ] **CRITICAL**: Orchestrator handles all phases
+- [ ] **CRITICAL**: All components integrated properly
+- [ ] **REQUIRED**: Error handling prevents corruption
+- [ ] **REQUIRED**: Checkpoint/resume functional
+- [ ] **GUIDELINE**: Performance acceptable
+
+### Quality Metrics
+- [ ] **CRITICAL**: Quality metrics collected properly
+- [ ] **REQUIRED**: Metrics stored in evidence
+- [ ] **GUIDELINE**: Metrics visualization available
+
+---
+
+## **[STRICT]** Success Metrics
+- External services connected: 100% authentication success
+- Reviews automated: All protocols integrated into gates
+- Orchestrator complete: All components functional
+- Quality metrics operational: Data collection and storage working
+
+---
+
+## **[STRICT]** Key Files Reference
+
+### Created/Modified This Week
+- [unified-workflow/automation/git_service.py](mdc:unified-workflow/automation/git_service.py)
+- [unified-workflow/automation/ai_governor_service.py](mdc:unified-workflow/automation/ai_governor_service.py)
+- [unified-workflow/automation/policy_service.py](mdc:unified-workflow/automation/policy_service.py)
+- [unified-workflow/automation/quality_gates.py](mdc:unified-workflow/automation/quality_gates.py)
+- [unified-workflow/automation/validation_gates.py](mdc:unified-workflow/automation/validation_gates.py)
+- [unified-workflow/automation/ai_orchestrator.py](mdc:unified-workflow/automation/ai_orchestrator.py)
+- [unified-workflow/automation/ai_executor.py](mdc:unified-workflow/automation/ai_executor.py)
+- [unified-workflow/config/external_services.yaml](mdc:unified-workflow/config/external_services.yaml)
+
+### Dependencies
+- [project_generator/integrations/git_integration.py](mdc:project_generator/integrations/git_integration.py)
+- [project_generator/integrations/ai_governor.py](mdc:project_generator/integrations/ai_governor.py)
+- `.cursor/dev-workflow/review-protocols/*`
+
+### Testing Files
+- `tests/integration/test_external_services.py`
+- `tests/test_review_protocols.py`
+- `tests/integration/test_orchestrator.py`
+
+---
+
+## **[GUIDELINE]** External Service Authentication
+
+### Git Service Authentication
+```yaml
+git:
+  type: local|github|gitlab
+  auth:
+    method: ssh|token|password
+    credentials:
+      token: ${GIT_TOKEN}
+      ssh_key_path: ${SSH_KEY_PATH}
+  config:
+    default_branch: main
+    auto_init: true
+```
+
+### AI Governor Authentication
+```yaml
+ai_governor:
+  enabled: true
+  rules_path: .cursor/rules
+  validation_level: strict|moderate|lenient
+  enforcement: block|warn|log
+```
+
+### Policy DSL Configuration
+```yaml
+policy_dsl:
+  compliance_frameworks:
+    - hipaa
+    - soc2
+    - pci-dss
+  policy_path: policies/
+  validation_mode: strict
+```
+
+---
+
+## **[GUIDELINE]** Review Protocol Integration Pattern
+
+### Review Protocol Execution
+```python
+def execute_review_protocol(
+    protocol_name: str,
+    artifacts: Dict[str, Any],
+    config: Dict[str, Any]
+) -> ReviewResult:
+    """Execute a review protocol
+    
+    Args:
+        protocol_name: Name of protocol to execute
+        artifacts: Artifacts to review
+        config: Protocol configuration
+        
+    Returns:
+        ReviewResult with pass/fail and findings
+    """
+    protocol = load_protocol(protocol_name)
+    
+    findings = []
+    for check in protocol.checks:
+        result = check.execute(artifacts, config)
+        if not result.passed:
+            findings.append(result.finding)
+    
+    return ReviewResult(
+        passed=len(findings) == 0,
+        findings=findings,
+        metrics=collect_metrics(protocol, findings)
+    )
+```
+
+---
+
+## **[GUIDELINE]** Risk Mitigation
+
+### Known Risks
+1. **External Service Downtime**: Services may be unavailable
+   - *Mitigation*: Implement retry logic and fallback modes
+   
+2. **Authentication Failures**: Credentials may expire or be invalid
+   - *Mitigation*: Validate credentials on startup, provide clear error messages
+   
+3. **Review Protocol Failures**: Protocols may have bugs or be too strict
+   - *Mitigation*: Allow manual override with justification
+
+---
+
+## Version
+- Spec: `1.0.0`
+- Timeline: Week 5 of 7-week integration plan
+- Last Updated: 2025-10-05

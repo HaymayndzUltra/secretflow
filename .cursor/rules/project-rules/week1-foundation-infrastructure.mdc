@@ -1,0 +1,151 @@
+---
+description: "TAGS: [integration,week1,foundation,infrastructure,packaging,templates,evidence] | TRIGGERS: week 1,foundation,infrastructure,package,template registry,evidence schema | SCOPE: integration-phase | DESCRIPTION: Week 1 implementation guide for foundation and infrastructure work including Python packaging fixes, unified template registry, and evidence schema resolution."
+alwaysApply: false
+---
+
+# Week 1: Foundation & Infrastructure
+
+## Meta-Intent
+Establish the foundational infrastructure required for all subsequent integration work, addressing critical packaging issues, template unification, and evidence schema standardization.
+
+## AI Persona
+You are a **Foundation Infrastructure Specialist** focused on creating robust, dependency-free base systems.
+
+### **[STRICT]** Core Principle
+All subsequent integration work depends on proper package structure, unified template access, and consistent evidence formats. This week's work must be completed and validated before proceeding to Week 2.
+
+---
+
+## **[STRICT]** Week 1 Goals
+1. Fix Python packaging issues across the codebase
+2. Establish shared infrastructure and adapter patterns
+3. Create unified template registry
+4. Resolve evidence schema conflicts
+
+---
+
+## **[STRICT]** Implementation Tasks
+
+### Day 1-2: Package Structure Fixes
+**Priority: CRITICAL**
+
+1. **Add Missing `__init__.py` Files**
+   - [x] Add [scripts/__init__.py](mdc:scripts/__init__.py) ✓ COMPLETED
+   - Verify all package directories have proper `__init__.py` files
+
+2. **Fix sys.path Manipulations**
+   - [ ] Audit 9 high-priority scripts identified in analysis
+   - [ ] Remove sys.path hacks and replace with proper imports
+   - [ ] Create adapter modules in `unified-workflow/automation/`
+   - [ ] Test import resolution across all modules
+
+3. **Validation Checkpoint**
+   - [ ] Run: `python -m pytest tests/test_imports.py`
+   - [ ] Verify: No runtime ImportError exceptions
+   - [ ] Confirm: All modules resolve via proper Python path
+
+### Day 3-4: Unified Template Registry
+**Priority: HIGH**
+
+1. **Create Central Registry**
+   - [x] Create [unified-workflow/core/template_registry.py](mdc:unified-workflow/core/template_registry.py) ✓ COMPLETED
+   - [x] Update [project_generator/templates/registry.py](mdc:project_generator/templates/registry.py) to delegate ✓ COMPLETED
+
+2. **Template Discovery & Loading**
+   - [ ] Test template discovery across all workflow phases
+   - [ ] Verify loading from both legacy and unified locations
+   - [ ] Document template versioning strategy in [docs/Template_Versioning.md](mdc:docs/Template_Versioning.md)
+
+3. **Validation Checkpoint**
+   - [ ] Run: `python -m unified_workflow.core.template_registry --test`
+   - [ ] Verify: All templates discoverable
+   - [ ] Confirm: No duplicate or missing templates
+
+### Day 5-7: Evidence Schema Resolution
+**Priority: HIGH**
+
+1. **Schema Converter Implementation**
+   - [x] Create [unified-workflow/core/evidence_schema_converter.py](mdc:unified-workflow/core/evidence_schema_converter.py) ✓ COMPLETED
+   - [ ] Test legacy to unified conversion
+   - [ ] Create migration scripts for historical data
+
+2. **Evidence Manager Updates**
+   - [ ] Update [unified-workflow/automation/evidence_manager.py](mdc:unified-workflow/automation/evidence_manager.py)
+   - [ ] Integrate schema converter into evidence collection
+   - [ ] Test evidence generation across all phases
+
+3. **Validation Checkpoint**
+   - [ ] Run: `python tests/test_evidence_schema.py`
+   - [ ] Verify: Schema conversion works bidirectionally
+   - [ ] Confirm: Historical evidence accessible
+
+---
+
+## **[STRICT]** Validation Gate 1
+
+Before proceeding to Week 2, ALL of the following must pass:
+
+### Import Resolution
+- [ ] **CRITICAL**: All imports resolve without sys.path hacks
+- [ ] **CRITICAL**: No ImportError in any module
+- [ ] **REQUIRED**: Adapter modules functional
+
+### Template Registry
+- [ ] **CRITICAL**: Template registry finds all templates
+- [ ] **REQUIRED**: Template versioning documented
+- [ ] **GUIDELINE**: Template loading performance acceptable
+
+### Evidence Schema
+- [ ] **CRITICAL**: Evidence converter passes all unit tests
+- [ ] **REQUIRED**: Migration scripts tested on sample data
+- [ ] **REQUIRED**: Evidence managers use unified schema
+
+### Regression Testing
+- [ ] **CRITICAL**: No regression in existing functionality
+- [ ] **REQUIRED**: All existing tests still pass
+- [ ] **GUIDELINE**: Performance benchmarks maintained
+
+---
+
+## **[STRICT]** Success Metrics
+- Infrastructure ready: 0 sys.path hacks remain
+- Template registry operational: 100% template discovery rate
+- Evidence schema unified: 100% conversion success rate
+- Zero import failures in automated tests
+
+---
+
+## **[STRICT]** Key Files Reference
+
+### Created/Modified This Week
+- [scripts/__init__.py](mdc:scripts/__init__.py)
+- [unified-workflow/automation/*_adapter.py](mdc:unified-workflow/automation/)
+- [unified-workflow/core/template_registry.py](mdc:unified-workflow/core/template_registry.py)
+- [unified-workflow/core/evidence_schema_converter.py](mdc:unified-workflow/core/evidence_schema_converter.py)
+- [project_generator/templates/registry.py](mdc:project_generator/templates/registry.py)
+
+### Testing Files
+- `tests/test_imports.py`
+- `tests/test_template_registry.py`
+- `tests/test_evidence_schema.py`
+
+---
+
+## **[GUIDELINE]** Risk Mitigation
+
+### Known Risks
+1. **Circular Import Dependencies**: May discover circular imports when removing sys.path hacks
+   - *Mitigation*: Refactor to break circular dependencies
+   
+2. **Template Path Changes**: Legacy code may hardcode template paths
+   - *Mitigation*: Use template registry exclusively
+   
+3. **Evidence Format Breaking Changes**: Old evidence may not convert cleanly
+   - *Mitigation*: Keep converter fallback to legacy format
+
+---
+
+## Version
+- Spec: `1.0.0`
+- Timeline: Week 1 of 7-week integration plan
+- Last Updated: 2025-10-05

@@ -12,15 +12,13 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Callable, Dict, Iterable, List, Optional, Sequence, Tuple
 
-
-ROOT = Path(__file__).resolve().parents[1]
-if str(ROOT) not in sys.path:
-    sys.path.insert(0, str(ROOT))
-
+# Import via proper package path (scripts should be run from repo root)
+# If running from elsewhere, use: python -m scripts.pre_lifecycle_plan
 from project_generator.core.brief_parser import BriefParser, ScaffoldSpec  # type: ignore[misc]
-
 from scripts.lifecycle_tasks import build_plan
 
+# Repository root (used for path calculations, NOT for sys.path manipulation)
+ROOT = Path(__file__).resolve().parents[1]
 
 # ---------------------------------------------------------------------------
 # Dataclasses and helpers

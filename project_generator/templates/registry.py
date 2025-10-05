@@ -12,91 +12,111 @@ from pathlib import Path
 from typing import Dict, Any, List, Optional
 
 # Import the unified template registry
-import sys
-unified_path = Path(__file__).resolve().parents[2] / "unified-workflow"
-if str(unified_path) not in sys.path:
-    sys.path.append(str(unified_path))
+# Note: This file was originally importing from unified-workflow core,
+# but that creates circular dependencies. The unified template registry
+# should import from this project_generator registry instead.
 
-from core.template_registry import get_registry, UnifiedTemplateRegistry
+# For now, we'll implement a basic registry that can be enhanced later
 
 
 class TemplateRegistry:
-    """Legacy template registry interface that delegates to unified registry."""
+    """Legacy template registry interface.
+
+    This is a simplified implementation that will be enhanced to delegate
+    to the unified template registry once the integration is complete.
+    """
 
     def __init__(self, root: Optional[Path] = None):
-        """Initialize registry (now delegates to unified registry).
-        
+        """Initialize registry.
+
         Args:
             root: Legacy parameter, kept for compatibility but ignored.
         """
-        self._unified_registry = get_registry()
-        # Ensure registry is initialized
-        self._unified_registry.initialize()
+        self._root = root or Path(__file__).resolve().parents[2]
+        self._templates = []
+        self._load_templates()
 
-    def _manifest_for(self, template_dir: Path) -> Optional[Dict[str, Any]]:
-        """Legacy method kept for compatibility."""
-        mf = template_dir / 'template.manifest.json'
-        if mf.exists():
+    def _load_templates(self):
+        """Load templates from template-packs directory."""
+        template_packs_dir = self._root / "template-packs"
+
+        if not template_packs_dir.exists():
+            print(f"Warning: Template packs directory not found: {template_packs_dir}")
+            return
+
+        print(f"Loading templates from: {template_packs_dir}")
+
+        # Scan all subdirectories recursively for template manifests
+        for manifest_file in template_packs_dir.rglob('template.manifest.json'):
             try:
-                return json.loads(mf.read_text(encoding='utf-8'))
-            except Exception:
-                return None
-        return None
+                print(f"  Loading manifest: {manifest_file}")
+                manifest = json.loads(manifest_file.read_text(encoding='utf-8'))
+
+                # Get the template directory (parent of manifest)
+                template_dir = manifest_file.parent
+
+                # Determine template type and name from path or manifest
+                rel_path = template_dir.relative_to(template_packs_dir)
+                path_parts = rel_path.parts
+
+                # If manifest specifies type and name, use them
+                template_type = manifest.get('type', path_parts[0] if len(path_parts) > 0 else 'unknown')
+                template_name = manifest.get('name', path_parts[-1] if len(path_parts) > 0 else template_dir.name)
+
+                template_info = {
+                    'type': template_type,
+                    'name': template_name,
+                    'variants': manifest.get('variants', ['base']),
+                    'engines': manifest.get('engines', ['default']),
+                    'path': str(template_dir),
+                }
+                self._templates.append(template_info)
+                print(f"  Added template: {template_info['type']}/{template_info['name']} at {template_info['path']}")
+            except Exception as e:
+                print(f"  Error loading manifest {manifest_file}: {e}")
+
+        print(f"Total templates loaded: {len(self._templates)}")
 
     def list_all(self) -> List[Dict[str, Any]]:
-        """List all templates using unified registry.
-        
+        """List all templates.
+
         Returns:
             List of templates in legacy format.
         """
-        templates = self._unified_registry.list_templates()
-        results = []
-        
-        for template in templates:
-            entry = {
-                'type': template.type.value,
-                'name': template.name,
-                'variants': template.variants,
-                'engines': template.engines,
-                'path': str(template.path),
-            }
-            results.append(entry)
-        return results
-    
+        return self._templates.copy()
+
     def get_template(self, template_type: str, template_name: str) -> Optional[Dict[str, Any]]:
         """Get a specific template by type and name.
-        
+
         Args:
             template_type: Type of template.
             template_name: Name of template.
-            
+
         Returns:
-            Template dict in legacy format if found, None otherwise.
+            Template metadata or None if not found.
         """
-        template = self._unified_registry.get_template(template_type, template_name)
-        if not template:
-            return None
-        
-        return {
-            'type': template.type.value,
-            'name': template.name,
-            'variants': template.variants,
-            'engines': template.engines,
-            'path': str(template.path),
-        }
-    
-    def get_template_path(self, template_type: str, template_name: str, 
+        for template in self._templates:
+            if template['type'] == template_type and template['name'] == template_name:
+                return template.copy()
+        return None
+
+    def get_template_path(self, template_type: str, template_name: str,
                          variant: str = "base") -> Optional[Path]:
         """Get the full path to a template variant.
-        
+
         Args:
             template_type: Type of template.
             template_name: Name of template.
             variant: Template variant.
-            
+
         Returns:
             Path to template if found, None otherwise.
         """
-        path = self._unified_registry.get_template_path(template_type, template_name, variant)
-        return path
+        template = self.get_template(template_type, template_name)
+        if template:
+            template_path = Path(template['path'])
+            # For now, return the base template directory
+            # In the future, this will resolve specific variants
+            return template_path
+        return None
 

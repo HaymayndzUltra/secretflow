@@ -22,8 +22,8 @@ from ..templates.registry import TemplateRegistry
 class ProjectGenerator:
     """Main project generator class"""
     
-    def __init__(self, args=None, validator: ProjectValidator = None, config: IndustryConfig = None, 
-                 output_dir=None, template_dir=None):
+    def __init__(self, args=None, validator: ProjectValidator = None, config: IndustryConfig = None,
+                 output_dir=None, template_dir=None, template_registry=None):
         # Support old test interface
         if output_dir is not None and template_dir is not None:
             # Legacy test constructor
@@ -65,7 +65,11 @@ class ProjectGenerator:
             self.config = IndustryConfig(getattr(self.args, 'industry', 'healthcare'))
             
         self.template_engine = TemplateEngine()
-        self.template_registry = TemplateRegistry()
+        # Use provided template registry or fall back to legacy
+        if template_registry is not None:
+            self.template_registry = template_registry
+        else:
+            self.template_registry = TemplateRegistry()
         # When True, do not emit any .cursor assets (rules, tools, ai-governor) into generated projects
         self.no_cursor_assets = bool(getattr(self.args, 'no_cursor_assets', False))
         # Minimal cursor mode: only project.json and selected rules (via rules manifest)
@@ -2330,14 +2334,30 @@ jobs:
         self.project_name = config.get('name')
     
     def get_template_path(self, component: str, technology: str) -> Path:
-        """Get template path for component and technology"""
+        """Get template path for component and technology using unified registry"""
+        try:
+            # Try to get template from unified registry first
+            if hasattr(self.template_registry, 'get_template_path'):
+                # This is the unified template registry
+                template_path = self.template_registry.get_template_path(component, technology, 'base')
+                if template_path and template_path.exists():
+                    return template_path
+            else:
+                # Fall back to legacy registry method
+                template_info = self.template_registry.get_template(component, technology)
+                if template_info:
+                    return Path(template_info['path'])
+        except Exception:
+            pass
+
+        # Fallback to hardcoded paths for backward compatibility
         if hasattr(self, 'template_dir'):
             # Legacy test interface
             template_path = self.template_dir / component / technology / 'base'
         else:
             # Production interface
             template_path = Path(__file__).parent.parent.parent / 'template-packs' / component / technology / 'base'
-        
+
         if not template_path.exists():
             raise FileNotFoundError(f"Template not found: {template_path}")
         return template_path

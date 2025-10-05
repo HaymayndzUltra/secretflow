@@ -55,7 +55,20 @@ class UnifiedTemplateRegistry:
         Args:
             root_path: Root path of the project. If None, auto-detects.
         """
-        self.root = root_path or self._find_root()
+        # For now, hardcode the correct root path since _find_root doesn't work from unified_workflow
+        if root_path is not None:
+            self.root = root_path
+        else:
+            # Try to find the project root by looking for template-packs
+            current = Path(__file__).resolve()
+            while current.parent != current:
+                if (current / "template-packs").exists():
+                    self.root = current
+                    break
+                current = current.parent
+            else:
+                # Fallback to a reasonable default
+                self.root = Path(__file__).resolve().parents[2]  # Go up 2 levels from unified_workflow/core
         self._templates: Dict[str, TemplateMetadata] = {}
         self._template_paths: Set[Path] = set()
         self._initialized = False
@@ -64,7 +77,7 @@ class UnifiedTemplateRegistry:
         self.search_paths = [
             self.root / "template-packs",  # Top-level templates (primary)
             self.root / "project_generator" / "template-packs",  # Legacy location
-            self.root / "unified-workflow" / "templates",  # Unified workflow templates
+            self.root / "unified_workflow" / "templates",  # Unified workflow templates
         ]
     
     def _find_root(self) -> Path:
@@ -103,16 +116,74 @@ class UnifiedTemplateRegistry:
     
     def _scan_template_path(self, base_path: Path) -> None:
         """Scan a template directory for templates.
-        
+
         Args:
             base_path: Base path to scan for templates.
         """
+        # Handle both the expected structure (template-packs/type/name/)
+        # and the actual structure (template-packs/type/name/ or template-packs/name/)
         for type_enum in TemplateType:
             type_dir = base_path / type_enum.value
             if type_dir.exists() and type_dir.is_dir():
                 for template_dir in type_dir.iterdir():
                     if template_dir.is_dir():
                         self._register_template(template_dir, type_enum)
+
+        # Also scan the base path for any template directories that contain manifests
+        # This handles the case where templates are directly in template-packs/
+        if base_path.exists() and base_path.is_dir():
+            for item in base_path.iterdir():
+                if item.is_dir() and item.name not in [t.value for t in TemplateType]:
+                    # This might be a template directory, check for manifest
+                    manifest_path = item / "template.manifest.json"
+                    if manifest_path.exists():
+                        # Try to infer type from path or manifest
+                        self._register_template_from_path(item)
+
+    def _register_template_from_path(self, template_path: Path) -> None:
+        """Register a template by inferring its type from path or manifest.
+
+        Args:
+            template_path: Path to the template directory.
+        """
+        try:
+            manifest_path = template_path / "template.manifest.json"
+            if not manifest_path.exists():
+                return
+
+            # Read manifest to get template info
+            with open(manifest_path, 'r', encoding='utf-8') as f:
+                manifest_data = json.load(f)
+
+            template_name = manifest_data.get('name', template_path.name)
+            template_type_str = manifest_data.get('type', 'unknown')
+
+            # Try to match to a known template type
+            template_type = None
+            for type_enum in TemplateType:
+                if type_enum.value == template_type_str:
+                    template_type = type_enum
+                    break
+
+            if template_type is None:
+                # Try to infer from path
+                path_parts = template_path.parts
+                for part in path_parts:
+                    for type_enum in TemplateType:
+                        if type_enum.value == part:
+                            template_type = type_enum
+                            break
+                    if template_type:
+                        break
+
+                if template_type is None:
+                    logger.warning(f"Could not determine type for template: {template_path}")
+                    return
+
+            self._register_template(template_path, template_type)
+
+        except Exception as e:
+            logger.warning(f"Failed to register template from path {template_path}: {e}")
     
     def _register_template(self, template_path: Path, template_type: TemplateType) -> None:
         """Register a single template.

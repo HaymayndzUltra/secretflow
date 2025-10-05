@@ -1,0 +1,223 @@
+---
+description: "TAGS: [integration,week3,templates,cli,compliance] | TRIGGERS: week 3,template migration,cli compatibility,compliance validation | SCOPE: integration-phase | DESCRIPTION: Week 3 implementation guide for template pack migration, CLI compatibility layer, and compliance validation integration."
+alwaysApply: false
+---
+
+# Week 3: Template & CLI Integration
+
+## Meta-Intent
+Complete template migration to unified registry, implement CLI compatibility layer for gradual migration, and integrate compliance validation across all workflows.
+
+## AI Persona
+You are a **Template & Interface Integration Specialist** focused on maintaining backward compatibility while modernizing interfaces.
+
+### **[STRICT]** Core Principle
+All templates must be accessible via unified registry. Legacy CLI commands must continue working through compatibility layer. Compliance validation must be integrated into quality gates.
+
+### **[STRICT]** Prerequisites
+- Week 2 Validation Gate 2 MUST be passed
+- Project generator integration complete
+- Brief processor operational
+- Workflow automation functional
+
+---
+
+## **[STRICT]** Week 3 Goals
+1. Complete template pack migration to unified registry
+2. Implement CLI compatibility layer for gradual transition
+3. Integrate compliance validation into workflow gates
+4. Setup deprecation tracking and telemetry
+
+---
+
+## **[STRICT]** Implementation Tasks
+
+### Day 1-2: Template Pack Migration
+**Priority: CRITICAL**
+
+1. **Verify Unified Registry**
+   - [ ] Audit all template locations in codebase
+   - [ ] Verify unified registry loads ALL templates
+   - [ ] Test template discovery across all phases
+   - [ ] Validate template metadata completeness
+
+2. **Update Template References**
+   - [ ] Update generators to use registry API
+   - [ ] Remove hardcoded template paths
+   - [ ] Update documentation references
+   - [ ] Test template application in each phase
+
+3. **Template Governance Documentation**
+   - [ ] Document template versioning in [docs/Template_Governance.md](mdc:docs/Template_Governance.md)
+   - [ ] Create template contribution guide
+   - [ ] Define template deprecation policy
+   - [ ] Setup template quality checklist
+
+4. **Validation Checkpoint**
+   - [ ] Run: `python -m pytest tests/test_template_registry.py --comprehensive`
+   - [ ] Verify: All templates discoverable via registry
+   - [ ] Confirm: No hardcoded paths remain
+   - [ ] Validate: Template application works in all phases
+
+### Day 3-4: CLI Compatibility Layer
+**Priority: HIGH**
+
+1. **Create Unified CLI Entry Point**
+   - [ ] Create [unified-workflow/cli.py](mdc:unified-workflow/cli.py)
+   - [ ] Implement command parser and router
+   - [ ] Map legacy commands to new implementations
+   - [ ] Setup command alias system
+
+2. **Command Routing Implementation**
+   - [ ] Route to legacy scripts where needed
+   - [ ] Route to unified modules where available
+   - [ ] Add deprecation warnings for old commands
+   - [ ] Implement command help system
+
+3. **Telemetry Integration**
+   - [ ] Add usage tracking for all commands
+   - [ ] Track legacy vs unified command usage
+   - [ ] Monitor command execution success rates
+   - [ ] Setup telemetry dashboard
+
+4. **Backward Compatibility Testing**
+   - [ ] Test all legacy commands still work
+   - [ ] Verify command output consistency
+   - [ ] Test command chaining and piping
+   - [ ] Validate help text accuracy
+
+5. **Validation Checkpoint**
+   - [ ] Run: `bash tests/test_cli_compatibility.sh`
+   - [ ] Verify: All legacy commands route correctly
+   - [ ] Confirm: Telemetry data collected
+   - [ ] Validate: Deprecation warnings shown appropriately
+
+### Day 5-7: Compliance Validation Integration
+**Priority: HIGH**
+
+1. **Complete Compliance Validator Module**
+   - [x] [unified-workflow/automation/compliance_validator.py](mdc:unified-workflow/automation/compliance_validator.py) ✓ COMPLETED
+   - [ ] Verify integration of HIPAA validator
+   - [ ] Verify integration of SOC2 validator
+   - [ ] Verify integration of PCI-DSS validator
+
+2. **Compliance Asset Generation**
+   - [ ] Test compliance checklist generation
+   - [ ] Test data flow diagram generation
+   - [ ] Test audit log specification generation
+   - [ ] Validate asset completeness
+
+3. **Gate Integration**
+   - [ ] Update [unified-workflow/automation/quality_gates.py](mdc:unified-workflow/automation/quality_gates.py)
+   - [ ] Add compliance validation to Phase 0 gate
+   - [ ] Add compliance checks to Phase 3 gate
+   - [ ] Test gate execution with compliance validation
+
+4. **End-to-End Compliance Testing**
+   - [ ] Test HIPAA compliance workflow
+   - [ ] Test SOC2 compliance workflow
+   - [ ] Test PCI-DSS compliance workflow
+   - [ ] Test multi-compliance scenarios
+
+5. **Validation Checkpoint**
+   - [ ] Run: `python -m pytest tests/test_compliance_validator.py`
+   - [ ] Verify: Compliance validation produces correct assets
+   - [ ] Confirm: All validators integrated
+   - [ ] Validate: Gates use unified validators
+
+---
+
+## **[STRICT]** Validation Gate 3
+
+Before proceeding to Week 4, ALL of the following must pass:
+
+### Template Registry
+- [ ] **CRITICAL**: All templates accessible via unified registry
+- [ ] **CRITICAL**: No hardcoded template paths remain
+- [ ] **REQUIRED**: Template governance documented
+- [ ] **GUIDELINE**: Template loading performance acceptable
+
+### CLI Compatibility
+- [ ] **CRITICAL**: Legacy CLI commands route correctly
+- [ ] **CRITICAL**: Command output consistent with legacy
+- [ ] **REQUIRED**: Telemetry captures usage data
+- [ ] **REQUIRED**: Deprecation warnings shown
+- [ ] **GUIDELINE**: Help text accurate and helpful
+
+### Compliance Validation
+- [ ] **CRITICAL**: Compliance validation produces correct assets
+- [ ] **CRITICAL**: All validators (HIPAA, SOC2, PCI) integrated
+- [ ] **REQUIRED**: Gates use unified validators
+- [ ] **REQUIRED**: Multi-compliance scenarios work
+
+### Integration Testing
+- [ ] **CRITICAL**: All integration tests pass (100%)
+- [ ] **REQUIRED**: End-to-end workflows successful
+- [ ] **GUIDELINE**: Performance benchmarks maintained
+
+---
+
+## **[STRICT]** Success Metrics
+- Templates unified: Single registry, 100% discovery rate
+- CLI telemetry active: Usage tracking operational
+- Compliance validation: All validators integrated, assets generated correctly
+
+---
+
+## **[STRICT]** Key Files Reference
+
+### Created/Modified This Week
+- [unified-workflow/cli.py](mdc:unified-workflow/cli.py)
+- [unified-workflow/automation/compliance_validator.py](mdc:unified-workflow/automation/compliance_validator.py)
+- [unified-workflow/automation/quality_gates.py](mdc:unified-workflow/automation/quality_gates.py)
+- [docs/Template_Governance.md](mdc:docs/Template_Governance.md)
+
+### Testing Files
+- `tests/test_template_registry.py`
+- `tests/test_cli_compatibility.sh`
+- `tests/test_compliance_validator.py`
+
+---
+
+## **[GUIDELINE]** CLI Command Mapping
+
+### Legacy → Unified Mapping
+```bash
+# Project generation (routes to unified)
+scripts/generate_client_project.py → unified-workflow cli project create
+
+# Brief processing (routes to unified)
+scripts/plan_from_brief.py → unified-workflow cli brief process
+
+# Workflow execution (routes to unified)
+scripts/run_workflow.py → unified-workflow cli workflow run
+
+# Compliance validation (routes to unified)
+scripts/validate_compliance_assets.py → unified-workflow cli compliance validate
+```
+
+### Deprecation Timeline
+- **Week 3-4**: Deprecation warnings shown
+- **Week 5-6**: Dual execution (legacy + unified)
+- **Week 7+**: Legacy commands redirect only
+
+---
+
+## **[GUIDELINE]** Risk Mitigation
+
+### Known Risks
+1. **Template Path Migration Errors**: Code may still reference old paths
+   - *Mitigation*: Comprehensive grep search and validation tests
+   
+2. **CLI Breaking Changes**: Subtle behavioral differences
+   - *Mitigation*: Extensive compatibility test suite
+   
+3. **Compliance Rule Changes**: Compliance standards evolve
+   - *Mitigation*: Versioned validators with update mechanism
+
+---
+
+## Version
+- Spec: `1.0.0`
+- Timeline: Week 3 of 7-week integration plan
+- Last Updated: 2025-10-05
