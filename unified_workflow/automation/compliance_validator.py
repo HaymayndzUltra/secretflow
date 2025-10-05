@@ -17,8 +17,21 @@ from typing import Any, Dict, List, Optional, Sequence, Tuple, Union
 # Since we're in unified-workflow, we need to go up to access project_generator
 import sys
 root_path = Path(__file__).resolve().parents[2]
-if str(root_path) not in sys.path:
-    sys.path.append(str(root_path))
+project_root = str(root_path)
+
+# Ensure the project root is in the path
+if project_root not in sys.path:
+    sys.path.insert(0, project_root)
+
+# Import project generator components using proper package imports
+# Since we're in unified-workflow, we need to go up to access project_generator
+import sys
+root_path = Path(__file__).resolve().parents[2]
+project_root = str(root_path)
+
+# Ensure the project root is in the path
+if project_root not in sys.path:
+    sys.path.insert(0, project_root)
 
 from project_generator.core.generator import ProjectGenerator
 from project_generator.core.industry_config import IndustryConfig
