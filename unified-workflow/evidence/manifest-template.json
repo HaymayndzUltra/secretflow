@@ -1,0 +1,9 @@
+{
+  "artifacts": [],
+  "metadata": {
+    "project_name": "{{project_name}}",
+    "workflow_version": "1.0.0",
+    "generated_at": "{{timestamp}}",
+    "total_artifacts": 0
+  }
+}
