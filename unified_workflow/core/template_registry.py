@@ -71,6 +71,9 @@ class UnifiedTemplateRegistry:
                 self.root = Path(__file__).resolve().parents[2]  # Go up 2 levels from unified_workflow/core
         self._templates: Dict[str, TemplateMetadata] = {}
         self._template_paths: Set[Path] = set()
+        self._template_locations: Dict[str, Path] = {}
+        self._template_priority: Dict[str, int] = {}
+        self._duplicate_sources: Dict[str, List[Path]] = {}
         self._initialized = False
         
         # Define template search paths in priority order
@@ -101,24 +104,28 @@ class UnifiedTemplateRegistry:
         logger.info("Initializing unified template registry...")
         self._templates.clear()
         self._template_paths.clear()
-        
+        self._template_locations.clear()
+        self._template_priority.clear()
+        self._duplicate_sources.clear()
+
         # Scan each search path
-        for search_path in self.search_paths:
+        for priority, search_path in enumerate(self.search_paths):
             if search_path.exists():
                 logger.info(f"Scanning template path: {search_path}")
-                self._scan_template_path(search_path)
-        
+                self._scan_template_path(search_path, priority)
+
         # Resolve conflicts and duplicates
         self._resolve_conflicts()
         
         self._initialized = True
         logger.info(f"Registry initialized with {len(self._templates)} templates")
     
-    def _scan_template_path(self, base_path: Path) -> None:
+    def _scan_template_path(self, base_path: Path, priority: int) -> None:
         """Scan a template directory for templates.
 
         Args:
             base_path: Base path to scan for templates.
+            priority: Priority index for the base path.
         """
         # Handle both the expected structure (template-packs/type/name/)
         # and the actual structure (template-packs/type/name/ or template-packs/name/)
@@ -127,7 +134,7 @@ class UnifiedTemplateRegistry:
             if type_dir.exists() and type_dir.is_dir():
                 for template_dir in type_dir.iterdir():
                     if template_dir.is_dir():
-                        self._register_template(template_dir, type_enum)
+                        self._register_template(template_dir, type_enum, priority)
 
         # Also scan the base path for any template directories that contain manifests
         # This handles the case where templates are directly in template-packs/
@@ -138,13 +145,14 @@ class UnifiedTemplateRegistry:
                     manifest_path = item / "template.manifest.json"
                     if manifest_path.exists():
                         # Try to infer type from path or manifest
-                        self._register_template_from_path(item)
+                        self._register_template_from_path(item, priority)
 
-    def _register_template_from_path(self, template_path: Path) -> None:
+    def _register_template_from_path(self, template_path: Path, priority: int) -> None:
         """Register a template by inferring its type from path or manifest.
 
         Args:
             template_path: Path to the template directory.
+            priority: Priority index for the template.
         """
         try:
             manifest_path = template_path / "template.manifest.json"
@@ -180,17 +188,23 @@ class UnifiedTemplateRegistry:
                     logger.warning(f"Could not determine type for template: {template_path}")
                     return
 
-            self._register_template(template_path, template_type)
+            self._register_template(template_path, template_type, priority)
 
         except Exception as e:
             logger.warning(f"Failed to register template from path {template_path}: {e}")
-    
-    def _register_template(self, template_path: Path, template_type: TemplateType) -> None:
+
+    def _register_template(
+        self,
+        template_path: Path,
+        template_type: TemplateType,
+        priority: int,
+    ) -> None:
         """Register a single template.
-        
+
         Args:
             template_path: Path to the template directory.
             template_type: Type of the template.
+            priority: Priority index for this template path.
         """
         # Check for manifest file
         manifest_path = template_path / "template.manifest.json"
@@ -227,29 +241,52 @@ class UnifiedTemplateRegistry:
         
         # Register with conflict tracking
         key = f"{template_type.value}/{metadata.name}"
-        if key in self._templates:
-            # Track duplicate for conflict resolution
-            existing = self._templates[key]
-            logger.warning(
-                f"Duplicate template '{key}' found at:\n"
-                f"  - {existing.path}\n"
-                f"  - {template_path}"
-            )
+        existing_priority = self._template_priority.get(key)
+        if existing_priority is not None:
+            if priority < existing_priority:
+                previous_path = self._template_locations.get(key)
+                if previous_path is not None:
+                    self._template_paths.discard(previous_path)
+                self._templates[key] = metadata
+                self._template_priority[key] = priority
+                self._template_locations[key] = template_path
+                self._template_paths.add(template_path)
+                logger.info(
+                    "Template '%s' overridden by higher priority path %s", key, template_path
+                )
+            else:
+                self._duplicate_sources.setdefault(key, []).append(template_path)
+                logger.debug(
+                    "Skipping lower priority duplicate '%s' from %s", key, template_path
+                )
         else:
             self._templates[key] = metadata
+            self._template_priority[key] = priority
+            self._template_locations[key] = template_path
             self._template_paths.add(template_path)
-    
+
     def _resolve_conflicts(self) -> None:
         """Resolve template conflicts using priority rules.
-        
+
         Priority order (highest to lowest):
         1. Top-level template-packs/ (newest, primary location)
         2. unified-workflow/templates/ (unified system templates)
         3. project_generator/template-packs/ (legacy location)
         """
-        # For now, first registration wins (search_paths are in priority order)
-        # In the future, we could implement more sophisticated conflict resolution
-        pass
+        # Conflicts are resolved during registration based on priority.
+        # This method remains for future extensibility and currently logs
+        # any duplicates that were skipped to aid template governance.
+        if not self._duplicate_sources:
+            return
+
+        for key, paths in self._duplicate_sources.items():
+            path_list = "\n  - ".join(str(path) for path in paths)
+            logger.info(
+                "Skipped %d duplicate(s) for template '%s':\n  - %s",
+                len(paths),
+                key,
+                path_list,
+            )
     
     def get_template(self, template_type: str, template_name: str) -> Optional[TemplateMetadata]:
         """Get a specific template by type and name.
@@ -318,13 +355,17 @@ class UnifiedTemplateRegistry:
     
     def add_template_location(self, path: Path, priority: int = 10) -> None:
         """Add a new template search location.
-        
+
         Args:
             path: Path to add to search locations.
             priority: Priority (lower number = higher priority).
         """
-        # Insert based on priority
-        self.search_paths.append(path)
+        if path in self.search_paths:
+            logger.debug("Template path %s already registered", path)
+            return
+
+        insert_index = max(0, min(priority, len(self.search_paths)))
+        self.search_paths.insert(insert_index, path)
         # Re-initialize to pick up new templates
         self.initialize(force=True)
     

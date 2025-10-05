@@ -1,122 +1,100 @@
-"""
-Template registry - Proxy to unified template registry.
+"""Compatibility wrapper around the unified template registry.
 
-This module now serves as a compatibility layer that delegates to the
-unified template registry, ensuring consistency across all systems.
+This module exposes the legacy :class:`TemplateRegistry` interface used by the
+``project_generator`` package while delegating all functionality to the
+``UnifiedTemplateRegistry`` located in ``unified_workflow.core``.  The wrapper
+ensures the project generator and the unified workflow consume an identical
+view of available templates without duplicating discovery logic.
 """
 
 from __future__ import annotations
 
-import json
 from pathlib import Path
-from typing import Dict, Any, List, Optional
+from typing import Dict, List, Optional
 
-# Import the unified template registry
-# Note: This file was originally importing from unified-workflow core,
-# but that creates circular dependencies. The unified template registry
-# should import from this project_generator registry instead.
-
-# For now, we'll implement a basic registry that can be enhanced later
+from unified_workflow.core.template_registry import (
+    TemplateMetadata,
+    UnifiedTemplateRegistry,
+)
 
 
 class TemplateRegistry:
-    """Legacy template registry interface.
+    """Legacy template registry facade.
 
-    This is a simplified implementation that will be enhanced to delegate
-    to the unified template registry once the integration is complete.
+    The original project generator expected a lightweight registry capable of
+    returning dictionaries.  The unified registry already exposes all required
+    metadata, so the facade converts modern ``TemplateMetadata`` instances into
+    the legacy structures on demand.
     """
 
     def __init__(self, root: Optional[Path] = None):
-        """Initialize registry.
+        """Initialize the registry facade.
 
         Args:
-            root: Legacy parameter, kept for compatibility but ignored.
+            root: Optional project root. When provided, template discovery is
+                limited to the supplied directory.  If omitted the unified
+                registry performs automatic root detection.
         """
-        self._root = root or Path(__file__).resolve().parents[2]
-        self._templates = []
-        self._load_templates()
 
-    def _load_templates(self):
-        """Load templates from template-packs directory."""
-        template_packs_dir = self._root / "template-packs"
+        self._registry = UnifiedTemplateRegistry(root_path=root)
+        self._registry.initialize()
 
-        if not template_packs_dir.exists():
-            print(f"Warning: Template packs directory not found: {template_packs_dir}")
-            return
+    # ------------------------------------------------------------------
+    # Legacy interface
+    # ------------------------------------------------------------------
+    def list_all(self) -> List[Dict[str, object]]:
+        """Return all templates in the legacy dictionary format."""
 
-        print(f"Loading templates from: {template_packs_dir}")
+        templates = self._registry.list_templates()
+        return [self._to_legacy_dict(template) for template in templates]
 
-        # Scan all subdirectories recursively for template manifests
-        for manifest_file in template_packs_dir.rglob('template.manifest.json'):
-            try:
-                print(f"  Loading manifest: {manifest_file}")
-                manifest = json.loads(manifest_file.read_text(encoding='utf-8'))
-
-                # Get the template directory (parent of manifest)
-                template_dir = manifest_file.parent
-
-                # Determine template type and name from path or manifest
-                rel_path = template_dir.relative_to(template_packs_dir)
-                path_parts = rel_path.parts
-
-                # If manifest specifies type and name, use them
-                template_type = manifest.get('type', path_parts[0] if len(path_parts) > 0 else 'unknown')
-                template_name = manifest.get('name', path_parts[-1] if len(path_parts) > 0 else template_dir.name)
-
-                template_info = {
-                    'type': template_type,
-                    'name': template_name,
-                    'variants': manifest.get('variants', ['base']),
-                    'engines': manifest.get('engines', ['default']),
-                    'path': str(template_dir),
-                }
-                self._templates.append(template_info)
-                print(f"  Added template: {template_info['type']}/{template_info['name']} at {template_info['path']}")
-            except Exception as e:
-                print(f"  Error loading manifest {manifest_file}: {e}")
-
-        print(f"Total templates loaded: {len(self._templates)}")
-
-    def list_all(self) -> List[Dict[str, Any]]:
-        """List all templates.
-
-        Returns:
-            List of templates in legacy format.
-        """
-        return self._templates.copy()
-
-    def get_template(self, template_type: str, template_name: str) -> Optional[Dict[str, Any]]:
-        """Get a specific template by type and name.
+    def get_template(
+        self, template_type: str, template_name: str
+    ) -> Optional[Dict[str, object]]:
+        """Retrieve metadata for a specific template.
 
         Args:
-            template_type: Type of template.
-            template_name: Name of template.
+            template_type: Template category (backend, frontend, etc.).
+            template_name: Template identifier within the category.
 
         Returns:
-            Template metadata or None if not found.
+            Legacy dictionary describing the template, or ``None`` when the
+            template is not present in the unified registry.
         """
-        for template in self._templates:
-            if template['type'] == template_type and template['name'] == template_name:
-                return template.copy()
-        return None
 
-    def get_template_path(self, template_type: str, template_name: str,
-                         variant: str = "base") -> Optional[Path]:
-        """Get the full path to a template variant.
+        metadata = self._registry.get_template(template_type, template_name)
+        if metadata is None:
+            return None
+        return self._to_legacy_dict(metadata)
+
+    def get_template_path(
+        self, template_type: str, template_name: str, variant: str = "base"
+    ) -> Optional[Path]:
+        """Return the path to a template variant.
 
         Args:
-            template_type: Type of template.
-            template_name: Name of template.
-            variant: Template variant.
+            template_type: Template category.
+            template_name: Template identifier.
+            variant: Optional variant name (``"base"`` by default).
 
         Returns:
-            Path to template if found, None otherwise.
+            Path to the template variant if it exists, otherwise ``None``.
         """
-        template = self.get_template(template_type, template_name)
-        if template:
-            template_path = Path(template['path'])
-            # For now, return the base template directory
-            # In the future, this will resolve specific variants
-            return template_path
-        return None
+
+        return self._registry.get_template_path(template_type, template_name, variant)
+
+    # ------------------------------------------------------------------
+    # Helpers
+    # ------------------------------------------------------------------
+    @staticmethod
+    def _to_legacy_dict(metadata: TemplateMetadata) -> Dict[str, object]:
+        """Convert unified metadata to the legacy dictionary representation."""
+
+        return {
+            "type": metadata.type.value,
+            "name": metadata.name,
+            "variants": list(metadata.variants),
+            "engines": list(metadata.engines) if metadata.engines else None,
+            "path": str(metadata.path),
+        }
 

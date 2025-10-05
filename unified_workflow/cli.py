@@ -15,7 +15,7 @@ import subprocess
 import sys
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Sequence, Tuple
 
 # Setup logging
 logging.basicConfig(
@@ -62,37 +62,81 @@ class TelemetryTracker:
         except Exception as e:
             logger.warning(f"Failed to save telemetry: {e}")
     
-    def track_command(self, command: str, args: List[str], legacy: bool = False) -> None:
+    def track_command(
+        self,
+        command: str,
+        args: List[str],
+        *,
+        source: str,
+        exit_code: Optional[int] = None,
+        fallback: bool = False,
+        attempted_sources: Optional[Sequence[str]] = None,
+    ) -> None:
         """Track a command execution.
-        
+
         Args:
             command: Command name
             args: Command arguments
-            legacy: Whether this was a legacy command
+            source: Execution source (``"unified"`` or ``"legacy"``)
+            exit_code: Optional exit code returned by the command
+            fallback: Whether the execution required a legacy fallback
+            attempted_sources: Optional sequence describing all routing attempts
         """
         timestamp = datetime.utcnow().isoformat() + "Z"
-        
+
         if command not in self.data["commands"]:
             self.data["commands"][command] = {
                 "count": 0,
                 "legacy_count": 0,
+                "unified_count": 0,
                 "first_seen": timestamp,
                 "last_seen": timestamp,
-                "args_patterns": {}
+                "args_patterns": {},
+                "last_exit_code": None,
+                "last_source": None,
+                "fallback_count": 0,
+                "attempt_counts": {"unified": 0, "legacy": 0},
+                "last_attempts": [],
             }
-        
+
         cmd_data = self.data["commands"][command]
+        cmd_data.setdefault("unified_count", 0)
+        cmd_data.setdefault("legacy_count", 0)
+        cmd_data.setdefault("args_patterns", {})
+        cmd_data.setdefault("last_exit_code", None)
+        cmd_data.setdefault("last_source", None)
+        cmd_data.setdefault("fallback_count", 0)
+        cmd_data.setdefault("attempt_counts", {"unified": 0, "legacy": 0})
+        cmd_data.setdefault("last_attempts", [])
+
         cmd_data["count"] += 1
-        if legacy:
+        if source == "legacy":
             cmd_data["legacy_count"] += 1
+        else:
+            cmd_data["unified_count"] += 1
         cmd_data["last_seen"] = timestamp
-        
+        cmd_data["last_source"] = source
+        if exit_code is not None:
+            cmd_data["last_exit_code"] = exit_code
+        if fallback:
+            cmd_data["fallback_count"] += 1
+
+        attempts = list(attempted_sources) if attempted_sources else [source]
+        deduped_attempts = []
+        for attempt in attempts:
+            if attempt not in deduped_attempts:
+                deduped_attempts.append(attempt)
+            if attempt not in cmd_data["attempt_counts"]:
+                cmd_data["attempt_counts"][attempt] = 0
+            cmd_data["attempt_counts"][attempt] += 1
+        cmd_data["last_attempts"] = deduped_attempts
+
         # Track argument patterns
         args_key = " ".join(args[:2]) if args else "no_args"
         if args_key not in cmd_data["args_patterns"]:
             cmd_data["args_patterns"][args_key] = 0
         cmd_data["args_patterns"][args_key] += 1
-        
+
         self._save_data()
     
     def get_deprecation_candidates(self, days: int = 14) -> List[str]:
@@ -120,17 +164,22 @@ class TelemetryTracker:
 
 class LegacyCommandRouter:
     """Routes legacy commands to their implementations."""
-    
-    def __init__(self, project_root: Optional[Path] = None):
+
+    def __init__(
+        self,
+        project_root: Optional[Path] = None,
+        tracker: Optional[TelemetryTracker] = None,
+    ):
         """Initialize the legacy command router.
-        
+
         Args:
             project_root: Root directory of the project
+            tracker: Optional shared telemetry tracker instance
         """
         self.project_root = project_root or self._find_project_root()
         self.scripts_dir = self.project_root / "scripts"
         self.unified_automation = self.project_root / "unified-workflow" / "automation"
-        self.tracker = TelemetryTracker()
+        self.tracker = tracker or TelemetryTracker()
         
         # Define command mappings
         self.command_map = {
@@ -219,46 +268,89 @@ class LegacyCommandRouter:
     
     def route_command(self, command: str, args: List[str], use_legacy: bool = False) -> int:
         """Route a command to its implementation.
-        
+
         Args:
             command: Command name
             args: Command arguments
             use_legacy: Force use of legacy implementation
-            
+
         Returns:
             Exit code
         """
         if command not in self.command_map:
             logger.error(f"Unknown command: {command}")
             return 1
-        
+
         cmd_info = self.command_map[command]
-        
-        # Track command usage
-        self.tracker.track_command(command, args, legacy=use_legacy)
-        
-        # Determine which implementation to use
+        attempted_sources: List[str] = []
+        fallback_used = False
+        exit_code: Optional[int] = None
+        final_source = "legacy" if use_legacy else "unified"
+
         if use_legacy or cmd_info["unified"] is None:
-            # Use legacy script
-            script_path = self.scripts_dir / cmd_info["script"]
-            if not script_path.exists():
-                logger.error(f"Legacy script not found: {script_path}")
-                return 1
-            
-            logger.info(f"Running legacy command: {command}")
-            return self._run_legacy_script(script_path, args)
+            attempted_sources.append("legacy")
+            script_name = cmd_info.get("script")
+            if not script_name:
+                logger.error("Legacy path requested but no legacy script is defined for %s", command)
+                exit_code = 1
+            else:
+                script_path = self.scripts_dir / script_name
+                if not script_path.exists():
+                    logger.error(f"Legacy script not found: {script_path}")
+                    exit_code = 1
+                else:
+                    logger.info(f"Running legacy command: {command}")
+                    exit_code = self._run_legacy_script(script_path, args)
+            final_source = "legacy"
         else:
-            # Use unified implementation
             unified_path = self.unified_automation / cmd_info["unified"]
             if unified_path.exists():
+                attempted_sources.append("unified")
                 logger.info(f"Running unified command: {command}")
-                return self._run_unified_module(unified_path, args)
+                exit_code = self._run_unified_module(unified_path, args)
+                final_source = "unified"
+
+                if exit_code != 0 and cmd_info.get("script"):
+                    logger.warning(
+                        "Unified command '%s' exited with %s, attempting legacy fallback",
+                        command,
+                        exit_code,
+                    )
+                    fallback_used = True
+                    attempted_sources.append("legacy")
+                    script_path = self.scripts_dir / cmd_info["script"]
+                    if script_path.exists():
+                        final_source = "legacy"
+                        exit_code = self._run_legacy_script(script_path, args)
+                    else:
+                        logger.error(f"Legacy script not found for fallback: {script_path}")
             else:
-                # Fall back to legacy if unified not ready
-                logger.warning(f"Unified implementation not found, falling back to legacy")
-                self.tracker.track_command(command, args, legacy=True)
-                script_path = self.scripts_dir / cmd_info["script"]
-                return self._run_legacy_script(script_path, args)
+                logger.warning("Unified implementation not found for '%s', falling back to legacy", command)
+                fallback_used = True
+                attempted_sources.extend(["unified", "legacy"])
+                script_name = cmd_info.get("script")
+                if not script_name:
+                    logger.error("No legacy script available for command %s", command)
+                    exit_code = 1
+                else:
+                    script_path = self.scripts_dir / script_name
+                    if not script_path.exists():
+                        logger.error(f"Legacy script not found: {script_path}")
+                        exit_code = 1
+                    else:
+                        final_source = "legacy"
+                        exit_code = self._run_legacy_script(script_path, args)
+
+        self.tracker.track_command(
+            command,
+            args,
+            source=final_source,
+            exit_code=exit_code,
+            fallback=fallback_used,
+            attempted_sources=attempted_sources,
+        )
+
+        return exit_code if exit_code is not None else 1
     
     def _run_legacy_script(self, script_path: Path, args: List[str]) -> int:
         """Run a legacy Python script.
@@ -302,9 +394,9 @@ class LegacyCommandRouter:
             return 1
 
 
-def create_parser() -> argparse.ArgumentParser:
+def create_parser(router: Optional[LegacyCommandRouter] = None) -> argparse.ArgumentParser:
     """Create the CLI argument parser.
-    
+
     Returns:
         Configured argument parser
     """
@@ -337,11 +429,12 @@ def create_parser() -> argparse.ArgumentParser:
         help="List commands that are candidates for deprecation"
     )
     
+    router = router or LegacyCommandRouter()
+
     # Subcommands
     subparsers = parser.add_subparsers(dest="command", help="Available commands")
-    
+
     # Add subcommands dynamically from router
-    router = LegacyCommandRouter()
     for cmd, desc in router.list_commands():
         subparser = subparsers.add_parser(cmd, help=desc)
         # Add a catch-all for arguments to pass through
@@ -371,54 +464,86 @@ def show_telemetry() -> None:
         reverse=True
     )
     
-    print(f"{'Command':<25} {'Total':<8} {'Legacy':<8} {'Last Used':<20}")
-    print("-" * 70)
-    
+    header = (
+        f"{'Command':<25} {'Total':<8} {'Unified':<8} {'Legacy':<8} "
+        f"{'Fallbacks':<10} {'Last Used':<20} {'Exit':<5} {'Source':<8}"
+    )
+    print(header)
+    print("-" * len(header))
+
     for cmd, data in commands:
         last_used = data["last_seen"][:19].replace("T", " ")
-        print(f"{cmd:<25} {data['count']:<8} {data['legacy_count']:<8} {last_used:<20}")
-    
+        unified_count = data.get("unified_count", 0)
+        legacy_count = data.get("legacy_count", 0)
+        fallback_count = data.get("fallback_count", 0)
+        exit_code = data.get("last_exit_code")
+        last_source = (data.get("last_source") or "-").upper()
+        print(
+            f"{cmd:<25} {data['count']:<8} {unified_count:<8} {legacy_count:<8} "
+            f"{fallback_count:<10} {last_used:<20} {str(exit_code if exit_code is not None else '-'): <5} {last_source:<8}"
+        )
+
     print(f"\nTotal unique commands: {len(commands)}")
     total_calls = sum(d["count"] for _, d in commands)
-    total_legacy = sum(d["legacy_count"] for _, d in commands)
+    total_unified = sum(d.get("unified_count", 0) for _, d in commands)
+    total_legacy = sum(d.get("legacy_count", 0) for _, d in commands)
+    total_fallbacks = sum(d.get("fallback_count", 0) for _, d in commands)
     print(f"Total command calls: {total_calls}")
-    print(f"Legacy command calls: {total_legacy} ({total_legacy/total_calls*100:.1f}%)")
+    if total_calls:
+        print(f"Unified command calls: {total_unified} ({total_unified/total_calls*100:.1f}%)")
+        print(f"Legacy command calls: {total_legacy} ({total_legacy/total_calls*100:.1f}%)")
+    else:
+        print("Unified command calls: 0")
+        print("Legacy command calls: 0")
+    print(f"Legacy fallbacks: {total_fallbacks}")
 
 
-def main() -> int:
-    """Main CLI entry point.
-    
-    Returns:
-        Exit code
-    """
-    parser = create_parser()
-    args = parser.parse_args()
-    
-    # Handle special flags
-    if args.show_telemetry:
-        show_telemetry()
-        return 0
-    
-    if args.list_deprecation_candidates:
-        tracker = TelemetryTracker()
-        candidates = tracker.get_deprecation_candidates()
-        if candidates:
-            print("\nDeprecation candidates (unused for 14+ days via legacy):")
-            for cmd in candidates:
-                print(f"  - {cmd}")
-        else:
-            print("\nNo deprecation candidates found.")
-        return 0
-    
-    # Handle commands
-    if not args.command:
-        parser.print_help()
-        return 0
-    
-    # Route command
-    router = LegacyCommandRouter()
-    command_args = args.args if hasattr(args, 'args') else []
-    return router.route_command(args.command, command_args, use_legacy=args.legacy)
+class UnifiedCLI:
+    """High-level interface bridging the parser and command router."""
+
+    def __init__(self, router: Optional[LegacyCommandRouter] = None) -> None:
+        """Create a unified CLI wrapper.
+
+        Args:
+            router: Optional pre-configured command router instance.
+        """
+
+        self.router = router or LegacyCommandRouter()
+        self.parser = create_parser(self.router)
+        self.tracker = self.router.tracker
+
+    def run(self, argv: Optional[Sequence[str]] = None) -> int:
+        """Execute the CLI using the provided arguments."""
+
+        args = self.parser.parse_args(argv)
+
+        if getattr(args, "show_telemetry", False):
+            show_telemetry()
+            return 0
+
+        if getattr(args, "list_deprecation_candidates", False):
+            candidates = self.tracker.get_deprecation_candidates()
+            if candidates:
+                print("\nDeprecation candidates (unused for 14+ days via legacy):")
+                for cmd in candidates:
+                    print(f"  - {cmd}")
+            else:
+                print("\nNo deprecation candidates found.")
+            return 0
+
+        if not getattr(args, "command", None):
+            self.parser.print_help()
+            return 0
+
+        command_args = getattr(args, "args", []) or []
+        return self.router.route_command(args.command, command_args, use_legacy=getattr(args, "legacy", False))
+
+
+def main(argv: Optional[Sequence[str]] = None) -> int:
+    """Main CLI entry point."""
+
+    cli = UnifiedCLI()
+    return cli.run(argv)
 
 
 if __name__ == "__main__":

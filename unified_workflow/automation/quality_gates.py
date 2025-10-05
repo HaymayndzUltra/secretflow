@@ -12,13 +12,14 @@ import json
 import time
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Any, Optional
+from typing import Any, Dict, List, Optional, Sequence, Tuple
 import click
 
 # Add the automation directory to Python path
 sys.path.insert(0, str(Path(__file__).parent))
 
 from evidence_manager import EvidenceManager
+from compliance_validator import ComplianceValidator
 
 
 class QualityGates:
@@ -29,6 +30,7 @@ class QualityGates:
         self.evidence_manager = EvidenceManager(evidence_root)
         self.workflow_home = Path(__file__).parent.parent
         self.review_protocols_dir = self.workflow_home.parent / ".cursor" / "dev-workflow" / "review-protocols"
+        self.compliance_validator = ComplianceValidator(self.workflow_home.parent)
         
         # Ensure project directory exists
         self.project_dir = Path(project_name)
@@ -81,16 +83,25 @@ class QualityGates:
         
         # Generate findings based on mode
         findings = self._generate_findings(mode, context)
-        
+
+        # Evaluate compliance results when relevant
+        compliance_summary: Dict[str, Any] = {}
+        compliance_assets: Optional[Dict[str, Path]] = None
+        if mode in {"security", "deep-security", "comprehensive"}:
+            compliance_results, standards = self._evaluate_compliance(context)
+            if compliance_results:
+                compliance_summary = compliance_results
+                compliance_assets = self._generate_compliance_evidence(standards)
+
         # Calculate score
         score = self._calculate_score(findings)
-        
+
         # Generate recommendations
         recommendations = self._generate_recommendations(findings, mode)
-        
+
         duration = time.time() - start_time
-        
-        return {
+
+        result: Dict[str, Any] = {
             "mode": mode,
             "protocol": protocol,
             "findings": findings,
@@ -99,6 +110,14 @@ class QualityGates:
             "duration": duration,
             "status": "passed" if score >= 7.0 else "failed"
         }
+
+        if compliance_summary:
+            result["compliance"] = {
+                "results": compliance_summary,
+                "assets": {name: str(path) for name, path in (compliance_assets or {}).items()},
+            }
+
+        return result
     
     def _generate_findings(self, mode: str, context: Dict[str, Any]) -> List[Dict[str, Any]]:
         """Generate findings based on mode and context"""
@@ -178,6 +197,53 @@ class QualityGates:
             ]
         
         return base_findings
+
+    def _evaluate_compliance(
+        self, context: Optional[Dict[str, Any]]
+    ) -> Tuple[Dict[str, Any], List[str]]:
+        """Evaluate compliance standards from context."""
+
+        context = context or {}
+        standards = context.get("compliance") or context.get("compliance_standards")
+        normalized = self.compliance_validator._normalize_standards(standards)
+        if not normalized:
+            normalized = list(self.compliance_validator.DEFAULT_VALIDATION_STANDARDS)
+
+        results: Dict[str, Any] = {}
+        for standard in normalized:
+            method = getattr(
+                self.compliance_validator, f"validate_{standard}_compliance", None
+            )
+            if not callable(method):
+                continue
+            valid, report = method()
+            results[standard] = {"valid": valid, **report}
+
+        return results, normalized
+
+    def _generate_compliance_evidence(self, standards: Sequence[str]) -> Dict[str, Path]:
+        """Generate compliance assets and log them as evidence."""
+
+        assets = self.compliance_validator.generate_compliance_assets(
+            output_dir=self.project_dir / "compliance",
+            standards=standards,
+        )
+
+        for label, path in assets.items():
+            try:
+                relative = path.relative_to(self.project_dir)
+                relative_str = str(relative)
+            except ValueError:
+                relative_str = str(path)
+
+            self.evidence_manager.log_artifact(
+                path=relative_str,
+                category="compliance",
+                description=f"Compliance asset generated: {label}",
+                phase=4,
+            )
+
+        return assets
     
     def _calculate_score(self, findings: List[Dict[str, Any]]) -> float:
         """Calculate quality score based on findings"""
