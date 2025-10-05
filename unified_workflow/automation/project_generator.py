@@ -1,442 +1,260 @@
-#!/usr/bin/env python3
-"""Unified Project Generator Adapter
+"""Unified project generator adapter.
 
-This module provides a unified interface for project generation, integrating
-the existing project_generator components with the unified workflow system.
+This module exposes a small adapter that wires the legacy
+``project_generator`` package into the Week 2 unified workflow.  The
+adapter normalises configuration, ensures the unified template registry
+is always used, and returns light-weight dataclasses that are convenient
+for validation prompts and tests.
 """
 
 from __future__ import annotations
 
-import logging
 import sys
+from dataclasses import dataclass
+from importlib import import_module
+from importlib.util import module_from_spec, spec_from_file_location
 from pathlib import Path
-from typing import Dict, List, Any, Optional, Union
+from typing import Any, Dict, List, Optional, Sequence, Union
+from unified_workflow.core.template_registry import (
+    TemplateMetadata,
+    UnifiedTemplateRegistry,
+)
 
-# Add repo root to path for project_generator imports
-sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-# Import project_generator components using clean imports
-from project_generator.core.generator import ProjectGenerator
-from project_generator.core.validator import ProjectValidator
-from project_generator.core.industry_config import IndustryConfig
+@dataclass(frozen=True)
+class ProjectGenerationResult:
+    """Result returned after calling :meth:`UnifiedProjectGenerator.generate`."""
 
-# Import unified template registry for template access
-from unified_workflow.core.template_registry import get_registry
+    success: bool
+    project_path: Optional[Path]
+    details: Dict[str, Any]
+    error: Optional[str] = None
 
-logger = logging.getLogger(__name__)
+
+@dataclass(frozen=True)
+class ProjectValidationResult:
+    """Result returned from :meth:`UnifiedProjectGenerator.validate`."""
+
+    is_valid: bool
+    errors: Sequence[str]
+    warnings: Sequence[str]
+
+
+@dataclass(frozen=True)
+class AvailableTemplate:
+    """Small wrapper exposing template metadata via simple attributes."""
+
+    name: str
+    type: str
+    path: Path
+    variants: Sequence[str]
+    engines: Optional[Sequence[str]]
 
 
 class UnifiedProjectGenerator:
-    """Unified project generator with integrated template registry and validation."""
+    """Bridge between the unified workflow and the legacy generator."""
 
-    def __init__(self):
-        """Initialize the unified project generator."""
-        self.project_generator = None
-        self.validator = None
-        self.template_registry = get_registry()
-
-        # Initialize template registry
-        self.template_registry.initialize()
-
-        logger.info("UnifiedProjectGenerator initialized with template registry")
-
-    def create_project(
+    def __init__(
         self,
-        name: str,
+        project_name: str,
         industry: str,
-        project_type: str,
-        frontend: str,
-        backend: str,
-        database: str,
-        output_dir: Optional[Union[str, Path]] = None,
-        **kwargs
-    ) -> Dict[str, Any]:
-        """Create a new project using the unified interface.
+        stack_config: Dict[str, str],
+        *,
+        project_type: str = "fullstack",
+        template_registry: Optional[UnifiedTemplateRegistry] = None,
+    ) -> None:
+        self.project_name = project_name
+        self.industry = industry
+        self.stack_config = stack_config
+        self.project_type = project_type
 
-        Args:
-            name: Project name
-            industry: Industry type (saas, fintech, healthcare, etc.)
-            project_type: Project type (fullstack, backend-only, frontend-only)
-            frontend: Frontend framework (nextjs, react, vue, angular)
-            backend: Backend framework (fastapi, django, nestjs, go)
-            database: Database (postgres, mongodb, firebase)
-            output_dir: Output directory (default: generated_projects/)
-            **kwargs: Additional configuration options
+        self._template_registry = template_registry or UnifiedTemplateRegistry()
+        self._template_registry.initialize()
 
-        Returns:
-            Project generation results
-        """
-        try:
-            logger.info(f"Creating project: {name} ({industry} {project_type})")
+        self._generator_cls = None
+        self._validator_cls = None
+        self._industry_config_cls = None
+        self._last_generation: Optional[ProjectGenerationResult] = None
 
-            # Set default output directory
-            if output_dir is None:
-                output_dir = Path("generated_projects") / name
-            else:
-                output_dir = Path(output_dir)
+    # ------------------------------------------------------------------
+    # Public API expected by validation prompt
+    # ------------------------------------------------------------------
+    def generate(self, output_dir: Optional[Union[str, Path]] = None) -> ProjectGenerationResult:
+        """Generate a project using the unified configuration interface."""
 
-            # Create output directory
-            output_dir.mkdir(parents=True, exist_ok=True)
+        target_root = Path(output_dir) if output_dir else Path.cwd() / self.project_name
+        target_root = target_root.resolve()
+        target_root.parent.mkdir(parents=True, exist_ok=True)
 
-            # Create project configuration
-            project_config = {
-                "name": name,
-                "industry": industry,
-                "project_type": project_type,
-                "frontend": frontend,
-                "backend": backend,
-                "database": database,
-                "output_dir": str(output_dir),
-                **kwargs
-            }
+        args = self._build_args(target_root)
+        generator = self._get_generator_class()(
+            args=args,
+            config=self._create_industry_config(),
+            template_registry=self._template_registry,
+        )
 
-            # Initialize project generator with industry config and unified template registry
-            industry_config = IndustryConfig(industry)
+        generation_details = generator.generate()
+        project_path = Path(generation_details.get("project_path", "")).resolve() if generation_details.get("project_path") else None
 
-            # Create args object for project generator (matching working direct test)
-            from argparse import Namespace
+        if generation_details.get("success"):
+            # The legacy generator always nests the project name under
+            # ``args.output_dir``.  Ensure the directory matches the
+            # caller expectation (``target_root``).
+            expected_path = target_root
+            if project_path and project_path != expected_path:
+                if expected_path.exists():
+                    project_path = expected_path
+                elif project_path.exists():
+                    project_path.rename(expected_path)
+                    project_path = expected_path
 
-            args = Namespace()
-            args.name = name
-            args.industry = industry
-            args.project_type = project_type
-            args.frontend = frontend
-            args.backend = backend
-            args.database = database
-            args.auth = kwargs.get('auth', 'auth0')
-            args.deploy = kwargs.get('deploy', 'vercel')
-            args.compliance = kwargs.get('compliance', '')
-            args.features = kwargs.get('features', '')
-            args.output_dir = str(output_dir)
-            args.no_git = kwargs.get('no_git', True)
-            args.no_install = kwargs.get('no_install', True)
-            args.workers = kwargs.get('workers', 2)
-            args.force = kwargs.get('force', False)
-            args.no_cursor_assets = kwargs.get('no_cursor_assets', False)
-            args.minimal_cursor = kwargs.get('minimal_cursor', False)
-            args.rules_manifest = kwargs.get('rules_manifest', None)
-            args.nestjs_orm = kwargs.get('nestjs_orm', 'typeorm')
-
-            self.project_generator = ProjectGenerator(
-                args=args,
-                config=industry_config,
-                template_registry=self.template_registry  # Use unified template registry
+            result = ProjectGenerationResult(True, project_path, generation_details)
+        else:
+            result = ProjectGenerationResult(
+                False,
+                project_path,
+                generation_details,
+                error=generation_details.get("error"),
             )
 
-            # Generate project using project generator
-            generation_result = self.project_generator.generate()
+        self._last_generation = result
+        return result
 
-            # Validate generated project (if validator supports it)
-            validation_result = None
-            if self.validator is None:
-                self.validator = ProjectValidator()
+    def validate(self) -> ProjectValidationResult:
+        """Validate the stack configuration against the legacy validator."""
 
-            # Try different validation methods
-            if hasattr(self.validator, 'validate'):
-                validation_result = self.validator.validate(str(output_dir))
-            elif hasattr(self.validator, 'validate_configuration'):
-                # Create a mock args object for configuration validation
-                from argparse import Namespace
-                mock_args = Namespace(
-                    name=name,
-                    industry=industry,
-                    project_type=project_type,
-                    frontend=frontend,
-                    backend=backend,
-                    database=database,
-                    output_dir=str(output_dir)
-                )
-                validation_result = self.validator.validate_configuration(mock_args)
-            else:
-                # Simple structural validation
-                validation_result = self._validate_project_structure(output_dir)
+        args = self._build_args(Path.cwd() / self.project_name)
+        validator = self._get_validator_class()()
+        validation = validator.validate_configuration(args)
 
-            # Combine results
-            result = {
-                "success": True,
-                "project_name": name,
-                "project_path": str(output_dir),
-                "generation": generation_result,
-                "validation": validation_result,
-                "templates_used": self._get_templates_used(project_config),
-                "artifacts": self._list_generated_artifacts(output_dir)
-            }
+        return ProjectValidationResult(
+            is_valid=bool(validation.get("valid")),
+            errors=tuple(validation.get("errors", [])),
+            warnings=tuple(validation.get("warnings", [])),
+        )
 
-            logger.info(f"Project {name} created successfully at {output_dir}")
-            return result
+    def get_templates(self) -> List[AvailableTemplate]:
+        """Expose templates from the unified registry as simple objects."""
 
-        except Exception as e:
-            logger.error(f"Project creation failed: {e}")
-            return {
-                "success": False,
-                "error": str(e),
-                "project_name": name
-            }
+        templates: List[TemplateMetadata] = self._template_registry.list_templates()
+        return [
+            AvailableTemplate(
+                name=template.name,
+                type=template.type.value,
+                path=template.path,
+                variants=tuple(template.variants),
+                engines=tuple(template.engines) if template.engines else None,
+            )
+            for template in templates
+        ]
 
-    def _get_templates_used(self, project_config: Dict[str, Any]) -> List[str]:
-        """Get list of templates used for the project."""
-        templates = []
+    # ------------------------------------------------------------------
+    # Internal helpers
+    # ------------------------------------------------------------------
+    def _build_args(self, target_root: Path):
+        """Create an ``argparse.Namespace`` mirroring CLI inputs."""
 
-        # Frontend template
-        if project_config.get("frontend"):
-            templates.append(f"frontend/{project_config['frontend']}")
+        from argparse import Namespace
 
-        # Backend template
-        if project_config.get("backend"):
-            templates.append(f"backend/{project_config['backend']}")
+        resolved_root = target_root.resolve()
+        output_dir = resolved_root.parent
+        project_name = resolved_root.name
 
-        # Database template
-        if project_config.get("database"):
-            templates.append(f"database/{project_config['database']}")
-
-        return templates
-
-    def _list_generated_artifacts(self, project_dir: Path) -> List[Dict[str, Any]]:
-        """List all artifacts generated in the project directory."""
-        artifacts = []
-
-        if not project_dir.exists():
-            return artifacts
-
-        for file_path in project_dir.rglob("*"):
-            if file_path.is_file():
-                artifacts.append({
-                    "path": str(file_path.relative_to(project_dir)),
-                    "size": file_path.stat().st_size,
-                    "type": self._categorize_file(file_path)
-                })
-
-        return artifacts
-
-    def _categorize_file(self, file_path: Path) -> str:
-        """Categorize a file based on its path and extension."""
-        path_str = str(file_path)
-
-        if "src" in path_str or "lib" in path_str:
-            if file_path.suffix in [".js", ".ts", ".jsx", ".tsx", ".py"]:
-                return "source_code"
-            elif file_path.suffix in [".css", ".scss", ".less"]:
-                return "styles"
-        elif "test" in path_str or "spec" in path_str:
-            return "test_code"
-        elif "docs" in path_str or file_path.suffix in [".md", ".txt"]:
-            return "documentation"
-        elif "package.json" in path_str or "requirements.txt" in path_str:
-            return "dependencies"
-        elif file_path.suffix in [".json", ".yaml", ".yml"]:
-            return "configuration"
-
-        return "other"
-
-    def _validate_project_structure(self, project_dir: Path) -> Dict[str, Any]:
-        """Perform basic structural validation of the generated project.
-
-        Args:
-            project_dir: Path to the project directory
-
-        Returns:
-            Validation results
-        """
-        if not project_dir.exists():
-            return {
-                "success": False,
-                "errors": [f"Project directory does not exist: {project_dir}"],
-                "warnings": []
-            }
-
-        errors = []
-        warnings = []
-
-        # Check for essential directories based on project type
-        artifacts = self._list_generated_artifacts(project_dir)
-
-        # Basic checks
-        if len(artifacts) == 0:
-            errors.append("No files generated in project directory")
-        else:
-            # Check for key files based on technology stack
-            has_package_json = any(a["path"] == "package.json" for a in artifacts)
-            has_requirements_txt = any(a["path"] == "requirements.txt" for a in artifacts)
-            has_readme = any(a["path"].endswith("README.md") for a in artifacts)
-
-            if not has_readme:
-                warnings.append("No README.md found in project")
-
-            # Check for source directories
-            has_frontend = any("frontend" in a["path"] for a in artifacts)
-            has_backend = any("backend" in a["path"] for a in artifacts)
-
-            if not has_frontend and not has_backend:
-                warnings.append("No frontend or backend directories found")
-
-        return {
-            "success": len(errors) == 0,
-            "errors": errors,
-            "warnings": warnings,
-            "artifact_count": len(artifacts),
-            "validation_type": "structural"
+        stack = {
+            "frontend": self.stack_config.get("frontend", "none"),
+            "backend": self.stack_config.get("backend", "none"),
+            "database": self.stack_config.get("database", "none"),
+            "auth": self.stack_config.get("auth", "auth0"),
+            "deploy": self.stack_config.get("deploy", "aws"),
         }
 
-    def validate_project(self, project_path: Union[str, Path]) -> Dict[str, Any]:
-        """Validate an existing project.
+        compliance = self.stack_config.get("compliance", [])
+        if isinstance(compliance, str):
+            compliance_str = compliance
+        else:
+            compliance_str = ",".join(compliance)
 
-        Args:
-            project_path: Path to the project directory
+        features = self.stack_config.get("features", [])
+        if isinstance(features, str):
+            features_str = features
+        else:
+            features_str = ",".join(features)
 
-        Returns:
-            Validation results
-        """
-        try:
-            project_path = Path(project_path)
+        return Namespace(
+            name=project_name,
+            industry=self.industry,
+            project_type=self.project_type,
+            frontend=stack["frontend"],
+            backend=stack["backend"],
+            database=stack["database"],
+            auth=stack["auth"],
+            deploy=stack["deploy"],
+            compliance=compliance_str,
+            features=features_str,
+            output_dir=str(output_dir),
+            no_git=True,
+            no_install=True,
+            workers=2,
+            force=True,
+            no_cursor_assets=True,
+            minimal_cursor=False,
+            rules_manifest=None,
+            nestjs_orm="typeorm",
+        )
 
-            if not project_path.exists():
-                return {
-                    "success": False,
-                    "error": f"Project directory does not exist: {project_path}"
-                }
+    def _get_generator_class(self):
+        if self._generator_cls is None:
+            self._generator_cls = self._load_symbol(
+                "project_generator.core.generator",
+                "ProjectGenerator",
+            )
+        return self._generator_cls
 
-            if self.validator is None:
-                self.validator = ProjectValidator()
+    def _get_validator_class(self):
+        if self._validator_cls is None:
+            self._validator_cls = self._load_symbol(
+                "project_generator.core.validator",
+                "ProjectValidator",
+            )
+        return self._validator_cls
 
-            validation_result = self.validator.validate(str(project_path))
+    def _create_industry_config(self):
+        if self._industry_config_cls is None:
+            self._industry_config_cls = self._load_symbol(
+                "project_generator.core.industry_config",
+                "IndustryConfig",
+            )
+        return self._industry_config_cls(self.industry)
 
-            return {
-                "success": True,
-                "project_path": str(project_path),
-                "validation": validation_result
-            }
+    def _load_symbol(self, module_path: str, attribute: str):
+        self._ensure_project_generator_package()
+        module = import_module(module_path)
+        return getattr(module, attribute)
 
-        except Exception as e:
-            logger.error(f"Project validation failed: {e}")
-            return {
-                "success": False,
-                "error": str(e),
-                "project_path": str(project_path)
-            }
+    def _ensure_project_generator_package(self) -> None:
+        package_name = "project_generator"
+        module = sys.modules.get(package_name)
+        if module is not None and hasattr(module, "__path__"):
+            return
 
-    def list_available_templates(self) -> List[Dict[str, Any]]:
-        """List all available templates from the unified registry.
+        repo_root = Path(__file__).resolve().parents[2] / package_name
+        spec = spec_from_file_location(
+            package_name,
+            repo_root / "__init__.py",
+            submodule_search_locations=[str(repo_root)],
+        )
+        if spec is None or spec.loader is None:
+            raise ImportError(f"Unable to load package {package_name}")
 
-        Returns:
-            List of template information
-        """
-        try:
-            templates = self.template_registry.list_templates()
-
-            result = []
-            for template in templates:
-                result.append({
-                    "type": template.type.value,
-                    "name": template.name,
-                    "path": str(template.path),
-                    "variants": template.variants,
-                    "engines": template.engines
-                })
-
-            return result
-
-        except Exception as e:
-            logger.error(f"Failed to list templates: {e}")
-            return []
-
-    def get_template_info(self, template_type: str, template_name: str) -> Optional[Dict[str, Any]]:
-        """Get information about a specific template.
-
-        Args:
-            template_type: Type of template (frontend, backend, database)
-            template_name: Name of the template
-
-        Returns:
-            Template information or None if not found
-        """
-        try:
-            template = self.template_registry.get_template(template_type, template_name)
-
-            if template:
-                return {
-                    "type": template.type.value,
-                    "name": template.name,
-                    "path": str(template.path),
-                    "variants": template.variants,
-                    "engines": template.engines
-                }
-
-            return None
-
-        except Exception as e:
-            logger.error(f"Failed to get template info: {e}")
-            return None
+        module = module_from_spec(spec)
+        sys.modules[package_name] = module
+        spec.loader.exec_module(module)
 
 
-# Convenience function for quick project creation
-def create_project(
-    name: str,
-    industry: str,
-    project_type: str,
-    frontend: str,
-    backend: str,
-    database: str,
-    output_dir: Optional[Union[str, Path]] = None,
-    **kwargs
-) -> Dict[str, Any]:
-    """Create a project using the unified interface.
-
-    Args:
-        name: Project name
-        industry: Industry type
-        project_type: Project type
-        frontend: Frontend framework
-        backend: Backend framework
-        database: Database type
-        output_dir: Output directory
-        **kwargs: Additional options
-
-    Returns:
-        Project creation results
-    """
-    generator = UnifiedProjectGenerator()
-    return generator.create_project(
-        name=name,
-        industry=industry,
-        project_type=project_type,
-        frontend=frontend,
-        backend=backend,
-        database=database,
-        output_dir=output_dir,
-        **kwargs
-    )
-
-
-# CLI interface for testing
-if __name__ == "__main__":
-    import argparse
-
-    parser = argparse.ArgumentParser(description="Unified Project Generator")
-    parser.add_argument("--name", required=True, help="Project name")
-    parser.add_argument("--industry", required=True, help="Industry type")
-    parser.add_argument("--type", required=True, help="Project type")
-    parser.add_argument("--frontend", required=True, help="Frontend framework")
-    parser.add_argument("--backend", required=True, help="Backend framework")
-    parser.add_argument("--database", required=True, help="Database type")
-    parser.add_argument("--output", help="Output directory")
-
-    args = parser.parse_args()
-
-    result = create_project(
-        name=args.name,
-        industry=args.industry,
-        project_type=args.type,
-        frontend=args.frontend,
-        backend=args.backend,
-        database=args.database,
-        output_dir=args.output
-    )
-
-    if result["success"]:
-        print(f"✅ Project {args.name} created successfully!")
-        print(f"📁 Location: {result['project_path']}")
-        print(f"📋 Artifacts: {len(result['artifacts'])} files generated")
-    else:
-        print(f"❌ Project creation failed: {result['error']}")
-        exit(1)
+__all__ = [
+    "UnifiedProjectGenerator",
+    "ProjectGenerationResult",
+    "ProjectValidationResult",
+    "AvailableTemplate",
+]
 
