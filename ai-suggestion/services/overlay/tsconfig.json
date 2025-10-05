@@ -1,9 +1,0 @@
-{
-  "extends": "../../tsconfig.base.json",
-  "compilerOptions": {
-    "jsx": "react-jsx",
-    "outDir": "dist/renderer"
-  },
-  "include": ["src/renderer/**/*"],
-  "exclude": ["node_modules", "dist"]
-}
