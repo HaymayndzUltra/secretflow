@@ -202,3 +202,17 @@ def execute_bootstrap(project_path):
 - Regenerate context kit if user feedback significant
 - Re-apply System Instruction Formatter if conflicts detected
 - Re-validate rule structure if formatting errors occur
+
+## Automation Integration
+- Workflow1 automation wrappers are not invoked during bootstrap, but operators should ensure repository cloning and Python
+  environments are ready so subsequent phases can call `unified_workflow.automation.workflow1` wrappers without interruption.
+- Capture baseline context (project slug, environment strategy) so it can be passed to phase-specific wrappers starting in Phase 2.
+
+## Evidence Templates
+- Review the [workflow1 evidence index](../templates/workflow1_evidence/index.json) to understand which template packs will be
+  consumed later in the workflow.
+- Confirm the evidence root is initialized (`workflow1/<phase>/evidence`) before handing off to the automation phases.
+
+## Operator Instructions
+- Provision the project workspace and verify that `python -m unified_workflow.cli` can resolve automation modules.
+- Document any manual bootstrap activities so they can be attached to the manifest using the new automation metadata fields.

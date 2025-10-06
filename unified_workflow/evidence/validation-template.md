@@ -9,6 +9,12 @@
 | Phase | Status | Score | Findings | Recommendations | Validated At |
 |-------|--------|-------|----------|-----------------|--------------|
 
+## Automation Context
+
+- **Wrappers Used**: {{automation_wrappers}}
+- **Automation Enforced**: {{automation_enforced}}
+- **Script Inventory**: {{automation_scripts}}
+
 ## Quality Gate Summary
 
 ### Overall Score: {{overall_score}}/10

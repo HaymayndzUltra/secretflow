@@ -219,3 +219,19 @@ def execute_implementation(parent_task, task_plan, context_kit):
 - Re-execute failed sub-task after fixes
 - Re-run quality gates after addressing issues
 - Rollback changes if critical problems found
+
+## Automation Integration
+- Configure feature flags via `Phase3QualityWrappers.configure_feature_flags(project, flags=[...])`. Pass each flag in the
+  `key:type:owner[:description]` format.
+- Execute the quality gates with `Phase3QualityWrappers.run_quality_gates(project, bootstrap=True)` to seed templates before running
+  the simple quality gate shell script. The wrapper enriches run logs with `automation_reference` metadata.
+
+## Evidence Templates
+- Generated assets correspond to the phase 3 entries in
+  [workflow1_evidence/index.json](../templates/workflow1_evidence/index.json) including security checklists, A11y plans, and
+  performance budgets.
+
+## Operator Instructions
+- Validate feature flag manifests and capture manual approvals by appending to the run log with the new metadata fields.
+- In the event of a gate failure, inspect the wrapper output (`stdout`/`stderr`) before re-running; this preserves traceability in
+  the evidence manifest.

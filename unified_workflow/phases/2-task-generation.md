@@ -220,3 +220,27 @@ def execute_task_generation(prd, context_kit):
 - Re-scan for rules if index incomplete
 - Re-analyze dependencies if conflicts found
 - Regenerate task plan if significant changes needed
+
+## Automation Integration
+- Invoke `Phase2DesignWrappers.generate_architecture_pack(project)` to populate architecture evidence. The wrapper records
+  automation metadata (`wrapper=Phase2DesignWrappers.generate_architecture_pack`) in the manifest.
+- Use `Phase2DesignWrappers.generate_contract_assets(project, service)` once the target service is confirmed. Supply the `service`
+  slug collected during PRD creation so the OpenAPI stub aligns with the planned interface.
+- When orchestrating via Python:
+  ```python
+  from unified_workflow.automation.workflow1 import Phase2DesignWrappers
+
+  wrappers = Phase2DesignWrappers()
+  wrappers.generate_architecture_pack(project_slug)
+  wrappers.generate_contract_assets(project_slug, service_slug)
+  ```
+
+## Evidence Templates
+- Architecture pack outputs map to the templates listed for phase 2 in
+  [workflow1_evidence/index.json](../templates/workflow1_evidence/index.json).
+- Contract assets populate `Product_Backlog.csv`, `Sprint0_Plan.md`, and OpenAPI stubs under `contracts/openapi`.
+
+## Operator Instructions
+- Review generated architecture and contract artifacts for completeness. Update the evidence manifest with reviewer notes using the
+  new `automation.parameters` field to capture any overrides (e.g., `{"persona": "Tech Lead"}`).
+- If adjustments are required, re-run the relevant wrapper; the manifest will de-duplicate entries automatically.

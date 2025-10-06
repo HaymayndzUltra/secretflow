@@ -179,3 +179,16 @@ def execute_prd_creation(feature_idea, context_kit):
 - Re-interview user if requirements unclear
 - Re-analyze architecture if conflicts found
 - Regenerate PRD if significant changes needed
+
+## Automation Integration
+- Capture the approved project slug and service catalog so they can be fed into the Phase 2 wrappers (`Phase2DesignWrappers`).
+- Record any domain terminology in the phase notes; wrappers can pass these values through `parameters` metadata when invoking
+  workflow1 scripts.
+
+## Evidence Templates
+- Reference [workflow1 evidence index](../templates/workflow1_evidence/index.json) for upcoming design and contract templates.
+- Ensure the evidence manifest is seeded with `automation_context` metadata describing the PRD review team.
+
+## Operator Instructions
+- Archive signed-off PRD artifacts and update the manifest to include `automation` metadata pointing at manual processes.
+- Confirm stakeholder approvals are logged so validation gates in later phases can reference them.

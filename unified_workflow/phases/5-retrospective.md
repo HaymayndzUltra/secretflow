@@ -201,3 +201,16 @@ def execute_retrospective(implementation_context, quality_audit):
 - Re-evaluate findings if bias detected
 - Re-run context discovery if incomplete
 - Modify recommendations based on user feedback
+
+## Automation Integration
+- Rehearse production rollback via `Phase5LaunchWrappers.rehearse_rollback(project)` prior to change freezes.
+- Validate disaster recovery readiness with `Phase5LaunchWrappers.verify_disaster_recovery(project)`; capture manual evidence in
+  the returned `ScriptExecutionResult` metadata when additional verification steps are required.
+
+## Evidence Templates
+- Launch runbooks, rollback plans, and SEO checklists map to the phase 5 entries in
+  [workflow1_evidence/index.json](../templates/workflow1_evidence/index.json).
+
+## Operator Instructions
+- After each rehearsal, append summary notes to `evidence/phase5/run.log` and update `validation.md` with automation context.
+- In case of failure, re-run the wrapper after addressing issues so the manifest contains the updated checksum for each artifact.

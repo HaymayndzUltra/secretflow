@@ -1,14 +1,7 @@
-# Unified Developer Workflow Automation Package
+"""Wrappers that integrate legacy workflow1 scripts with automation tooling."""
+from __future__ import annotations
 
-__version__ = "1.0.0"
-__author__ = "AI Governor Framework Team"
-
-from .ai_executor import AIExecutor
-from .ai_orchestrator import AIOrchestrator
-from .evidence_manager import EvidenceManager
-from .quality_gates import QualityGates
-from .validation_gates import ValidationGates
-from .workflow1 import (
+from .wrappers import (
     Phase2DesignWrappers,
     Phase3QualityWrappers,
     Phase4IntegrationWrappers,
@@ -20,11 +13,6 @@ from .workflow1 import (
 )
 
 __all__ = [
-    "AIExecutor",
-    "AIOrchestrator", 
-    "EvidenceManager",
-    "QualityGates",
-    "ValidationGates",
     "Phase2DesignWrappers",
     "Phase3QualityWrappers",
     "Phase4IntegrationWrappers",

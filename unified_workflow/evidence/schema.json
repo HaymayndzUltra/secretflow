@@ -41,6 +41,33 @@
                 "minimum": 0,
                 "maximum": 6,
                 "description": "Phase number (0-6)"
+              },
+              "automation": {
+                "type": "object",
+                "description": "Automation context describing which wrapper generated the artifact",
+                "properties": {
+                  "script": {
+                    "type": "string",
+                    "description": "Relative path to the executed workflow1 script"
+                  },
+                  "wrapper": {
+                    "type": "string",
+                    "description": "Qualified name of the automation wrapper"
+                  },
+                  "parameters": {
+                    "type": "object",
+                    "description": "Parameters that were passed to the automation wrapper",
+                    "additionalProperties": {
+                      "type": "string"
+                    }
+                  },
+                  "executed_at": {
+                    "type": "string",
+                    "format": "date-time",
+                    "description": "Timestamp recorded by the orchestrator"
+                  }
+                },
+                "required": ["script", "wrapper"]
               }
             },
             "required": ["path", "category", "description", "checksum", "created_at", "phase"]
@@ -61,6 +88,21 @@
             },
             "total_artifacts": {
               "type": "integer"
+            },
+            "automation_context": {
+              "type": "object",
+              "description": "Summary of automation components used to gather the manifest",
+              "properties": {
+                "wrappers": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "version": {
+                  "type": "string"
+                }
+              }
             }
           },
           "required": ["project_name", "workflow_version", "generated_at", "total_artifacts"]
@@ -98,6 +140,25 @@
               },
               "duration_seconds": {
                 "type": "number"
+              },
+              "automation_reference": {
+                "type": "object",
+                "description": "Automation wrapper invocation captured for this step",
+                "properties": {
+                  "wrapper": {
+                    "type": "string"
+                  },
+                  "script": {
+                    "type": "string"
+                  },
+                  "parameters": {
+                    "type": "object",
+                    "additionalProperties": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "required": ["wrapper"]
               }
             },
             "required": ["timestamp", "phase", "action", "status"]
@@ -118,6 +179,10 @@
             "last_updated": {
               "type": "string",
               "format": "date-time"
+            },
+            "automation_enforced": {
+              "type": "boolean",
+              "description": "Indicates whether automation wrappers were used for validation"
             }
           },
           "required": ["project_name", "workflow_version", "total_entries", "last_updated"]

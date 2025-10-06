@@ -167,3 +167,18 @@ def execute_operations(production_systems, monitoring_config):
 - Conduct postmortem for significant incidents
 - Update procedures based on learnings
 - Implement preventive measures
+
+## Automation Integration
+- Monitor live SLOs using `Phase6OperationsWrappers.monitor_slo(project, availability=..., latency=..., error_rate=...)`. The
+  wrapper records PASS/FAIL state in both the manifest and validation log.
+- Schedule retrospectives with `Phase6OperationsWrappers.schedule_retros(project, start=..., cadence=..., count=...)` to generate
+  the retro cadence JSON file.
+
+## Evidence Templates
+- Operations templates such as retro agendas and postmortem shells align with the phase 6 entries in
+  [workflow1_evidence/index.json](../templates/workflow1_evidence/index.json).
+
+## Operator Instructions
+- Capture operational incidents in `postmortem_template` outputs and set `automation.parameters` fields to include incident IDs.
+- When SLO checks fail, escalate by annotating the validation report with `automation_enforced: false` for the impacted phase and
+  attach any manual evidence collected outside the wrapper.

@@ -213,3 +213,19 @@ def execute_quality_audit(mode, implementation_context):
 - Re-run audit with different mode if needed
 - Address critical issues before proceeding
 - Escalate to human if automation fails
+
+## Automation Integration
+- Generate observability packs via `Phase4IntegrationWrappers.generate_observability_pack(project)`. This wrapper ensures the
+  manifest records the template lineage for observability artifacts.
+- Run smoke tests with `Phase4IntegrationWrappers.run_staging_smoke(project, result="pass", report=Path(...))`. Provide a custom
+  report path when integrating with CI pipelines; the wrapper normalizes the expected evidence path.
+
+## Evidence Templates
+- Observability specifications and the staging smoke playbook align with the phase 4 entries in
+  [workflow1_evidence/index.json](../templates/workflow1_evidence/index.json).
+
+## Operator Instructions
+- Attach any additional staging diagnostics to the manifest by setting `automation.parameters` with contextual metadata (e.g.,
+  build number, environment).
+- When smoke testing fails, capture the generated report path from the wrapper result and annotate the validation log before
+  triggering a rerun.
