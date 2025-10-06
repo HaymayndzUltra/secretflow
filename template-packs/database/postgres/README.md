@@ -142,3 +142,8 @@ Additional security measures for {{COMPLIANCE}}:
 - Audit logging enabled
 - Access control implementation
 - Regular backups
+
+### Week 7 Alignment
+- I-log ang backup/restore rehearsals sa [Deployment Runbook](../../../docs/operations/deployment-runbook.md) evidence checklist.
+- Para sa migration mula sa legacy workflows, sundin ang [Migration Guide](../../../docs/operations/migration-guide.md) upang i-verify ang schema conversion at telemetry capture.
+- Gamitin ang [Troubleshooting Guide](../../../docs/operations/troubleshooting.md) kapag may failure sa `pg_dump` o `pg_restore` na nagba-block sa rollout.

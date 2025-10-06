@@ -7,3 +7,4 @@ locations but are described here so automation and operator documentation can re
 - Reference this index when generating evidence manifests via the workflow1 automation wrappers.
 - Each entry includes the phase, canonical destination within `workflow1/<phase>/evidence`, and a short description to help
   operators validate output.
+- When migrating historical evidence, follow the [Migration Guide](../../../docs/operations/migration-guide.md) and validate conversions with the [Troubleshooting Guide](../../../docs/operations/troubleshooting.md).

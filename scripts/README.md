@@ -115,3 +115,8 @@ CLI entry points that should have automated coverage.
 - `itest/`: Smoke tests for CLI entry points (`itest/run_smoke.py`).
 - `workflow_automation/`: Core workflow automation package consumed by
   `run_workflow.py` and generator tooling.
+
+### Week 7 References
+- [Deployment Runbook](../docs/operations/deployment-runbook.md) – required companion when using scripts in `deploy/` and `health/`.
+- [Troubleshooting Guide](../docs/operations/troubleshooting.md) – resolutions for common failures surfaced by these scripts.
+- [Migration Guide](../docs/operations/migration-guide.md) – context for retiring legacy entry points and using the unified CLI wrapper.

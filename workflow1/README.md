@@ -71,3 +71,8 @@ Ang `workflow1/` ay koleksyon ng mga protocol, template, at ebidensiya para sa p
 - Magdagdag ng bagong phase sa pamamagitan ng pag-clone ng pattern (`protocol.md`, `scripts/`, `templates/`, `evidence/phaseX`).
 - I-update ang [`INDEX.md`](INDEX.md) upang irehistro ang bagong assets at priority ordering.
 - Kapag nagdagdag ng bagong automation, tiyaking sumusulat ito sa manifest (`manifest.json`) at validation log upang manatiling auditable ang evidence trail.
+
+### Week 7 Ops Alignment
+- Sundin ang [Migration Guide](../docs/operations/migration-guide.md) kapag ina-upgrade ang legacy Workflow1 assets papunta sa unified workflow.
+- I-coordinate ang operator handoffs gamit ang [Operator Quickstart](../docs/operations/operator-quickstart.md) at [Support Playbook](../docs/operations/support-playbook.md).
+- Gamitin ang [Troubleshooting Guide](../docs/operations/troubleshooting.md) kapag may hindi pagkakatugma sa evidence schema o automation scripts.

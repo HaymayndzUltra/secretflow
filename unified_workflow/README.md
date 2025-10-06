@@ -15,6 +15,17 @@ python3 automation/ai_orchestrator.py --project-name "my-project"
 python3 automation/ai_orchestrator.py --project-name "my-project" --phases "0,1,2,3"
 ```
 
+## Week 7 Operational Resources
+
+The Week 7 Documentation & Deployment sprint adds operator-focused guides:
+
+- [Unified CLI Reference](../docs/operations/cli-reference.md) for routing behavior and telemetry.
+- [Operator Quickstart](../docs/operations/operator-quickstart.md) to onboard new team members.
+- [Deployment Runbook](../docs/operations/deployment-runbook.md) covering staging, production, and rollback workflows.
+- [Support Playbook](../docs/operations/support-playbook.md) outlining escalation and knowledge management.
+
+Review these alongside the existing `DEPLOYMENT.md` to ensure production rollouts follow the governed process.
+
 ## 📋 Overview
 
 The Unified Developer Workflow provides:

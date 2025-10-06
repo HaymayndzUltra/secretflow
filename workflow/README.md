@@ -21,6 +21,10 @@ Ang `workflow/` directory ay naglalaman ng reusable na blueprint files na ginaga
 4. **Compliance matrix** – Dagdagan o bawasan ang entries upang tumugma sa target certifications. Ito rin ang baseline na isinasama sa submission checklist.
 5. **Readiness checklist** – Opsyonal na palitan ang listahan para tumugma sa internal exit criteria ng iyong koponan.
 
+### Week 7 Updates
+- Gamitin ang [Deployment Runbook](../docs/operations/deployment-runbook.md) para sa staging/production rollout na tumutukoy sa mga workflow template na ito.
+- Basahin ang [Troubleshooting Guide](../docs/operations/troubleshooting.md) para sa mga tip kapag may nabigong gate o health check habang ginagamit ang templates.
+
 ## Evidence Schema
 
 - Ang schema ay nag-e-enforce na bawat artifact entry ay may `path`, `category`, `description`, `checksum` (SHA-256), at `created_at` timestamp.

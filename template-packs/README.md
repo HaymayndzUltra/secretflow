@@ -39,3 +39,8 @@ Ang direktoryong ito ang canonical source ng scaffolding assets na binabasa ng `
 - Huwag maglagay ng binary o build artifacts sa loob ng packs; inaasahan ng generator na idempotent ang copy operations.
 - Maaari kang magdagdag ng mga `.jinja` o iba pang templated files, ngunit kailangan mo ring i-extend ang `TemplateEngine` kung may bagong syntax.
 - Kapag nagbago ang folder structure, i-update ang anumang automation scripts na umaasa sa relative paths (hal. smoke tests o DevEx scripts).
+
+### Week 7 Notes
+- Suriin ang [Migration Guide](../docs/operations/migration-guide.md) bago alisin o palitan ang legacy packs upang matiyak ang backward compatibility.
+- I-refer ang [Example Projects Catalog](../docs/operations/example-projects.md) kapag nagpapakita kung paano ginagamit ng generator ang mga pack na ito sa training sessions.
+- Kapag may deployment-specific asset, i-align sa [Deployment Runbook](../docs/operations/deployment-runbook.md) para maiwasan ang drift sa production procedures.

@@ -210,28 +210,28 @@ The original 5-week timeline has critical dependency inversions:
 
 ### Tasks
 1. **Day 1-2: Documentation**
-   - [ ] Update all README files
-   - [ ] Create migration guide
-   - [ ] Document new CLI
-   - [ ] Create troubleshooting guide
+   - [x] Update all README files
+   - [x] Create migration guide
+   - [x] Document new CLI
+   - [x] Create troubleshooting guide
 
 2. **Day 3-4: Training Materials**
-   - [ ] Create operator quickstart
-   - [ ] Record demo videos
-   - [ ] Create example projects
-   - [ ] Setup support channels
+   - [x] Create operator quickstart
+   - [ ] Record demo videos *(deferred – scripts prepared, recording pending)*
+   - [x] Create example projects
+   - [x] Setup support channels
 
 3. **Day 5-7: Production Rollout**
-   - [ ] Deploy to staging
-   - [ ] Run acceptance tests
-   - [ ] Deploy to production
-   - [ ] Monitor for issues
+   - [ ] Deploy to staging *(runbook authored; execution scheduled in production environment)*
+   - [ ] Run acceptance tests *(suite documented; awaiting environment window)*
+   - [ ] Deploy to production *(pending go/no-go approval)*
+   - [ ] Monitor for issues *(monitoring checklist prepared in runbook)*
 
 ### Final Validation Gate
-- [ ] Documentation complete and reviewed
-- [ ] Training materials tested with users
-- [ ] Production deployment successful
-- [ ] Monitoring shows healthy metrics
+- [x] Documentation complete and reviewed *(Week 7 operations library published)*
+- [ ] Training materials tested with users *(pilot session scheduled)*
+- [ ] Production deployment successful *(pending environment availability)*
+- [ ] Monitoring shows healthy metrics *(monitoring checklist ready for execution)*
 
 ## Risk Mitigation Updates
 

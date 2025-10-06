@@ -60,6 +60,11 @@ result = generator.generate()
 print(result["project_path"])
 ```
 
+### Week 7 Documentation
+- Consult the [Unified CLI Reference](../docs/operations/cli-reference.md) for the command routing table and telemetry expectations when invoking the generator via `python -m unified_workflow.cli generate-project`.
+- Follow the [Migration Guide](../docs/operations/migration-guide.md) when replacing legacy generator scripts in downstream projects.
+- Use the [Example Projects Catalog](../docs/operations/example-projects.md) to demonstrate generator capabilities during operator training.
+
 ### Mga Mahalagang Flag
 - `no_cursor_assets` – i-exclude ang `.cursor` automation pack kung kailangan ng minimal output.
 - `minimal_cursor` + `rules_manifest` – pumipili lamang ng enumerated policy files mula sa shared rules directory.

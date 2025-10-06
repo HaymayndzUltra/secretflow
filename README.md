@@ -62,6 +62,20 @@ By adopting these proven strategies for structured AI collaboration, the framewo
 
 Ready to install the framework and run your first governed task?
 
+## Week 7 Operations Deliverables
+
+The Documentation & Deployment sprint introduced production-ready playbooks for operators and release engineers. Key resources:
+
+- [Migration Guide](docs/operations/migration-guide.md) – step-by-step path from legacy Workflow1 to the unified stack.
+- [Unified CLI Reference](docs/operations/cli-reference.md) – command catalog, telemetry usage, and extension tips.
+- [Troubleshooting Guide](docs/operations/troubleshooting.md) – common failure modes with resolutions.
+- [Operator Quickstart](docs/operations/operator-quickstart.md) – two-hour onboarding path for new operators.
+- [Example Projects Catalog](docs/operations/example-projects.md) – curated demos for training and validation.
+- [Deployment Runbook](docs/operations/deployment-runbook.md) – staging/production rollout checklists and rollback plan.
+- [Support Playbook](docs/operations/support-playbook.md) – channel ownership, escalation matrix, and knowledge management.
+
+All Week 7 artifacts live under `docs/operations/` with supporting logs/templates in `artifacts/`.
+
 
 ## 3. Quick Start: Installation
 
