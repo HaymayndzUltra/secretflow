@@ -66,6 +66,31 @@ You are a **Tech Lead**. Transform a PRD into a simple, actionable plan. Guide i
 4.  **Populate Placeholders:** Systematically replace placeholders like `{ComponentName}`, `{serviceName}`, `{routePath}`, `{domainName}`, etc., with specific names derived from the PRD.
 5.  **Finalize and Save:** Assemble the complete Markdown document and save the task file.
 
+### PHASE 4: Automation Hook Annotation
+
+1.  **`[MUST]` Annotate High-Level Tasks with Automation:** For each high-level task, identify and add automation hooks that can be executed during Protocol 3 (Task Execution).
+    *   **4.1. Identify Automation Opportunities:** For every high-level task, consider if it can benefit from automated checks, tests, deployments, or utility scripts.
+        *   **[GUIDELINE] Prioritize:**
+            *   **Testing:** Unit tests, integration tests, E2E tests (`ci-test.yml`, `scripts/run_tests.py`)
+            *   **Linting/Formatting:** Code style checks (`ci-lint.yml`, `scripts/run_linter.py`)
+            *   **Deployment/Build:** Small-scale deployments, build steps (`ci-deploy.yml`, `scripts/build_component.py`)
+            *   **Reporting:** Coverage aggregation, evidence collection (`scripts/aggregate_coverage.py`)
+    *   **4.2. Add `Automation:` Metadata:** Annotate each high-level task with automation hooks.
+        *   **Format:** `Automation: <type>:<command_or_workflow_path>`
+        *   **Types:** `script`, `workflow`
+        *   **Examples:**
+            *   `Automation: script:python scripts/run_tests.py --scope {ComponentName}`
+            *   `Automation: workflow:.github/workflows/ci-test.yml --event push --payload '{"component": "{ComponentName}"}'`
+        *   **[CRITICAL]** Ensure the command/workflow path is relative to the workspace root and executable.
+    *   **4.3. Parameterize Automation:** Use placeholders (e.g., `{ComponentName}`, `{routePath}`) that Protocol 3 can resolve from the task context.
+
+2.  **`[MUST]` Validate Automation References:** Before finalizing, verify that all referenced automation hooks exist and are executable.
+    ```bash
+    python scripts/validate_automation_hooks.py --task-file .cursor/tasks/tasks-{prd-name}.md
+    ```
+
+3.  **`[MUST]` Update Task Templates:** Ensure all decomposition templates include automation hook examples for future reference.
+
 ---
 
 ## DECOMPOSITION TEMPLATES (INTERNAL MODELS)
@@ -162,15 +187,21 @@ Based on PRD: `[Link to PRD file]`
 > **WHY:** [Business value statement explaining the objective and impact]
 > **Recommended Model:** `{Persona Name}`
 > **Rules to apply:** `[{rule-name-1}]`, `[{rule-name-2}]`
+> **Automation:** script:python scripts/run_tests.py --scope {ComponentName}
+> **Automation:** workflow:.github/workflows/ci-lint.yml --event push
     -   *(Use Frontend Decomposition Template, applying rules to each sub-task)*
 -   [ ] 2.0 **High-Level Task 2 (e.g., Create Backend Route)** [COMPLEXITY: Simple/Complex]
 > **WHY:** [Business value statement explaining the objective and impact]  
 > **Recommended Model:** `{Persona Name}`
 > **Rules to apply:** `[{rule-name-1}]`, `[{rule-name-2}]`
+> **Automation:** script:python scripts/run_tests.py --scope {serviceName}
+> **Automation:** workflow:.github/workflows/ci-test.yml --event push
     -   *(Use Backend Decomposition Template, applying rules to each sub-task)*
 -   [ ] 3.0 **High-Level Task 3 (e.g., End-to-End Integration Tests)** [COMPLEXITY: Simple/Complex] [DEPENDS ON: 1.0, 2.0]
 > **WHY:** [Business value statement explaining the objective and impact]
 > **Recommended Model:** `{Persona Name}`
 > **Rules to apply:** `[{rule-name-1}]`, `[{rule-name-2}]`
+> **Automation:** script:python scripts/run_e2e_tests.py --scope integration
+> **Automation:** workflow:.github/workflows/ci-test.yml --event push --payload '{"test_type": "e2e"}'
     -   [ ] 3.1 [Specific test sub-task] [APPLIES RULES: {rule-name-1}]
 ``` 

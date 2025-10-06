@@ -14,6 +14,23 @@ This protocol MUST be executed after all tasks in an execution plan are complete
 
 You must execute these phases in order. Phase 1 informs Phase 2.
 
+### PRE-RETROSPECTIVE: Evidence Aggregation
+
+1.  **`[MUST]` Aggregate Evidence Artifacts:** Before starting the retrospective, collect and present relevant evidence for the completed parent task.
+    ```bash
+    python scripts/evidence_report.py --scope task-{X.0} --output .artifacts/evidence-report-task-{X.0}-$(date +%Y%m%d-%H%M).md
+    ```
+
+2.  **`[MUST]` Load Evidence into Context:**
+    *   **Action:** Reference specific artifacts in analysis (coverage reports, CI logs, deployment status)
+    *   **Action:** Base recommendations on objective metrics rather than subjective observations
+    *   **Action:** Cite evidence in retrospective output with direct links
+
+3.  **`[MUST]` Include CI/CD Outcomes:**
+    *   **Action:** Reference CI workflow statuses and logs from completed parent task
+    *   **Action:** Include deployment outcomes (success/failure, performance metrics)
+    *   **Action:** Use CI data to identify patterns (recurring linting issues, flaky tests)
+
 ### PHASE 1: Technical Self-Review and Compliance Analysis
 
 *This phase is mostly silent. You are gathering facts before presenting them.*

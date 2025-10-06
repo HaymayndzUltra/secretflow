@@ -122,6 +122,22 @@ This ensures the AI works with a clean, relevant context for each major step of 
         - **[REQUIRED]** Address any CRITICAL or HIGH priority findings before proceeding
         - **[COMMUNICATION]** `[QUALITY GATE] Running comprehensive quality audit for parent task completion...`
         - **[VALIDATION]** Report audit results: `[QUALITY REPORT] Score: X/10. Critical: Y, High: Z. Status: PASS/NEEDS_ATTENTION`
+    *   **[NEW] CI Workflow Status Check:**
+        - **[MUST]** Check CI workflow statuses for the current parent task:
+            ```bash
+            gh run list --workflow=ci-lint.yml --limit 5
+            gh run list --workflow=ci-test.yml --limit 5
+            gh run list --workflow=ci-deploy.yml --limit 5
+            ```
+        - **[MUST]** Include CI results in quality report:
+            - Embed workflow run IDs and URLs
+            - Include status indicators (✅/⚠️/❌)
+            - Reference CI artifacts and logs
+        - **[CRITICAL]** Block parent task completion if critical CI workflows fail:
+            - If `ci-test.yml` fails → Status: NEEDS_ATTENTION
+            - If `ci-lint.yml` fails with strict rules → Status: NEEDS_ATTENTION
+            - If `ci-deploy.yml` fails → Status: NEEDS_ATTENTION
+        - **[COMMUNICATION]** `[CI STATUS] ci-lint.yml: ✅ SUCCESS (https://github.com/org/repo/actions/runs/12345)`
     *   **[NEW] Consolidation Decision Framework:**
         - **For feature branches**: Offer `git rebase -i` to squash related commits
         - **For main branch**: Keep granular history for production debugging

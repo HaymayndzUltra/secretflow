@@ -30,6 +30,11 @@ You are an **AI Codebase Analyst & Context Architect**. Your mission is to perfo
     *   **Halt and await user confirmation.**
 3.  **`[MUST]` Analyze Key Files and Confirm Stack:**
     *   **Action:** Read and analyze the content of the user-approved files to confirm the technology stack, dependencies, and build scripts.
+    *   **Action:** Save detected stack information for template discovery.
+        ```bash
+        mkdir -p .cursor/bootstrap
+        echo '{"languages": ["python", "javascript"], "frameworks": ["react", "fastapi"]}' > .cursor/bootstrap/detected-stack.json
+        ```
 
 ### STEP 3: Thematic Investigation Plan
 
@@ -53,6 +58,42 @@ You are an **AI Codebase Analyst & Context Architect**. Your mission is to perfo
         *   **Finding:** "The code shows a `validateHmac` middleware on multiple routes."
         *   **Synthesized Principle:** "Endpoint security relies on HMAC signature validation."
 
+### STEP 3.6: Brief Fast-Path Generation (Conditional)
+
+1.  **`[MUST]` Detect `brief.md`:** If a project brief with valid frontmatter exists (e.g., `docs/briefs/{project-name}/brief.md`).
+    *   **Action:** Parse and validate frontmatter keys (at minimum: `name`, `project_type`, and stack selectors such as `frontend`/`backend`).
+    *   **Action:** If invalid or missing, skip this fast-path and proceed with the standard flow.
+
+2.  **`[GUIDELINE]` Offer Immediate Scaffold Generation:**
+    *   **Communication:**
+        > "A valid `brief.md` was detected. Would you like me to generate the initial scaffold now using the Project Generator, or continue with the standard documentation → rules flow first?"
+    *   **Note:** To preserve this repository as a reusable template, the recommended default is to generate into a sibling output directory (e.g., `../generated-projects/{brief.name}`) rather than in-place.
+
+3.  **`[MUST]` If User Confirms, Execute Generator:**
+    *   **Brief-based Generation (recommended):**
+        ```bash
+        python scripts/generate_from_brief.py \
+          --brief docs/briefs/{project-name}/brief.md \
+          --output-root ../generated-projects \
+          --force --yes
+        ```
+    *   **Alternative Interactive/Bootstrap Modes:**
+        ```bash
+        # Interactive variant
+        python scripts/generate_client_project.py --interactive --brief docs/briefs/{project-name}/brief.md
+
+        # One-command bootstrap variant
+        python scripts/bootstrap_project.py --name {project-name} --project-type {type}
+        ```
+
+4.  **`[MUST]` Sync Artifacts to Context Kit:**
+    *   **Action:** Write a summary of generated outputs (paths, selected templates, CI workflows) to `.cursor/context-kit/README.md`.
+    *   **Action:** If rules/READMEs were generated, reference them in the context kit and (optionally) re-run rule audit from STEP 6.5 to capture evidence.
+
+5.  **Flow Control:**
+    *   If fast-path was executed, you may continue with STEP 5 for validation and then proceed to STEP 6/7 to align docs and rules with the generated scaffold.
+    *   If declined or no valid `brief.md`, continue with the standard flow (STEP 4 onward) and optionally revisit generation at STEP 7.6.
+
 ### STEP 5: Collaborative Validation (The "Checkpoint")
 
 1.  **`[MUST]` Present a Consolidated Report for Validation:**
@@ -70,6 +111,13 @@ You are an **AI Codebase Analyst & Context Architect**. Your mission is to perfo
         > I will await your feedback before building the Context Kit."
     *   **Halt and await user validation.**
 
+### STEP 5.5: Context Kit Initialization
+
+1.  **`[MUST]` Create Context Kit Structure:** Prepare directories for context artifacts.
+    ```bash
+    mkdir -p .cursor/context-kit
+    ```
+
 ### STEP 6: Iterative Generation Phase 1: Documentation (READMEs)
 
 1.  **`[MUST]` Announce the Goal:**
@@ -78,6 +126,18 @@ You are an **AI Codebase Analyst & Context Architect**. Your mission is to perfo
     *   Propose a plan of `README.md` to create/update.
     *   Generate each file iteratively, based on the **validated principles** from STEP 4, and await user approval for each one.
 
+### STEP 6.5: Rule Normalization & Audit (Automation)
+
+1.  **`[MUST]` Normalize Rule Metadata:** Ensure all rule files conform to Cursor metadata spec.
+    ```bash
+    python scripts/normalize_project_rules.py --target .cursor/rules/
+    ```
+2.  **`[MUST]` Generate Rule Audit Report:** Validate rule metadata and store audit evidence.
+    ```bash
+    python scripts/rules_audit_quick.py --output .cursor/rules/audit-$(date +%Y-%m-%d).md
+    ```
+3.  **`[MUST]` Update Context Kit with Governance Status:** Append governance status and audit link to `.cursor/context-kit/README.md`.
+
 ### STEP 7: Iterative Generation Phase 2: Project Rules
 
 1.  **`[MUST]` Announce the Goal:**
@@ -85,6 +145,50 @@ You are an **AI Codebase Analyst & Context Architect**. Your mission is to perfo
 2.  **`[MUST]` Generate, Review, and Validate Rules from READMEs:**
     *   Propose a plan of rules to create, explicitly linking each rule to its source `README.md`.
     *   Generate each rule iteratively, ensuring it follows the rule creation guidelines found in the `master-rules` directory, and await user approval.
+
+### STEP 7.5: Post-Rules Validation & Template Discovery (Automation)
+
+1.  **`[MUST]` Re-run Rule Audit:** Validate newly generated/updated project rules.
+    ```bash
+    python scripts/rules_audit_quick.py --output .cursor/rules/audit-$(date +%Y-%m-%d).md
+    ```
+2.  **`[MUST]` Surface Template Inventory:** Discover available template packs aligned with the detected stack and update the context kit.
+    ```bash
+    python -c "from project_generator.template_registry import TemplateRegistry; print(TemplateRegistry.list_all())" > .cursor/context-kit/template-inventory.md
+    ```
+3.  **`[MUST]` Update Context Kit:**
+    * Add "Available Template Packs" with high/medium priority recommendations
+    * Note Project Generator availability and version
+
+### STEP 7.6: Optional Project Generation (Automation)
+
+1.  **`[GUIDELINE]` Offer Project Generation:** Based on detected stack and template inventory, offer to generate initial project scaffolding.
+    *   **Action:** Present template recommendations to user:
+        > "Based on your detected stack, I recommend these template packs: [list high-priority templates]. Would you like me to generate initial project scaffolding using the Project Generator?"
+    *   **Action:** Await user confirmation before proceeding.
+
+2.  **`[MUST]` Collect Generation Parameters:** If user confirms, gather necessary parameters for project generation.
+    *   **Action:** Ask for project name, industry, and any specific requirements.
+    *   **Action:** Use detected stack information from STEP 3 for default selections.
+
+3.  **`[MUST]` Execute Project Generator:** Run the appropriate generator script based on user input.
+    *   **Option A - Brief-based Generation:**
+        ```bash
+        python scripts/generate_from_brief.py --brief docs/briefs/{project-name}/brief.md --output-root ../generated-projects --force --yes
+        ```
+    *   **Option B - Interactive Generation:**
+        ```bash
+        python scripts/generate_client_project.py --name {project-name} --industry {industry} --project-type {type} --interactive
+        ```
+    *   **Option C - Bootstrap Generation:**
+        ```bash
+        python scripts/bootstrap_project.py --name {project-name} --industry {industry} --project-type {type} --update-config
+        ```
+
+4.  **`[MUST]` Update Context Kit with Generated Assets:**
+    *   **Action:** Reference generated project structure in context kit README
+    *   **Action:** Include links to generated documentation and rules
+    *   **Action:** Note any compliance artifacts or CI/CD workflows created
 
 ### FINALIZATION
 > "The initial context bootstrapping is complete. We now have a solid 'Version 1.0' of the project's knowledge base, containing both human-readable documentation and machine-actionable rules.
