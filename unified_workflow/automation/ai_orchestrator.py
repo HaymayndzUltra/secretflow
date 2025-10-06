@@ -19,6 +19,7 @@ import click
 sys.path.insert(0, str(Path(__file__).parent))
 
 from evidence_manager import EvidenceManager
+from external_services import ExternalServicesManager
 
 
 class AIOrchestrator:
@@ -29,13 +30,14 @@ class AIOrchestrator:
         self.evidence_manager = EvidenceManager(evidence_root)
         self.workflow_home = Path(__file__).parent.parent
         self.phases_dir = self.workflow_home / "phases"
-        
+
         # Ensure project directory exists
         self.project_dir = Path(project_name)
         self.project_dir.mkdir(exist_ok=True)
-        
+
         # Load project configuration
         self.config = self._load_project_config()
+        self.external_services = ExternalServicesManager(self.project_dir)
     
     def _load_project_config(self) -> Dict[str, Any]:
         """Load project configuration"""
@@ -50,7 +52,15 @@ class AIOrchestrator:
                 "project": {
                     "name": self.project_name,
                     "type": "web-app",
-                    "stack": ["react", "nodejs", "postgresql"]
+                    "industry": "saas",
+                    "stack": {
+                        "frontend": "react",
+                        "backend": "nodejs",
+                        "database": "postgresql",
+                        "auth": "auth0",
+                        "deploy": "vercel",
+                    },
+                    "compliance": ["gdpr"],
                 },
                 "workflow": {
                     "version": "1.0.0",
@@ -74,6 +84,115 @@ class AIOrchestrator:
         with open(phase_path, 'r') as f:
             return f.read()
     
+    def _build_governor_payload(self, context: Dict[str, Any]) -> Dict[str, Any]:
+        """Create a payload for AI Governor validation."""
+
+        project_config = self.config.get("project", {})
+        stack = project_config.get("stack", {})
+
+        if isinstance(stack, list):
+            stack = {
+                "frontend": stack[0] if stack else None,
+                "backend": stack[1] if len(stack) > 1 else None,
+                "database": stack[2] if len(stack) > 2 else None,
+            }
+
+        payload = {
+            "name": project_config.get("name", self.project_name),
+            "industry": project_config.get("industry", context.get("industry", "saas")),
+            "project_type": project_config.get("type", context.get("project_type", "fullstack")),
+            "stack": stack,
+            "compliance": context.get("compliance") or project_config.get("compliance", []),
+        }
+
+        return payload
+
+    def _prepare_phase_integrations(self, phase: int, phase_name: str, context: Dict[str, Any]) -> Dict[str, Any]:
+        """Prepare external integrations for a phase."""
+
+        services = self.external_services.get_phase_services(phase)
+        summary: Dict[str, Any] = {}
+
+        git_service = services.get("git")
+        if git_service:
+            git_summary: Dict[str, Any] = {"validation": git_service.validate()}
+            if not git_summary["validation"].get("repository_initialized"):
+                initialized = git_service.initialize_repository()
+                git_summary["initialized"] = initialized
+                self.evidence_manager.log_execution(
+                    phase=phase,
+                    action="Git Repository Initialization",
+                    status="completed" if initialized else "failed",
+                    details={"phase_name": phase_name},
+                )
+            summary["git"] = git_summary
+
+        governor_service = services.get("ai_governor")
+        if governor_service:
+            payload = self._build_governor_payload(context)
+            validation = governor_service.validate_project_config(payload)
+            summary["ai_governor"] = validation
+            self.evidence_manager.log_execution(
+                phase=phase,
+                action="AI Governor Policy Check",
+                status="completed" if validation.get("valid", True) else "failed",
+                details=validation,
+            )
+
+            if phase == 0:
+                copied_rules = governor_service.copy_master_rules(self.project_dir)
+                summary["ai_governor"]["copied_rules"] = copied_rules
+
+        policy_service = services.get("policy_dsl")
+        if policy_service:
+            bundle_info = policy_service.ensure_policy_bundle()
+            available = policy_service.available_policies()
+            summary["policy_dsl"] = {
+                "bundle": bundle_info,
+                "available_policies": available,
+            }
+            self.evidence_manager.log_execution(
+                phase=phase,
+                action="Policy DSL Prepared",
+                status="completed",
+                details={"available_policies": available},
+            )
+
+        return summary
+
+    def _finalize_phase_integrations(self, phase: int, phase_name: str, execution_result: Dict[str, Any], summary: Dict[str, Any]) -> None:
+        """Finalize integrations after phase execution."""
+
+        services = self.external_services.get_phase_services(phase)
+        git_service = services.get("git")
+
+        if (
+            git_service
+            and execution_result.get("status") == "success"
+            and execution_result.get("outputs", {}).get("artifacts")
+        ):
+            commit_message = f"Phase {phase}: {phase_name} deliverables"
+            committed = git_service.commit_phase_artifacts(phase, commit_message)
+            summary.setdefault("git", {})["commit"] = {
+                "message": commit_message,
+                "committed": committed,
+            }
+            self.evidence_manager.log_execution(
+                phase=phase,
+                action="Git Commit",
+                status="completed" if committed else "failed",
+                details={"message": commit_message},
+            )
+
+    def _print_service_summary(self, summary: Dict[str, Any]) -> None:
+        """Pretty print external service summary."""
+
+        if not summary:
+            return
+
+        print("🔗 External Services Summary:")
+        print(json.dumps(summary, indent=2))
+
     def _execute_ai_phase(self, phase: int, phase_name: str, phase_file: str, context: Dict[str, Any]) -> Dict[str, Any]:
         """Execute AI phase with context and rules"""
         start_time = time.time()
@@ -86,6 +205,8 @@ class AIOrchestrator:
             details={"phase_name": phase_name, "context": context}
         )
         
+        service_summary = self._prepare_phase_integrations(phase, phase_name, context)
+
         try:
             # Load phase protocol
             protocol_content = self._load_phase_protocol(phase_file)
@@ -125,15 +246,20 @@ class AIOrchestrator:
                 duration_seconds=duration
             )
             
-            return {
+            result_payload = {
                 "status": "success",
                 "phase": phase,
                 "phase_name": phase_name,
                 "ai_role": result.get("ai_role", "AI Assistant"),
                 "outputs": result,
-                "duration": duration
+                "duration": duration,
             }
-            
+
+            self._finalize_phase_integrations(phase, phase_name, result_payload, service_summary)
+            result_payload["external_services"] = service_summary
+
+            return result_payload
+
         except Exception as e:
             duration = time.time() - start_time
             self.evidence_manager.log_execution(
@@ -144,13 +270,16 @@ class AIOrchestrator:
                 details={"error": str(e)}
             )
             
-            return {
+            error_result = {
                 "status": "error",
                 "phase": phase,
                 "phase_name": phase_name,
                 "error": str(e),
-                "duration": duration
+                "duration": duration,
             }
+            error_result["external_services"] = service_summary
+
+            return error_result
     
     def _simulate_ai_execution(self, phase: int, phase_name: str, protocol_content: str, context: Dict[str, Any]) -> Dict[str, Any]:
         """Simulate AI execution based on phase protocol"""
@@ -364,7 +493,9 @@ class AIOrchestrator:
             context = {
                 "description": f"Executing {phase_name} for project {self.project_name}",
                 "project_type": self.config["project"]["type"],
-                "tech_stack": self.config["project"]["stack"]
+                "tech_stack": self.config["project"]["stack"],
+                "compliance": self.config["project"].get("compliance", []),
+                "industry": self.config["project"].get("industry"),
             }
         
         print(f"🎯 AI Orchestrating Phase {phase_num}: {phase_name}")
@@ -382,14 +513,17 @@ class AIOrchestrator:
                 validation = result["outputs"]["validation"]
                 print(f"📊 Quality Score: {validation['score']}/10")
                 print(f"🔍 Status: {validation['status']}")
-                
+
                 if validation["findings"]:
                     print(f"⚠️  Findings: {len(validation['findings'])}")
                     for finding in validation["findings"]:
                         print(f"   - {finding['severity'].upper()}: {finding['description']}")
+
+            self._print_service_summary(result.get("external_services", {}))
         else:
             print(f"❌ Phase {phase_num} failed: {result['error']}")
-        
+            self._print_service_summary(result.get("external_services", {}))
+
         return result
     
     def execute_phase_sequence(self, start_phase: int, end_phase: int, context: Optional[Dict[str, Any]] = None) -> List[Dict[str, Any]]:

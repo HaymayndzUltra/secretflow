@@ -19,6 +19,7 @@ import click
 sys.path.insert(0, str(Path(__file__).parent))
 
 from evidence_manager import EvidenceManager
+from external_services import ExternalServicesManager
 
 
 class AIExecutor:
@@ -29,13 +30,14 @@ class AIExecutor:
         self.evidence_manager = EvidenceManager(evidence_root)
         self.workflow_home = Path(__file__).parent.parent
         self.phases_dir = self.workflow_home / "phases"
-        
+
         # Ensure project directory exists
         self.project_dir = Path(project_name)
         self.project_dir.mkdir(exist_ok=True)
-        
+
         # Initialize project configuration
         self.config = self._load_project_config()
+        self.external_services = ExternalServicesManager(self.project_dir)
     
     def _load_project_config(self) -> Dict[str, Any]:
         """Load project configuration"""
@@ -50,12 +52,20 @@ class AIExecutor:
                 "project": {
                     "name": self.project_name,
                     "type": "web-app",
-                    "stack": ["react", "nodejs", "postgresql"],
+                    "industry": "saas",
+                    "stack": {
+                        "frontend": "react",
+                        "backend": "nodejs",
+                        "database": "postgresql",
+                        "auth": "auth0",
+                        "deploy": "vercel",
+                    },
                     "quality_gates": {
                         "security": True,
                         "performance": True,
                         "accessibility": True
-                    }
+                    },
+                    "compliance": ["gdpr"],
                 },
                 "workflow": {
                     "version": "1.0.0",
@@ -76,6 +86,220 @@ class AIExecutor:
         with open(config_path, 'w') as f:
             json.dump(self.config, f, indent=2)
     
+    def _build_governor_payload(self, context: Dict[str, Any]) -> Dict[str, Any]:
+        """Create a payload for AI Governor validation."""
+
+        project_config = self.config.get("project", {})
+        stack = project_config.get("stack", {})
+
+        if isinstance(stack, list):
+            stack = {
+                "frontend": stack[0] if stack else None,
+                "backend": stack[1] if len(stack) > 1 else None,
+                "database": stack[2] if len(stack) > 2 else None,
+            }
+
+        return {
+            "name": project_config.get("name", self.project_name),
+            "industry": project_config.get("industry", context.get("industry", "saas")),
+            "project_type": project_config.get("type", context.get("project_type", "fullstack")),
+            "stack": stack,
+            "compliance": context.get("compliance") or project_config.get("compliance", []),
+        }
+
+    def _prepare_phase_integrations(self, phase: int, phase_name: str, context: Dict[str, Any]) -> Dict[str, Any]:
+        """Prepare external integrations before executing a phase."""
+
+        services = self.external_services.get_phase_services(phase)
+        summary: Dict[str, Any] = {}
+
+        git_service = services.get("git")
+        if git_service:
+            git_summary: Dict[str, Any] = {"validation": git_service.validate()}
+            if not git_summary["validation"].get("repository_initialized"):
+                initialized = git_service.initialize_repository()
+                git_summary["initialized"] = initialized
+                self.evidence_manager.log_execution(
+                    phase=phase,
+                    action="Git Repository Initialization",
+                    status="completed" if initialized else "failed",
+                    details={"phase_name": phase_name},
+                )
+            summary["git"] = git_summary
+
+        governor_service = services.get("ai_governor")
+        if governor_service:
+            payload = self._build_governor_payload(context)
+            validation = governor_service.validate_project_config(payload)
+            summary["ai_governor"] = validation
+            self.evidence_manager.log_execution(
+                phase=phase,
+                action="AI Governor Policy Check",
+                status="completed" if validation.get("valid", True) else "failed",
+                details=validation,
+            )
+
+            if phase == 0:
+                copied_rules = governor_service.copy_master_rules(self.project_dir)
+                summary["ai_governor"]["copied_rules"] = copied_rules
+
+        policy_service = services.get("policy_dsl")
+        if policy_service:
+            bundle_info = policy_service.ensure_policy_bundle()
+            available = policy_service.available_policies()
+            summary["policy_dsl"] = {
+                "bundle": bundle_info,
+                "available_policies": available,
+            }
+            self.evidence_manager.log_execution(
+                phase=phase,
+                action="Policy DSL Prepared",
+                status="completed",
+                details={"available_policies": available},
+            )
+
+        return summary
+
+    def _finalize_phase_integrations(self, phase: int, phase_name: str, execution_result: Dict[str, Any], summary: Dict[str, Any]) -> None:
+        """Finalize integrations after phase execution."""
+
+        services = self.external_services.get_phase_services(phase)
+        git_service = services.get("git")
+
+        if (
+            git_service
+            and execution_result.get("status") == "success"
+            and execution_result.get("outputs", {}).get("artifacts")
+        ):
+            commit_message = f"Phase {phase}: {phase_name} deliverables"
+            committed = git_service.commit_phase_artifacts(phase, commit_message)
+            summary.setdefault("git", {})["commit"] = {
+                "message": commit_message,
+                "committed": committed,
+            }
+            self.evidence_manager.log_execution(
+                phase=phase,
+                action="Git Commit",
+                status="completed" if committed else "failed",
+                details={"message": commit_message},
+            )
+
+    def _print_service_summary(self, summary: Dict[str, Any]) -> None:
+        """Pretty print external service summary."""
+
+        if not summary:
+            return
+
+        print("🔗 External Services Summary:")
+        print(json.dumps(summary, indent=2))
+
+    def _build_governor_payload(self, context: Dict[str, Any]) -> Dict[str, Any]:
+        """Create a payload for AI Governor validation."""
+
+        project_config = self.config.get("project", {})
+        stack = project_config.get("stack", {})
+
+        if isinstance(stack, list):
+            stack = {
+                "frontend": stack[0] if stack else None,
+                "backend": stack[1] if len(stack) > 1 else None,
+                "database": stack[2] if len(stack) > 2 else None,
+            }
+
+        return {
+            "name": project_config.get("name", self.project_name),
+            "industry": project_config.get("industry", context.get("industry", "saas")),
+            "project_type": project_config.get("type", context.get("project_type", "fullstack")),
+            "stack": stack,
+            "compliance": context.get("compliance") or project_config.get("compliance", []),
+        }
+
+    def _prepare_phase_integrations(self, phase: int, phase_name: str, context: Dict[str, Any]) -> Dict[str, Any]:
+        """Prepare external integrations before executing a phase."""
+
+        services = self.external_services.get_phase_services(phase)
+        summary: Dict[str, Any] = {}
+
+        git_service = services.get("git")
+        if git_service:
+            git_summary: Dict[str, Any] = {"validation": git_service.validate()}
+            if not git_summary["validation"].get("repository_initialized"):
+                initialized = git_service.initialize_repository()
+                git_summary["initialized"] = initialized
+                self.evidence_manager.log_execution(
+                    phase=phase,
+                    action="Git Repository Initialization",
+                    status="completed" if initialized else "failed",
+                    details={"phase_name": phase_name},
+                )
+            summary["git"] = git_summary
+
+        governor_service = services.get("ai_governor")
+        if governor_service:
+            payload = self._build_governor_payload(context)
+            validation = governor_service.validate_project_config(payload)
+            summary["ai_governor"] = validation
+            self.evidence_manager.log_execution(
+                phase=phase,
+                action="AI Governor Policy Check",
+                status="completed" if validation.get("valid", True) else "failed",
+                details=validation,
+            )
+
+            if phase == 0:
+                copied_rules = governor_service.copy_master_rules(self.project_dir)
+                summary["ai_governor"]["copied_rules"] = copied_rules
+
+        policy_service = services.get("policy_dsl")
+        if policy_service:
+            bundle_info = policy_service.ensure_policy_bundle()
+            available = policy_service.available_policies()
+            summary["policy_dsl"] = {
+                "bundle": bundle_info,
+                "available_policies": available,
+            }
+            self.evidence_manager.log_execution(
+                phase=phase,
+                action="Policy DSL Prepared",
+                status="completed",
+                details={"available_policies": available},
+            )
+
+        return summary
+
+    def _finalize_phase_integrations(self, phase: int, phase_name: str, execution_result: Dict[str, Any], summary: Dict[str, Any]) -> None:
+        """Finalize integrations after phase execution."""
+
+        services = self.external_services.get_phase_services(phase)
+        git_service = services.get("git")
+
+        if (
+            git_service
+            and execution_result.get("status") == "success"
+            and execution_result.get("outputs", {}).get("artifacts")
+        ):
+            commit_message = f"Phase {phase}: {phase_name} deliverables"
+            committed = git_service.commit_phase_artifacts(phase, commit_message)
+            summary.setdefault("git", {})["commit"] = {
+                "message": commit_message,
+                "committed": committed,
+            }
+            self.evidence_manager.log_execution(
+                phase=phase,
+                action="Git Commit",
+                status="completed" if committed else "failed",
+                details={"message": commit_message},
+            )
+
+    def _print_service_summary(self, summary: Dict[str, Any]) -> None:
+        """Pretty print external service summary."""
+
+        if not summary:
+            return
+
+        print("🔗 External Services Summary:")
+        print(json.dumps(summary, indent=2))
+
     def _log_phase_start(self, phase: int, phase_name: str):
         """Log phase start"""
         self.evidence_manager.log_execution(
@@ -100,7 +324,12 @@ class AIExecutor:
         
         # Log phase start
         self._log_phase_start(phase, phase_name)
-        
+        service_summary = self._prepare_phase_integrations(phase, phase_name, {
+            "project_type": self.config.get("project", {}).get("type"),
+            "industry": self.config.get("project", {}).get("industry"),
+            "compliance": self.config.get("project", {}).get("compliance"),
+        })
+
         try:
             # Load phase protocol
             phase_path = self.phases_dir / phase_file
@@ -155,25 +384,33 @@ class AIExecutor:
             duration = time.time() - start_time
             self._log_phase_end(phase, phase_name, "completed", duration)
             
-            return {
+            result_payload = {
                 "status": "success",
                 "phase": phase,
                 "phase_name": phase_name,
                 "outputs": outputs,
-                "duration": duration
+                "duration": duration,
             }
-            
+
+            self._finalize_phase_integrations(phase, phase_name, result_payload, service_summary)
+            result_payload["external_services"] = service_summary
+
+            return result_payload
+
         except Exception as e:
             duration = time.time() - start_time
             self._log_phase_end(phase, phase_name, "failed", duration)
-            
-            return {
+
+            error_result = {
                 "status": "error",
                 "phase": phase,
                 "phase_name": phase_name,
                 "error": str(e),
-                "duration": duration
+                "duration": duration,
             }
+            error_result["external_services"] = service_summary
+
+            return error_result
     
     def _generate_phase_outputs(self, phase: int, phase_name: str) -> Dict[str, Any]:
         """Generate simulated phase outputs"""
@@ -355,7 +592,7 @@ class AIExecutor:
             else:
                 print(f"✅ Phase {phase_num} completed successfully")
                 print(f"⏱️  Duration: {result['duration']:.2f} seconds")
-                
+
                 # Show validation results
                 if result["outputs"].get("validation"):
                     validation = result["outputs"]["validation"]
@@ -366,6 +603,11 @@ class AIExecutor:
                         print(f"⚠️  Findings: {len(validation['findings'])}")
                         for finding in validation["findings"]:
                             print(f"   - {finding['severity'].upper()}: {finding['description']}")
+
+                self._print_service_summary(result.get("external_services", {}))
+
+        if overall_status == "error":
+            self._print_service_summary(result.get("external_services", {}))
         
         # Generate final report
         final_report = self._generate_final_report(results, overall_status)
@@ -442,13 +684,15 @@ class AIExecutor:
         print("=" * 60)
         
         result = self._execute_phase(phase_num, phase_name, phase_file)
-        
+
         if result["status"] == "success":
             print(f"✅ Phase {phase_num} completed successfully")
             print(f"⏱️  Duration: {result['duration']:.2f} seconds")
         else:
             print(f"❌ Phase {phase_num} failed: {result['error']}")
-        
+
+        self._print_service_summary(result.get("external_services", {}))
+
         return result
 
 

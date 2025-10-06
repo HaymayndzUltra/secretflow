@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import json
 import logging
+import shutil
 import subprocess
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Union
@@ -248,25 +249,12 @@ class AIGovernorService:
         """
         return self.integration.validate_project_config(config)
     
-    def copy_master_rules(self) -> bool:
-        """Copy master rules to the project.
-        
-        Returns:
-            True if successful, False otherwise
-        """
-        return self.integration.copy_master_rules()
-    
-    def generate_project_rules(self, config: Dict[str, Any]) -> bool:
-        """Generate project-specific rules based on configuration.
-        
-        Args:
-            config: Project configuration
-            
-        Returns:
-            True if successful, False otherwise
-        """
-        return self.integration.generate_project_rules(config)
-    
+    def copy_master_rules(self, target: Optional[Path] = None) -> List[str]:
+        """Copy master rules to the project."""
+
+        destination = Path(target) if target else self.project_root
+        return self.integration.copy_master_rules(destination)
+
     def create_workflow_config(self, phase: int) -> Dict[str, Any]:
         """Create workflow configuration for a phase.
         
@@ -284,34 +272,57 @@ class AIGovernorService:
 
 class PolicyDSLService:
     """Policy DSL service for compliance and security policy validation."""
-    
+
     def __init__(self, project_root: Path):
         """Initialize Policy DSL service.
-        
+
         Args:
             project_root: Root directory of the project
         """
         self.project_root = Path(project_root)
-        self.policy_dir = project_root / "policies"
-        self.policy_templates = project_root / "template-packs" / "policy-dsl"
-    
+        self.policy_dir = self.project_root / "policies"
+        self.policy_templates = self.project_root / "template-packs" / "policy-dsl"
+
     def validate(self) -> Dict[str, Any]:
-        """Validate Policy DSL is available and configured.
-        
-        Returns:
-            Validation result
-        """
+        """Validate Policy DSL is available and configured."""
+
         templates_available = self.policy_templates.exists()
         policies_exist = self.policy_dir.exists() and any(self.policy_dir.glob("*.yaml"))
-        
+
         return {
             "status": "ok" if templates_available else "warning",
             "available": templates_available,
             "templates_path": str(self.policy_templates) if templates_available else None,
             "policies_configured": policies_exist,
-            "policy_count": len(list(self.policy_dir.glob("*.yaml"))) if policies_exist else 0
+            "policy_count": len(list(self.policy_dir.glob("*.yaml"))) if policies_exist else 0,
         }
-    
+
+    def ensure_policy_bundle(self) -> Dict[str, Any]:
+        """Ensure policy templates are copied into the project workspace."""
+
+        self.policy_dir.mkdir(parents=True, exist_ok=True)
+
+        created: List[str] = []
+        if self.policy_templates.exists():
+            for template in self.policy_templates.glob("*.yaml"):
+                target = self.policy_dir / template.name
+                if not target.exists():
+                    shutil.copy2(template, target)
+                    created.append(str(target))
+
+        return {
+            "policy_directory": str(self.policy_dir),
+            "created": created,
+        }
+
+    def available_policies(self) -> List[str]:
+        """Return the list of available policy identifiers."""
+
+        if not self.policy_dir.exists():
+            return []
+
+        return sorted(path.stem for path in self.policy_dir.glob("*.yaml"))
+
     def load_policy(self, policy_name: str) -> Optional[Dict[str, Any]]:
         """Load a specific policy by name.
         

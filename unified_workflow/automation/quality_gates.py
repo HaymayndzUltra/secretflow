@@ -20,6 +20,7 @@ sys.path.insert(0, str(Path(__file__).parent))
 
 from evidence_manager import EvidenceManager
 from compliance_validator import ComplianceValidator
+from .review_protocol_loader import ReviewProtocol, ReviewProtocolLoader
 
 
 class QualityGates:
@@ -29,43 +30,40 @@ class QualityGates:
         self.project_name = project_name
         self.evidence_manager = EvidenceManager(evidence_root)
         self.workflow_home = Path(__file__).parent.parent
-        self.review_protocols_dir = self.workflow_home.parent / ".cursor" / "dev-workflow" / "review-protocols"
+        self.review_loader = ReviewProtocolLoader(self.workflow_home.parent)
         self.compliance_validator = ComplianceValidator(self.workflow_home.parent)
         
         # Ensure project directory exists
         self.project_dir = Path(project_name)
         self.project_dir.mkdir(exist_ok=True)
     
-    def _load_review_protocol(self, mode: str) -> Dict[str, Any]:
-        """Load review protocol based on mode"""
-        
+    def _load_review_protocol(self, mode: str) -> ReviewProtocol:
+        """Load review protocol based on mode."""
+
         protocol_mapping = {
-            "quick": "code-review.md",
-            "security": "security-check.md",
-            "architecture": "architecture-review.md",
-            "design": "design-system.md",
-            "ui": "ui-accessibility.md",
-            "deep-security": "pre-production.md"
+            "quick": "code-review",
+            "security": "security-check",
+            "architecture": "architecture-review",
+            "design": "design-system",
+            "ui": "ui-accessibility",
+            "deep-security": "pre-production",
         }
-        
-        protocol_file = protocol_mapping.get(mode, "code-review.md")
-        protocol_path = self.review_protocols_dir / protocol_file
-        
-        if not protocol_path.exists():
-            # Fallback to generic protocol
-            protocol_path = self.review_protocols_dir / "code-review.md"
-        
-        if not protocol_path.exists():
-            raise FileNotFoundError(f"Review protocol not found: {protocol_file}")
-        
-        with open(protocol_path, 'r') as f:
-            content = f.read()
-        
-        return {
-            "mode": mode,
-            "file": protocol_file,
-            "content": content
-        }
+
+        slug = protocol_mapping.get(mode, "code-review")
+        protocol = self.review_loader.load(slug)
+
+        self.evidence_manager.log_execution(
+            phase=4,
+            action="Review Protocol Loaded",
+            status="completed",
+            details={
+                "mode": mode,
+                "protocol": protocol.path.name,
+                "checklist_items": len(protocol.checklist),
+            },
+        )
+
+        return protocol
     
     def _execute_quality_gate(self, mode: str, context: Dict[str, Any]) -> Dict[str, Any]:
         """Execute quality gate based on mode"""
@@ -74,9 +72,9 @@ class QualityGates:
         
         # Load protocol
         protocol = self._load_review_protocol(mode)
-        
+
         print(f"🔍 Executing Quality Gate: {mode.upper()}")
-        print(f"📋 Protocol: {protocol['file']}")
+        print(f"📋 Protocol: {protocol.path.name}")
         
         # Simulate quality gate execution
         time.sleep(2)  # Simulate processing time
@@ -103,7 +101,7 @@ class QualityGates:
 
         result: Dict[str, Any] = {
             "mode": mode,
-            "protocol": protocol,
+            "protocol": protocol.to_dict(),
             "findings": findings,
             "score": score,
             "recommendations": recommendations,

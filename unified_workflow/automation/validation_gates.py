@@ -19,6 +19,7 @@ import click
 sys.path.insert(0, str(Path(__file__).parent))
 
 from evidence_manager import EvidenceManager
+from .review_protocol_loader import ReviewProtocol, ReviewProtocolLoader
 
 
 class ValidationGates:
@@ -27,6 +28,8 @@ class ValidationGates:
     def __init__(self, project_name: str, evidence_root: str = "evidence"):
         self.project_name = project_name
         self.evidence_manager = EvidenceManager(evidence_root)
+        self.workflow_home = Path(__file__).parent.parent
+        self.review_loader = ReviewProtocolLoader(self.workflow_home.parent)
         
         # Ensure project directory exists
         self.project_dir = Path(project_name)
@@ -179,10 +182,33 @@ class ValidationGates:
             "validation_criteria": ["Phase completed successfully"]
         })
     
+    def _phase_review_protocol(self, phase: int) -> Optional[ReviewProtocol]:
+        """Select the review protocol associated with a validation phase."""
+
+        protocol_mapping = {
+            0: "architecture-review",
+            1: "design-system",
+            2: "code-review",
+            3: "code-review",
+            4: "pre-production",
+            5: "ui-accessibility",
+            6: "security-check",
+        }
+
+        slug = protocol_mapping.get(phase)
+        if not slug:
+            return None
+
+        try:
+            return self.review_loader.load(slug)
+        except FileNotFoundError:
+            return None
+
     def _create_validation_request(self, phase: int, context: Dict[str, Any]) -> Dict[str, Any]:
         """Create validation request for phase"""
-        
+
         checkpoint = self._get_validation_checkpoint(phase)
+        protocol = self._phase_review_protocol(phase)
         
         validation_request = {
             "phase": phase,
@@ -194,9 +220,29 @@ class ValidationGates:
             "approvals": {},
             "comments": [],
             "artifacts": checkpoint["artifacts"],
-            "validation_criteria": checkpoint["validation_criteria"]
+            "validation_criteria": list(checkpoint["validation_criteria"]),
         }
-        
+
+        if protocol:
+            validation_request["review_protocol"] = protocol.to_dict()
+            combined_criteria = validation_request["validation_criteria"] + protocol.checklist
+            deduped: List[str] = []
+            for item in combined_criteria:
+                if item not in deduped:
+                    deduped.append(item)
+            validation_request["validation_criteria"] = deduped
+
+            self.evidence_manager.log_execution(
+                phase=phase,
+                action="Review Protocol Linked",
+                status="completed",
+                details={
+                    "checkpoint": checkpoint["name"],
+                    "protocol": protocol.path.name,
+                    "checklist_items": len(protocol.checklist),
+                },
+            )
+
         return validation_request
     
     def _save_validation_request(self, validation_request: Dict[str, Any]):
@@ -250,7 +296,16 @@ class ValidationGates:
         print(f"🎯 Checkpoint: {validation_request['checkpoint']['title']}")
         print(f"🆔 Request ID: {validation_request['request_id']}")
         print(f"👥 Required Approvals: {', '.join(validation_request['checkpoint']['required_approvals'])}")
-        
+        if "review_protocol" in validation_request:
+            protocol_info = validation_request["review_protocol"]
+            print(
+                f"🧭 Review Protocol: {protocol_info['title']} "
+                f"({protocol_info['path']})"
+            )
+            print(
+                f"✅ Checklist Items: {len(protocol_info.get('checklist', []))}"
+            )
+
         return validation_request
     
     def approve_validation(self, request_id: str, approver: str, approval: bool, comments: Optional[str] = None) -> Dict[str, Any]:

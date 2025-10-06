@@ -7,6 +7,7 @@ from .ai_executor import AIExecutor
 from .ai_orchestrator import AIOrchestrator
 from .evidence_manager import EvidenceManager
 from .quality_gates import QualityGates
+from .review_protocol_loader import ReviewProtocolLoader
 from .validation_gates import ValidationGates
 from .workflow1 import (
     Phase2DesignWrappers,
@@ -24,6 +25,7 @@ __all__ = [
     "AIOrchestrator", 
     "EvidenceManager",
     "QualityGates",
+    "ReviewProtocolLoader",
     "ValidationGates",
     "Phase2DesignWrappers",
     "Phase3QualityWrappers",
